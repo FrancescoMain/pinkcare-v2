@@ -1,0 +1,196 @@
+/* Error Dialog Styles - Simile a PrimeFaces */
+.error-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.error-dialog.pnl_dlg {
+  background: white;
+  border-radius: 6px;
+  min-width: 400px;
+  max-width: 600px;
+  width: 90%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  animation: slideIn 0.3s ease-out;
+  border: 1px solid #ccc;
+  font-family: Arial, sans-serif;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.error-dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px 12px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f7f7f7;
+  border-radius: 6px 6px 0 0;
+}
+
+.error-dialog-header h3 {
+  margin: 0;
+  color: #d32f2f;
+  font-size: 16px;
+  font-weight: bold;
+  font-family: Arial, sans-serif;
+}
+
+.error-dialog-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: #666;
+  padding: 4px 8px;
+  width: auto;
+  height: auto;
+  border-radius: 3px;
+  transition: all 0.2s;
+}
+
+.error-dialog-close:hover {
+  color: #000;
+  background-color: #f0f0f0;
+}
+
+.error-dialog-close:focus {
+  outline: 2px solid #007bff;
+  outline-offset: 2px;
+}
+
+.error-dialog-content {
+  padding: 20px;
+  line-height: 1.5;
+}
+
+.error-message {
+  color: #d32f2f;
+  font-weight: normal;
+  margin: 0 0 8px 0;
+  font-size: 14px;
+}
+
+.support-message {
+  color: #333;
+  margin: 8px 0 16px 0;
+  font-size: 14px;
+}
+
+.support-message a {
+  color: #1976d2;
+  text-decoration: none;
+}
+
+.support-message a:hover {
+  text-decoration: underline;
+}
+
+.error-details {
+  margin-top: 16px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fafafa;
+}
+
+.error-details summary {
+  padding: 8px 12px;
+  background-color: #f5f5f5;
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 13px;
+  border-bottom: 1px solid #ddd;
+}
+
+.error-details summary:hover {
+  background-color: #eeeeee;
+}
+
+.error-details pre {
+  padding: 12px;
+  margin: 0;
+  background-color: #fafafa;
+  font-size: 11px;
+  overflow-x: auto;
+  color: #333;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.error-dialog-footer {
+  padding: 12px 20px 20px;
+  display: flex;
+  justify-content: flex-end;
+  border-top: 1px solid #e0e0e0;
+  background: #f7f7f7;
+  border-radius: 0 0 6px 6px;
+}
+
+.btn-primary {
+  background-color: #1976d2;
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  min-width: 80px;
+}
+
+.btn-primary:hover {
+  background-color: #1565c0;
+}
+
+.btn-primary:focus {
+  outline: 2px solid #90caf9;
+  outline-offset: 2px;
+}
+
+.btn-primary:active {
+  background-color: #0d47a1;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .error-dialog.pnl_dlg {
+    min-width: auto;
+    width: 95%;
+    margin: 10px;
+  }
+  
+  .error-dialog-header,
+  .error-dialog-content,
+  .error-dialog-footer {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+}
+
+/* Focus management for accessibility */
+.error-dialog-overlay {
+  outline: none;
+}
+
+.error-dialog.pnl_dlg:focus {
+  outline: none;
+}
