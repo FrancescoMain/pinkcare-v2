@@ -1,0 +1,190 @@
+/* Growl Container - Stile PrimeFaces */
+.growl-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1002; /* Sopra loading dialog */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 400px;
+  min-width: 300px;
+}
+
+/* Singolo messaggio growl */
+.growl-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: slideInRight 0.3s ease-out;
+  border-left: 4px solid;
+  background: white;
+  font-family: Arial, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Icona del messaggio */
+.growl-message-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+/* Contenuto del messaggio */
+.growl-message-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.growl-message-summary {
+  font-weight: bold;
+  margin-bottom: 4px;
+  color: #333;
+}
+
+.growl-message-detail {
+  color: #666;
+  word-wrap: break-word;
+}
+
+/* Pulsante di chiusura */
+.growl-message-close {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: #999;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.growl-message-close:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+  color: #333;
+}
+
+/* Stili per severità - INFO */
+.growl-message-info {
+  border-left-color: #2196f3;
+}
+
+.growl-message-info .growl-message-summary {
+  color: #1976d2;
+}
+
+/* Stili per severità - SUCCESS */
+.growl-message-success {
+  border-left-color: #4caf50;
+}
+
+.growl-message-success .growl-message-summary {
+  color: #388e3c;
+}
+
+/* Stili per severità - WARN */
+.growl-message-warn {
+  border-left-color: #ff9800;
+}
+
+.growl-message-warn .growl-message-summary {
+  color: #f57c00;
+}
+
+/* Stili per severità - ERROR */
+.growl-message-error {
+  border-left-color: #f44336;
+}
+
+.growl-message-error .growl-message-summary {
+  color: #d32f2f;
+}
+
+/* Animazione di uscita */
+.growl-message.removing {
+  animation: slideOutRight 0.3s ease-in forwards;
+}
+
+@keyframes slideOutRight {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+/* Responsive per mobile */
+@media (max-width: 480px) {
+  .growl-container {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    max-width: none;
+    min-width: auto;
+  }
+  
+  .growl-message {
+    padding: 12px;
+    font-size: 12px;
+  }
+  
+  .growl-message-icon {
+    font-size: 14px;
+  }
+}
+
+/* Stile per tema scuro (se necessario) */
+@media (prefers-color-scheme: dark) {
+  .growl-message {
+    background: #2d2d2d;
+    color: #e0e0e0;
+  }
+  
+  .growl-message-summary {
+    color: #f0f0f0;
+  }
+  
+  .growl-message-detail {
+    color: #cccccc;
+  }
+  
+  .growl-message-close {
+    color: #aaa;
+  }
+  
+  .growl-message-close:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #fff;
+  }
+}
+
+/* Effetto hover su tutto il messaggio */
+.growl-message:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}

@@ -1,10 +1,22 @@
 import { useState, useCallback, useEffect } from 'react';
+import { useGlobalAjaxStatus } from './useGlobalAjaxStatus';
+import { useGrowl } from './useGrowl';
 
 export const useErrorHandler = () => {
   const [error, setError] = useState(null);
   const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
+  const { 
+    isLoading, 
+    fetchWithAjaxStatus, 
+    executeWithAjaxStatus,
+    setLoadingState,
+    resetStatus 
+  } = useGlobalAjaxStatus();
+  
+  // Integrazione con Growl per messaggi toast
+  const growl = useGrowl();
 
-  const showError = useCallback((errorObj) => {
+  const showError = useCallback((errorObj, options = {}) => {
     console.error('Application Error:', errorObj);
     
     // Normalizza l'errore in un oggetto standard
@@ -16,9 +28,21 @@ export const useErrorHandler = () => {
       ...errorObj
     };
     
-    setError(normalizedError);
-    setIsErrorDialogOpen(true);
-  }, []);
+    // Mostra toast error se richiesto
+    if (options.showToast !== false) {
+      growl.addErrorMessage(
+        'Errore di sistema',
+        normalizedError.message,
+        { sticky: true }
+      );
+    }
+    
+    // Mostra dialog solo per errori critici o se esplicitamente richiesto
+    if (options.showDialog !== false) {
+      setError(normalizedError);
+      setIsErrorDialogOpen(true);
+    }
+  }, [growl]);
 
   const hideError = useCallback(() => {
     setIsErrorDialogOpen(false);
@@ -37,26 +61,15 @@ export const useErrorHandler = () => {
     };
   }, [showError]);
 
-  // Wrapper per chiamate API
+  // Wrapper per chiamate API con gestione loading e errori
   const fetchWithErrorHandling = useCallback(async (url, options = {}) => {
-    try {
-      const response = await fetch(url, options);
-      
-      if (!response.ok) {
-        const errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-        const error = new Error(errorMessage);
-        error.status = response.status;
-        error.statusText = response.statusText;
-        error.url = url;
-        throw error;
-      }
-      
-      return response;
-    } catch (error) {
-      showError(error);
-      throw error;
-    }
-  }, [showError]);
+    return await fetchWithAjaxStatus(url, options, showError);
+  }, [fetchWithAjaxStatus, showError]);
+
+  // Wrapper per operazioni asincrone con gestione loading e errori
+  const executeWithErrorHandling = useCallback(async (asyncFn) => {
+    return await executeWithAjaxStatus(asyncFn, showError);
+  }, [executeWithAjaxStatus, showError]);
 
   // Gestione errori globali JavaScript
   useEffect(() => {
@@ -93,12 +106,48 @@ export const useErrorHandler = () => {
     };
   }, [showError]);
 
+  // Funzioni di convenienza per messaggi (come JSF FacesContext.addMessage)
+  const showSuccessMessage = useCallback((summary, detail, options) => {
+    growl.addSuccessMessage(summary, detail, options);
+  }, [growl]);
+
+  const showInfoMessage = useCallback((summary, detail, options) => {
+    growl.addInfoMessage(summary, detail, options);
+  }, [growl]);
+
+  const showWarnMessage = useCallback((summary, detail, options) => {
+    growl.addWarnMessage(summary, detail, options);
+  }, [growl]);
+
+  const showErrorMessage = useCallback((summary, detail, options) => {
+    growl.addErrorMessage(summary, detail, options);
+  }, [growl]);
+
   return {
+    // Error handling
     error,
     isErrorDialogOpen,
     showError,
     hideError,
     handleAsyncError,
-    fetchWithErrorHandling
+    
+    // Ajax status handling
+    isLoading,
+    fetchWithErrorHandling,
+    executeWithErrorHandling,
+    setLoadingState,
+    resetStatus,
+
+    // Growl messages (equivalente a FacesContext.addMessage)
+    showSuccessMessage,
+    showInfoMessage, 
+    showWarnMessage,
+    showErrorMessage,
+    
+    // Growl state e controlli
+    growlMessages: growl.messages,
+    removeGrowlMessage: growl.removeMessage,
+    clearGrowlMessages: growl.clearMessages,
+    hasGrowlMessages: growl.hasMessages
   };
 };

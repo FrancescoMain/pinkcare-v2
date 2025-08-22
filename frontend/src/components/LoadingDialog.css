@@ -1,0 +1,125 @@
+/* Loading Dialog Styles - Simile al statusDialog PrimeFaces */
+.loading-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999; /* Sotto l'error dialog ma sopra il contenuto */
+  backdrop-filter: blur(1px);
+}
+
+.loading-dialog {
+  background: white;
+  border-radius: 8px;
+  padding: 30px 40px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  text-align: center;
+  border: 1px solid #ddd;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.loading-dialog-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.loading-gif {
+  max-width: 50px;
+  max-height: 50px;
+  width: auto;
+  height: auto;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #1976d2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-message {
+  margin: 0;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  font-family: Arial, sans-serif;
+}
+
+/* Variante più piccola per loading inline */
+.loading-dialog.compact {
+  padding: 20px 25px;
+}
+
+.loading-dialog.compact .loading-spinner {
+  width: 30px;
+  height: 30px;
+  border-width: 2px;
+}
+
+.loading-dialog.compact .loading-message {
+  font-size: 13px;
+}
+
+/* Stile per il loading nell'angolo */
+.loading-dialog.corner {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  z-index: 1001;
+  padding: 15px 20px;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.loading-dialog.corner .loading-dialog-content {
+  flex-direction: row;
+  gap: 12px;
+}
+
+.loading-dialog.corner .loading-spinner {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
+}
+
+.loading-dialog.corner .loading-message {
+  font-size: 12px;
+  margin: 0;
+  line-height: 20px;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .loading-dialog {
+    margin: 20px;
+    padding: 25px 30px;
+  }
+}

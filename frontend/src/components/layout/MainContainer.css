@@ -1,0 +1,265 @@
+/* MainContainer Styles - Replica dello stile JSF standard_public.xhtml */
+
+/* Main container */
+.main-container {
+  margin-top: 30px;
+}
+
+/* Form di login mobile - solo visibile su mobile */
+.visible-xs {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .visible-xs {
+    display: block !important;
+  }
+}
+
+/* Responsive login per mobile */
+.resp_log {
+  margin-bottom: 20px;
+}
+
+.resp_log .log {
+  padding: 12px;
+  font-size: 14px;
+  line-height: 14px;
+  width: 100%;
+  margin-bottom: 0 !important;
+  border: none;
+  background: white;
+}
+
+.border_input {
+  border: 3px solid #e5e5e5;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.resp_log input:first-child {
+  border-bottom: 1px solid #e5e5e5;
+}
+
+/* Pulsante login mobile */
+.btn-block {
+  display: block;
+  width: 100%;
+}
+
+.btn-secondary {
+  background-color: #6c757d;
+  color: white;
+  border: 1px solid #6c757d;
+  padding: 10px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: #5a6268;
+  border-color: #545b62;
+}
+
+/* Main heading per la registrazione */
+.main-heading2 {
+  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 30px;
+}
+
+.main-heading2 i {
+  margin-right: 10px;
+  color: #e42080;
+}
+
+/* Layout colonne */
+.col-xs-12 {
+  width: 100%;
+  padding: 0 15px;
+  box-sizing: border-box;
+  margin-bottom: 15px;
+}
+
+.col-sm-12 {
+  width: 100%;
+  padding: 0 15px;
+  box-sizing: border-box;
+}
+
+.col-md-1 {
+  width: 8.333333%;
+  padding: 0 15px;
+  box-sizing: border-box;
+}
+
+.col-md-5 {
+  width: 41.666667%;
+  padding: 0 15px;
+  box-sizing: border-box;
+}
+
+.col-md-6 {
+  width: 50%;
+  padding: 0 15px;
+  box-sizing: border-box;
+}
+
+/* Form controls */
+.form-control {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #c4c7cc;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: #515365;
+  background-color: white;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  box-sizing: border-box;
+  margin-bottom: 15px;
+}
+
+.form-control:focus {
+  border-color: #80bdff;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.form-control::placeholder {
+  color: #888;
+}
+
+/* Password field icon */
+.field-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  z-index: 2;
+  color: #666;
+}
+
+.field-icon:hover {
+  color: #333;
+}
+
+/* Select styling */
+select.form-control {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 4 5"><path fill="%23666" d="M2 0L0 2h4zm0 5L0 3h4z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 12px;
+  padding-right: 35px;
+}
+
+/* Checkbox e label styling */
+label {
+  display: block;
+  font-size: 14px;
+  color: #333;
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+input[type="checkbox"] {
+  margin-right: 8px;
+  transform: scale(1.2);
+}
+
+/* Links */
+a {
+  color: #e42080;
+  text-decoration: underline;
+}
+
+a:hover {
+  color: #c71a6b;
+  text-decoration: none;
+}
+
+.forgot {
+  color: #666;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.forgot:hover {
+  color: #333;
+}
+
+/* Error messages */
+.errorMessage {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 5px;
+}
+
+/* Item spacing */
+.item {
+  height: 10px;
+}
+
+/* Responsive breakpoints */
+@media (min-width: 768px) {
+  .col-sm-12 {
+    width: 100%;
+  }
+}
+
+@media (min-width: 992px) {
+  .col-md-1 {
+    width: 8.333333%;
+  }
+  
+  .col-md-5 {
+    width: 41.666667%;
+  }
+  
+  .col-md-6 {
+    width: 50%;
+  }
+}
+
+/* Responsive per colonne form registrazione */
+@media (min-width: 768px) {
+  .col-md-6 {
+    width: 50%;
+    float: left;
+  }
+}
+
+@media (max-width: 767px) {
+  .col-xs-12,
+  .col-sm-12,
+  .col-md-6,
+  .col-md-5,
+  .col-md-1 {
+    width: 100%;
+    float: none;
+    margin-bottom: 15px;
+  }
+  
+  .main-heading2 {
+    font-size: 20px;
+    text-align: center;
+  }
+}
+
+/* Mobile specific - col-xs-6 */
+@media (max-width: 767px) {
+  .col-xs-6 {
+    width: 50%;
+    float: left;
+    padding: 0 10px;
+    box-sizing: border-box;
+  }
+}
