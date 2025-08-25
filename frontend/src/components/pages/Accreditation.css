@@ -1,0 +1,55 @@
+/* Accreditation page specific styles */
+
+.accreditation-content {
+  padding: 20px 0;
+}
+
+.accreditation-content h4 {
+  color: #333;
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  font-family: 'Open Sans', Arial, sans-serif;
+}
+
+.accreditation-content p {
+  font-family: 'Open Sans', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.accreditation-content ul {
+  font-family: 'Open Sans', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 20px;
+  padding-left: 30px;
+}
+
+.accreditation-content ul li {
+  margin-bottom: 10px;
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+  .accreditation-content {
+    padding: 15px 0;
+  }
+  
+  .accreditation-content h4 {
+    font-size: 18px;
+    margin-bottom: 15px;
+  }
+  
+  .accreditation-content p,
+  .accreditation-content ul {
+    font-size: 14px;
+  }
+  
+  .accreditation-content ul {
+    padding-left: 20px;
+  }
+}

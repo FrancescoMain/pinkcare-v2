@@ -25,7 +25,7 @@ const Footer = () => {
               <a href="/public">{t('standard_public.home')}</a>
               <a href="/about">{t('standard_public.about_us')}</a>
               <a href="/public?tab=blog_list">{t('standard_public.blog')}</a>
-              <a href="/public?tab=accreditation_pinkcare">{t('standard_public.pinkcare_accreditation')}</a>
+              <a href="/accreditation">{t('standard_public.pinkcare_accreditation')}</a>
               
               <ul style={{ listStyleType: 'none', marginTop: '10px', paddingLeft: '0' }}>
                 <li>

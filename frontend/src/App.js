@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import About from "./components/pages/About";
 import Home from "./components/pages/Home/Home";
 import Disclosure from "./components/pages/Disclosure";
+import Accreditation from "./components/pages/Accreditation";
 import ErrorDialog from "./components/ErrorDialog";
 import LoadingDialog from "./components/LoadingDialog";
 import Growl from "./components/Growl";
@@ -47,7 +49,8 @@ function App() {
                 <Routes>
                   <Route path="/" element={<Home />} />
                   <Route path="/public" element={<Home />} />
-                  <Route path="/about" element={<Home />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="/accreditation" element={<Accreditation />} />
                   {/* Altre route da aggiungere qui */}
                 </Routes>
               </MainContainer>
