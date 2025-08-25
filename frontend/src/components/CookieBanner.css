@@ -1,0 +1,58 @@
+/* Cookie Banner Styles - replicati da standard_public.xhtml */
+
+#wt-cookie-banner {
+  background: #000;
+  color: #fff;
+  padding: 20px;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999999;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+#wt-cookie-banner > p {
+  float: left;
+  margin: 4px 0;
+  flex: 1;
+  min-width: 200px;
+}
+
+#wt-cookie-banner #wt-cookie-accept-btn {
+  color: inherit;
+  border: 1px solid;
+  padding: 3px 12px;
+  float: right;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-left: 15px;
+}
+
+#wt-cookie-banner #wt-cookie-accept-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  #wt-cookie-banner {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  #wt-cookie-banner > p {
+    float: none;
+    margin-bottom: 15px;
+    min-width: auto;
+  }
+  
+  #wt-cookie-banner #wt-cookie-accept-btn {
+    float: none;
+    margin-left: 0;
+    width: 100px;
+  }
+}

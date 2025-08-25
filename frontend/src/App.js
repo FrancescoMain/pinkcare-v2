@@ -8,6 +8,8 @@ import LoadingDialog from "./components/LoadingDialog";
 import Growl from "./components/Growl";
 import Header from "./components/layout/Header";
 import MainContainer from "./components/layout/MainContainer";
+import Footer from "./components/layout/Footer";
+import CookieBanner from "./components/CookieBanner";
 import { useErrorHandler } from "./hooks/useErrorHandler";
 // Importa stili globali PinkCare
 import "./styles/global.css";
@@ -44,6 +46,9 @@ function App() {
           </Routes>
         </MainContainer>
 
+        {/* Footer PinkCare - replica del footer standard_public.xhtml */}
+        <Footer />
+
         {/* Growl Messages - equivalente a <p:growl> PrimeFaces */}
         <Growl
           messages={growlMessages}
@@ -61,6 +66,9 @@ function App() {
           onClose={hideError}
           error={error}
         />
+
+        {/* Cookie Banner - replica del wt-cookie-banner */}
+        <CookieBanner />
       </div>
     </Router>
   );
