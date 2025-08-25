@@ -203,8 +203,8 @@ a:hover {
   margin-top: 5px;
 }
 
-/* Item spacing */
-.item {
+/* Item spacing - specific to form items only */  
+form .item {
   height: 10px;
 }
 

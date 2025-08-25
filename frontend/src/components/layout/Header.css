@@ -140,8 +140,8 @@ input[type="checkbox"] {
   margin-right: 8px;
 }
 
-/* Item spacing */
-.item {
+/* Item spacing - specific to form items only */
+form .item {
   height: 35px;
 }
 

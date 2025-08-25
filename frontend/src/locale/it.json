@@ -22,12 +22,10 @@
     "subscribe": "Iscriviti"
   },
   "public": {
-    "system_error": "Errore di sistema",
-    "send_a_message_to": "Invia un messaggio a"
+    "system_error": "Errore di sistema"
   },
   "standard_login": {
-    "gender": "sesso",
-    "send_a_message_to": "Invia un messaggio a"
+    "gender": "sesso"
   },
   "authentication": {
     "agree": "Accetto",

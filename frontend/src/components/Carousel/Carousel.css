@@ -21,6 +21,8 @@
   line-height: 1;
   width: 100%;
   height: auto;
+  display: block;
+  margin: 0 auto;
 }
 
 .carousel-inner > .active,
@@ -223,17 +225,9 @@
   right: -20px;
 }
 
-/* Ensure proper height for carousel items */
-.carousel .item {
-  height: 32rem;
-  background-color: #777;
-}
-
-.carousel .item > img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  min-width: 100%;
-  height: 32rem;
-  object-fit: cover;
+/* Clean carousel without fixed height constraints */
+.carousel-inner > .item {
+  /* Remove background gray color and height constraints */
+  background-color: transparent;
+  height: auto; /* Let images determine natural height */
 }
