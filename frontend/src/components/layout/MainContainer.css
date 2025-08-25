@@ -263,3 +263,46 @@ form .item {
     box-sizing: border-box;
   }
 }
+
+/* About content styles */
+.about-content {
+  padding: 20px 0;
+}
+
+.about-content h4.main-heading2 {
+  color: #333;
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 30px;
+  font-family: 'Open Sans', Arial, sans-serif;
+}
+
+.about-content p {
+  font-family: 'Open Sans', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.about-content strong {
+  color: #e42080;
+  font-weight: 600;
+}
+
+/* Responsive per about content */
+@media (max-width: 767px) {
+  .about-content {
+    padding: 15px 0;
+  }
+  
+  .about-content h4.main-heading2 {
+    font-size: 20px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .about-content p {
+    font-size: 14px;
+  }
+}

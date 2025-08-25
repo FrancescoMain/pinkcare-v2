@@ -1,11 +1,64 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
+import { useDocumentTitle } from '../../hooks/useDocumentTitle';
 import { useErrorHandler } from '../../hooks/useErrorHandler';
 import './MainContainer.css';
 
 const MainContainer = ({ userVO = null, children }) => {
   const { t } = useTranslation();
+  const location = useLocation();
   const { showSuccessMessage, showErrorMessage } = useErrorHandler();
+
+  // Gestione del contenuto basato sulla route
+  const getMainContent = () => {
+    switch (location.pathname) {
+      case '/about':
+        return (
+          <div className="about-content">
+            <h4 className="main-heading2">Chi siamo</h4>
+            
+            <p style={{ textAlign: 'justify' }}>
+              PinkCare è il primo portale dedicato alla salute femminile: una piattaforma con la finalità 
+              di supportare le Donne nel proprio percorso di <strong>prevenzione</strong>, <strong>benessere</strong> e <strong>cura</strong>.
+            </p>
+            
+            <p style={{ textAlign: 'justify' }}>
+              PinkCare è una piattaforma in grado di offrire alle Utenti un servizio di <strong>tutoring personalizzato</strong> 
+              in base all'età e alla storia clinica. Registrandosi gratuitamente a PinkCare è possibile ottenere 
+              il proprio <strong>Piano di prevenzione</strong> e <strong>cura personalizzato</strong> e ricevere notifiche e aggiornamenti su visite 
+              ed esami da effettuare per proteggere la propria salute.
+            </p>
+            
+            <p style={{ textAlign: 'justify' }}> 
+              All'interno della propria area personale è possibile archiviare referti, documenti e altre informazioni 
+              mediche e trovare gli articoli del blog selezionati in base alla propria fascia d'età e ai propri interessi. 
+              La scheda sanitaria online potrà essere condivisa con il proprio specialista di fiducia, in modo da fornire 
+              notizie complete circa il proprio stato di salute.
+              PinkCare suggerisce gli appuntamenti più importanti per la propria agenda della salute e aiuta a trovare 
+              specialisti e strutture per eseguire visite ed esami. Per fornire alle Utenti un elevato standard di qualità 
+              delle prestazioni, su PinkCare troverai solo professionisti rispondenti alle procedure di qualità definite dal Comitato scientifico.
+            </p>
+          </div>
+        );
+      
+      default:
+        // Home content - renderizza i children (Home component)
+        return children;
+    }
+  };
+
+  // Gestione del title della pagina
+  const getPageTitle = () => {
+    switch (location.pathname) {
+      case '/about':
+        return 'PinkCare - Chi siamo';
+      default:
+        return 'PinkCare: il primo portale dedicato alla salute femminile';
+    }
+  };
+
+  useDocumentTitle(getPageTitle());
 
   // Stati per il form di registrazione
   const [newUser, setNewUser] = useState({
@@ -173,7 +226,7 @@ const MainContainer = ({ userVO = null, children }) => {
 
           {/* Start Appointment Image Area */}
           <div className="col-md-6 col-xs-12">
-            {children}
+            {getMainContent()}
           </div>
           <div className="col-md-1 col-sm-12 col-xs-12"></div>
           {/* End Appointment Image Area */}
@@ -285,7 +338,7 @@ const MainContainer = ({ userVO = null, children }) => {
                     <div className="">
                       {t('standard_public.consent_to_processing_sensitive_data', 'CONSENSO AL TRATTAMENTO DEI DATI SENSIBILI')}<br/>
                       {t('standard_public.i_declare', 'Dichiaro di aver letto e compreso')}
-                      {' '}<a href="public?tab=disclosure" target="_blank">{t('standard_public.disclosure', "l'informativa")}</a>{' '}
+                      {' '}<a href="/disclosure" target="_blank">{t('standard_public.disclosure', "l'informativa")}</a>{' '}
                       {t('standard_public.processing_of_my_personal_data', 'per il trattamento dei dati anagrafici e sensibili e acconsento al trattamento che riguarderà i dati personali idonei a rivelare lo stato di salute del sottoscritto.')}<br/>
                       <label>
                         <input 
@@ -299,7 +352,7 @@ const MainContainer = ({ userVO = null, children }) => {
                       </label><br/>
                       {t('standard_public.consent_to_processing_personal_data', 'CONSENSO AL TRATTAMENTO DEI DATI PERSONALI')}<br/>
                       {t('standard_public.i_declare', 'Dichiaro di aver letto e compreso')}
-                      {' '}<a href="public?tab=privacy_policy" target="_blank">{t('standard_public.disclosure', "l'informativa")}</a>{' '}
+                      {' '}<a href="/privacy-policy" target="_blank">{t('standard_public.disclosure', "l'informativa")}</a>{' '}
                       {t('standard_public.processing_of_my_data_for_marketing', 'per il trattamento dei dati per finalità di marketing. Acconsento quindi al trattamento dei dati personali da me comunicati. In particolare:')}<br/>
                       <label>
                         <input 

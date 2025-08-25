@@ -23,7 +23,7 @@ const Footer = () => {
             {/* Information Links Section */}
             <div className="col-md-6 col-sm-4 col-xs-12">
               <a href="/public">{t('standard_public.home')}</a>
-              <a href="/public?tab=about_us">{t('standard_public.about_us')}</a>
+              <a href="/about">{t('standard_public.about_us')}</a>
               <a href="/public?tab=blog_list">{t('standard_public.blog')}</a>
               <a href="/public?tab=accreditation_pinkcare">{t('standard_public.pinkcare_accreditation')}</a>
               
@@ -52,7 +52,7 @@ const Footer = () => {
               {t('standard_public.designed_by')} <a href="http://www.t1srl.it/">TiOne Technology Srl</a>
             </p>
             <p className="pull-right">
-              <a href="/public?tab=general_policy" target="_blank">Privacy policy</a>
+              <a href="/disclosure" target="_blank">Informativa Privacy</a>
             </p>
           </div>
         </div>
