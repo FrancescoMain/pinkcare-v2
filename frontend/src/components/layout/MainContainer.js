@@ -1,25 +1,10 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useErrorHandler } from '../../hooks/useErrorHandler';
 import './MainContainer.css';
 
-const MainContainer = ({ userVO = null, children }) => {
+const MainContainer = ({ userVO = null, children, errorHandler }) => {
   const { t } = useTranslation();
-  const { showSuccessMessage, showErrorMessage } = useErrorHandler();
-
-  // Stati per il form di registrazione
-  const [newUser, setNewUser] = useState({
-    name: '',
-    surname: '',
-    email: '',
-    password: '',
-    birthday: '',
-    gender: null,
-    nick_name: '',
-    agree_condition_and_privacy: false,
-    agree_marketing: false,
-    agree_newsletter: false
-  });
+  const { showSuccessMessage, showErrorMessage } = errorHandler;
 
   // Stati per form di login mobile
   const [mobileLoginData, setMobileLoginData] = useState({
@@ -27,16 +12,6 @@ const MainContainer = ({ userVO = null, children }) => {
     j_password: '',
     _spring_security_remember_me: false
   });
-
-  const [showPassword, setShowPassword] = useState(false);
-
-  const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setNewUser(prev => ({
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    }));
-  };
 
   const handleMobileLoginChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -59,36 +34,14 @@ const MainContainer = ({ userVO = null, children }) => {
     showSuccessMessage('Login Mobile', 'Login effettuato con successo');
   };
 
-  const handleRegistration = (e) => {
-    e.preventDefault();
-    
-    // Validazione base
-    if (!newUser.name || !newUser.surname || !newUser.email || !newUser.password) {
-      showErrorMessage('Errore di validazione', 'Tutti i campi obbligatori devono essere compilati');
-      return;
-    }
-    
-    if (!newUser.agree_condition_and_privacy) {
-      showErrorMessage('Errore', 'Devi accettare i termini e condizioni');
-      return;
-    }
-
-    // Conferma registrazione
-    const confirmed = window.confirm(t('authentication.have_you_verified_all_your_data', 'Hai verificato tutti i tuoi dati') + '?');
-    if (!confirmed) return;
-    
-    console.log('Registration:', newUser);
-    showSuccessMessage('Registrazione', 'Registrazione completata con successo!');
-  };
 
   const handlePasswordForgot = () => {
     console.log('Password dimenticata per:', mobileLoginData.j_username);
     showSuccessMessage('Recovery', 'Email di recupero inviata');
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
+
+
 
   return (
     <>
@@ -171,167 +124,8 @@ const MainContainer = ({ userVO = null, children }) => {
             )}
           </form>
 
-          {/* Start Appointment Image Area */}
-          <div className="col-md-6 col-xs-12">
-            {children}
-          </div>
-          <div className="col-md-1 col-sm-12 col-xs-12"></div>
-          {/* End Appointment Image Area */}
-
           {/* Start Content Area */}
-          <div className="col-md-5 col-sm-12 col-xs-12">
-            {/* Start Registration Form */}
-            <div>
-              <h4 className="main-heading2" style={{ marginBottom: '30px' }}>
-                <i className="fas fa-pencil-square-o"></i>
-                {t('standard_public.subscribe', 'Iscriviti')}*
-              </h4>
-              <p>*{t('standard_public.free_membership', 'Iscrizione completamente gratuita, non sono richiesti dati economici')}</p>
-              
-              <form className="content" autoComplete="off" onSubmit={handleRegistration}>
-                <div className="row">
-                  <div className="col-xs-12 col-sm-12 col-md-6">
-                    <input 
-                      name="name"
-                      value={newUser.name}
-                      onChange={handleInputChange}
-                      placeholder={t('authentication.first_name', 'Nome')} 
-                      className="form-control"
-                      required
-                    />
-                  </div>
-                  <div className="col-xs-12 col-sm-12 col-md-6">
-                    <input 
-                      name="surname"
-                      value={newUser.surname}
-                      onChange={handleInputChange}
-                      placeholder={t('authentication.last_name', 'Cognome')} 
-                      className="form-control"
-                      required
-                    />
-                  </div>
-                  <div className="col-xs-12 col-sm-12 col-md-6">
-                    <input 
-                      type="email" 
-                      name="email"
-                      value={newUser.email}
-                      onChange={handleInputChange}
-                      className="form-control" 
-                      placeholder={t('authentication.email', 'Email')} 
-                      autoComplete="off"
-                      pattern="^(([a-zA-Z0-9_+.-]+)@([a-zA-Z0-9][a-zA-Z0-9_.-]+).([a-zA-Z]+))$"
-                    />
-                  </div>
-                  <div className="col-xs-12 col-sm-12 col-md-6">
-                    <div style={{ position: 'relative' }}>
-                      <input style={{ opacity: 0, position: 'absolute' }} />
-                      <input type="password" style={{ opacity: 0, position: 'absolute' }} />
-                      <input 
-                        id="eye-field"
-                        name="password"
-                        type={showPassword ? 'text' : 'password'}
-                        value={newUser.password}
-                        onChange={handleInputChange}
-                        placeholder={t('authentication.password', 'Password')} 
-                        className="form-control" 
-                        autoComplete="new-password"
-                        pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d_@./#+-]{8,}$"
-                        title={t('authentication.min8chars_alphanumeric', '(min 8 caratteri alfanumerici)')}
-                        required
-                      />
-                      <span 
-                        toggle="#eye-field" 
-                        className={`fa ${showPassword ? 'fa-eye-slash' : 'fa-eye'} field-icon toggle-password`}
-                        onClick={togglePasswordVisibility}
-                        style={{ cursor: 'pointer' }}
-                      ></span>
-                    </div>
-                  </div>
-                  
-                  <div className="col-xs-12 col-sm-12 col-md-6">
-                    <input 
-                      type="date"
-                      name="birthday"
-                      value={newUser.birthday}
-                      onChange={handleInputChange}
-                      placeholder={t('authentication.your_birthday', 'Data di nascita')} 
-                      className="form-control"
-                      required
-                    />
-                  </div>
-                  <div className="col-xs-12 col-sm-12 col-md-6">
-                    <select 
-                      name="gender"
-                      value={newUser.gender || ''}
-                      onChange={handleInputChange}
-                      className="form-control"
-                    >
-                      <option value="">{t('authentication.gender', 'Sesso')}</option>
-                      <option value="true">{t('authentication.male', 'Uomo')}</option>
-                      <option value="false">{t('authentication.female', 'Donna')}</option>
-                    </select>
-                  </div>
-                  <div className="col-xs-12 col-sm-12">
-                    <input 
-                      name="nick_name"
-                      value={newUser.nick_name}
-                      onChange={handleInputChange}
-                      placeholder={t('authentication.nick_name', 'Nick name forum')} 
-                      className="form-control"
-                      required
-                    />
-                  </div>
-                  <div className="col-xs-12 col-sm-12">
-                    <div className="">
-                      {t('standard_public.consent_to_processing_sensitive_data', 'CONSENSO AL TRATTAMENTO DEI DATI SENSIBILI')}<br/>
-                      {t('standard_public.i_declare', 'Dichiaro di aver letto e compreso')}
-                      {' '}<a href="/disclosure" target="_blank">{t('standard_public.disclosure', "l'informativa")}</a>{' '}
-                      {t('standard_public.processing_of_my_personal_data', 'per il trattamento dei dati anagrafici e sensibili e acconsento al trattamento che riguarderà i dati personali idonei a rivelare lo stato di salute del sottoscritto.')}<br/>
-                      <label>
-                        <input 
-                          type="checkbox"
-                          name="agree_condition_and_privacy"
-                          checked={newUser.agree_condition_and_privacy}
-                          onChange={handleInputChange}
-                          required
-                        />
-                        {' '}{t('standard_public.agree_to_receive', 'Acconsento per ricevere il mio piano di prevenzione')}
-                      </label><br/>
-                      {t('standard_public.consent_to_processing_personal_data', 'CONSENSO AL TRATTAMENTO DEI DATI PERSONALI')}<br/>
-                      {t('standard_public.i_declare', 'Dichiaro di aver letto e compreso')}
-                      {' '}<a href="/privacy-policy" target="_blank">{t('standard_public.disclosure', "l'informativa")}</a>{' '}
-                      {t('standard_public.processing_of_my_data_for_marketing', 'per il trattamento dei dati per finalità di marketing. Acconsento quindi al trattamento dei dati personali da me comunicati. In particolare:')}<br/>
-                      <label>
-                        <input 
-                          type="checkbox"
-                          name="agree_marketing"
-                          checked={newUser.agree_marketing}
-                          onChange={handleInputChange}
-                        />
-                        {' '}{t('authentication.yes_marketing', 'Mi piacerebbe ricevere aggiornamenti sulle promozioni e offerte')}
-                      </label><br/>
-                      <label>
-                        <input 
-                          type="checkbox"
-                          name="agree_newsletter"
-                          checked={newUser.agree_newsletter}
-                          onChange={handleInputChange}
-                        />
-                        {' '}{t('authentication.yes_newsletter', 'Mi piacerebbe ricevere la newsletter di PinkCare')}
-                      </label>
-                    </div>
-                    <button 
-                      type="submit"
-                      className="btn btn-secondary"
-                    >
-                      {t('authentication.complete_registration', 'REGISTRATI')}
-                    </button>
-                  </div>
-                </div>
-              </form>
-            </div>
-            {/* End Registration Form */}
-          </div>
+          {children}
           {/* End Content Area */}
         </div>
       </div>

@@ -1,7 +1,61 @@
-/* Stili specifici per la pagina Home */
+/* Stili specifici per la pagina Home - identici a standard_public.xhtml */
 
 .home-page {
-  padding: 40px 0;
+  /* No padding - managed by main-container */
+}
+
+.home-page .row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -15px;
+}
+
+.home-page .col-md-6,
+.home-page .col-md-5,
+.home-page .col-md-1 {
+  padding: 0 15px;
+  box-sizing: border-box;
+}
+
+/* Tab buttons - compact height styling */
+.tab-button {
+  padding: 5px 15px !important;
+  text-align: center !important;
+  border: none !important;
+  margin-bottom: 0 !important;
+  min-height: auto !important;
+  height: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.tab-button h5 {
+  margin: 0 !important;
+  padding: 0 !important;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.tab-active {
+  background-color: #e42080 !important;
+  color: white !important;
+}
+
+.tab-inactive {
+  background-color: white !important;
+  color: #e42080 !important;
+  border: 1px solid #e5e5e5;
+}
+
+.tab-inactive a {
+  color: #e42080 !important;
+  text-decoration: none !important;
+}
+
+.tab-inactive a:hover {
+  text-decoration: underline !important;
 }
 
 .footer-area {

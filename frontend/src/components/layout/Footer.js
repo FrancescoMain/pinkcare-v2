@@ -7,25 +7,16 @@ const Footer = () => {
 
   return (
     <>
-      {/* Main Footer Section */}
+      {/* Main Footer Section - exact match of standard_public.xhtml */}
       <div className="foot">
         <div className="container">
           <div className="row list_link">
-            {/* Doctor Registration Section */}
-            <div className="col-md-6 col-sm-4 col-xs-12" style={{ textAlign: 'center' }}>
-              <h3 style={{ marginTop: 0 }}>{t('standard_public.are_you_a_doctor')}</h3>
-              <h4>{t('standard_public.find_out_how')}</h4>
-              <a href="/login?page=register_business" className="btn btn-secondary" style={{ marginBottom: '10px' }}>
-                {t('standard_public.register')}
-              </a>
-            </div>
-
-            {/* Information Links Section */}
+            {/* Information Links Section - exactly as in original */}
             <div className="col-md-6 col-sm-4 col-xs-12">
-              <a href="/public">{t('standard_public.home')}</a>
-              <a href="/about">{t('standard_public.about_us')}</a>
-              <a href="/public?tab=blog_list">{t('standard_public.blog')}</a>
-              <a href="/accreditation">{t('standard_public.pinkcare_accreditation')}</a>
+              <a href="public">{t('standard_public.home', 'HOME')}</a>
+              <a href="public?tab=about_us">{t('standard_public.about_us', 'CHI SIAMO')}</a>
+              <a href="public?tab=blog_list">{t('standard_public.blog', 'BLOG')}</a>
+              <a href="public?tab=accreditation_pinkcare">{t('standard_public.pinkcare_accreditation', 'ACCREDITAMENTO PINKCARE')}</a>
               
               <ul style={{ listStyleType: 'none', marginTop: '10px', paddingLeft: '0' }}>
                 <li>
@@ -49,10 +40,10 @@ const Footer = () => {
         <div className="copyright">
           <div className="container clearfix">
             <p className="pull-left">
-              {t('standard_public.designed_by')} <a href="http://www.t1srl.it/">TiOne Technology Srl</a>
+              {t('standard_public.designed_by', 'Designed By')} <a href="http://www.t1srl.it/">TiOne Technology Srl</a>
             </p>
             <p className="pull-right">
-              <a href="/disclosure" target="_blank">Informativa Privacy</a>
+              <a href="public?tab=general_policy" target="_blank">Privacy policy</a>
             </p>
           </div>
         </div>

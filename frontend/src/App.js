@@ -18,6 +18,7 @@ import "./styles/global.css";
 
 function App() {
   const { t } = useTranslation();
+  const errorHandler = useErrorHandler();
   const {
     error,
     isErrorDialogOpen,
@@ -25,7 +26,7 @@ function App() {
     hideError,
     growlMessages,
     removeGrowlMessage,
-  } = useErrorHandler();
+  } = errorHandler;
 
 
   // Stato utente per gestire login/logout
@@ -45,10 +46,10 @@ function App() {
               <Header userVO={simulatedUser} />
 
               {/* Main Container Area - replica del layout JSF */}
-              <MainContainer userVO={simulatedUser}>
+              <MainContainer userVO={simulatedUser} errorHandler={errorHandler}>
                 <Routes>
-                  <Route path="/" element={<Home />} />
-                  <Route path="/public" element={<Home />} />
+                  <Route path="/" element={<Home userVO={simulatedUser} errorHandler={errorHandler} />} />
+                  <Route path="/public" element={<Home userVO={simulatedUser} errorHandler={errorHandler} />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/accreditation" element={<Accreditation />} />
                   {/* Altre route da aggiungere qui */}

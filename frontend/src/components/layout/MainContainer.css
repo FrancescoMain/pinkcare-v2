@@ -137,12 +137,18 @@
 /* Password field icon */
 .field-icon {
   position: absolute;
-  right: 15px;
-  top: 50%;
-  transform: translateY(-50%);
+  right: 12px;
+  top: 0;
   cursor: pointer;
   z-index: 2;
   color: #666;
+  line-height: 1;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  text-align: center;
+  font-size: 16px;
+  vertical-align: middle;
 }
 
 .field-icon:hover {
@@ -262,5 +268,160 @@ form .item {
     padding: 0 10px;
     box-sizing: border-box;
   }
+}
+
+/* Password strength indicator - base styles */
+.password-strength-indicator {
+  position: absolute;
+  top: 0;
+  width: 200px;
+  padding: 8px 12px;
+  font-size: 12px;
+  border: 1px solid;
+  border-radius: 4px;
+  background-color: white;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Tooltip a destra (default) */
+.password-strength-indicator.tooltip-right {
+  left: calc(100% + 10px);
+}
+
+.password-strength-indicator.tooltip-right::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: -8px;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-right: 8px solid;
+  border-right-color: inherit;
+}
+
+/* Tooltip a sinistra quando non c'è spazio */
+.password-strength-indicator.tooltip-left {
+  right: calc(100% + 10px);
+  left: auto;
+}
+
+.password-strength-indicator.tooltip-left::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: -8px;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-top: 8px solid transparent;
+  border-bottom: 8px solid transparent;
+  border-left: 8px solid;
+  border-left-color: inherit;
+}
+
+
+/* Responsive: su mobile posiziona sotto */
+@media (max-width: 768px) {
+  .password-strength-indicator {
+    position: absolute !important;
+    top: 100% !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: auto !important;
+    margin-top: 5px !important;
+  }
+  
+  .password-strength-indicator::before {
+    display: none !important;
+  }
+}
+
+.password-weak {
+  color: #856404;
+  background-color: #fff3cd;
+  border-color: #ffeaa7;
+}
+
+.password-weak.tooltip-right::before {
+  border-right-color: #ffeaa7;
+}
+
+.password-weak.tooltip-left::before {
+  border-left-color: #ffeaa7;
+}
+
+.password-good {
+  color: #155724;
+  background-color: #d4edda;
+  border-color: #c3e6cb;
+}
+
+.password-good.tooltip-right::before {
+  border-right-color: #c3e6cb;
+}
+
+.password-good.tooltip-left::before {
+  border-left-color: #c3e6cb;
+}
+
+.password-strong {
+  color: #004085;
+  background-color: #cce5ff;
+  border-color: #99ccff;
+}
+
+.password-strong.tooltip-right::before {
+  border-right-color: #99ccff;
+}
+
+.password-strong.tooltip-left::before {
+  border-left-color: #99ccff;
+}
+
+/* Italian date format support */
+.date-input-italian {
+  /* Force DD/MM/YYYY display by setting locale */
+  position: relative;
+}
+
+/* Custom date input component - forces DD/MM/YYYY format */
+.date-input-custom {
+  position: relative;
+}
+
+.date-format-hint {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 11px;
+  color: #999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.date-input-custom:focus + .date-format-hint {
+  opacity: 1;
+}
+
+/* Hide the hint when there's text */
+.date-input-custom:not(:placeholder-shown) + .date-format-hint {
+  opacity: 0;
+}
+
+/* Ensure proper styling for custom date input */
+.date-input-custom {
+  font-family: monospace;
+  letter-spacing: 1px;
+}
+
+.date-input-custom::placeholder {
+  font-family: inherit;
+  letter-spacing: normal;
 }
 

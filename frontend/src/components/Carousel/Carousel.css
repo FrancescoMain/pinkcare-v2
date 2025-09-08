@@ -122,15 +122,32 @@
   font-size: 30px;
 }
 
-/* Fallback for when Glyphicons are not available */
+/* Fallback for when Glyphicons are not available - ensure visibility */
 .carousel-control .glyphicon-chevron-left:before {
   content: '‹';
   font-size: 30px;
+  font-weight: bold;
+  display: inline-block;
+  line-height: 1;
 }
 
 .carousel-control .glyphicon-chevron-right:before {
   content: '›';
   font-size: 30px;
+  font-weight: bold;
+  display: inline-block;
+  line-height: 1;
+}
+
+/* Additional fallback - use Unicode arrows if chevrons don't show */
+@supports not (content: '‹') {
+  .carousel-control .glyphicon-chevron-left:before {
+    content: '←';
+  }
+  
+  .carousel-control .glyphicon-chevron-right:before {
+    content: '→';
+  }
 }
 
 .carousel-indicators {
