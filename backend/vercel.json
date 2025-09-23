@@ -1,19 +1,12 @@
 {
   "version": 2,
   "name": "pinkcare-api",
-  "builds": [
-    {
-      "src": "server.js",
-      "use": "@vercel/node",
-      "config": {
-        "bundler": "nft",
-        "externalNodeModules": [
-          "pg"
-        ],
-        "maxDuration": 30
-      }
+  "functions": {
+    "server.js": {
+      "runtime": "nodejs18.x",
+      "includeFiles": "node_modules/pg/**/*"
     }
-  ],
+  },
   "routes": [
     {
       "src": "/(.*)",
