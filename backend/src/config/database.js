@@ -1,3 +1,5 @@
+// Explicitly require pg so Vercel bundles the driver when Sequelize loads it dynamically
+require('pg');
 const { Sequelize } = require('sequelize');
 
 // Database connection configuration (from data-access-config.xml)
