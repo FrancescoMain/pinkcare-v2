@@ -4,6 +4,11 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const path = require('path');
 
+// Allow self-signed certificate from Supabase session pooler when running on Vercel
+if (!process.env.NODE_TLS_REJECT_UNAUTHORIZED) {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
+}
+
 const envFile = process.env.ENV_FILE
   ? path.resolve(__dirname, process.env.ENV_FILE)
   : path.resolve(__dirname, '.env');
