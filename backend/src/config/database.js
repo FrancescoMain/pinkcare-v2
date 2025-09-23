@@ -2,17 +2,41 @@
 require('pg');
 const { Sequelize } = require('sequelize');
 
+const toBoolean = (value, defaultValue = false) => {
+  if (value === undefined || value === null || value === '') {
+    return defaultValue;
+  }
+  return value.toString().toLowerCase() === 'true';
+};
+
 // Database connection configuration (from data-access-config.xml)
-const sslEnabled = (process.env.DB_SSL || '').toLowerCase() === 'true';
+const databaseUrl = process.env.DATABASE_URL;
+let urlHost = '';
+let urlSslMode = '';
 
-const dialectOptions = {};
-
-if (sslEnabled) {
-  dialectOptions.ssl = {
-    require: true,
-    rejectUnauthorized: (process.env.DB_SSL_REJECT_UNAUTHORIZED || '').toLowerCase() === 'true'
-  };
+if (databaseUrl) {
+  try {
+    const parsed = new URL(databaseUrl);
+    urlHost = parsed.hostname || '';
+    urlSslMode = (parsed.searchParams.get('sslmode') || '').toLowerCase();
+  } catch (error) {
+    console.warn('Invalid DATABASE_URL provided, falling back to discrete credentials:', error.message);
+  }
 }
+
+const hostLooksLikeSupabase =
+  urlHost.endsWith('.supabase.co') ||
+  urlHost.endsWith('.pooler.supabase.com') ||
+  urlHost.includes('.supabase.');
+
+const sslEnvEnabled = toBoolean(process.env.DB_SSL);
+const shouldEnableSslFromUrl = Boolean(databaseUrl) && (urlSslMode ? urlSslMode !== 'disable' : hostLooksLikeSupabase);
+
+const useSsl = sslEnvEnabled || shouldEnableSslFromUrl;
+const rejectUnauthorized = toBoolean(
+  process.env.DB_SSL_REJECT_UNAUTHORIZED,
+  hostLooksLikeSupabase ? false : true
+);
 
 const baseOptions = {
   dialect: 'postgres',
@@ -31,11 +55,14 @@ const baseOptions = {
   }
 };
 
-if (Object.keys(dialectOptions).length > 0) {
-  baseOptions.dialectOptions = dialectOptions;
+if (useSsl) {
+  baseOptions.dialectOptions = {
+    ssl: {
+      require: true,
+      rejectUnauthorized
+    }
+  };
 }
-
-const databaseUrl = process.env.DATABASE_URL;
 
 if (!databaseUrl) {
   baseOptions.host = process.env.DB_HOST || 'localhost';
