@@ -50,6 +50,18 @@ const rejectUnauthorized = toBoolean(
   hostLooksLikeSupabase ? false : true
 );
 
+if (process.env.NODE_ENV !== 'production') {
+  console.log('[DB Config] Using discrete DB options:', {
+    databaseUrl: databaseUrl ? `${urlHost} (sslmode=${urlSslMode || 'default'})` : 'N/A',
+    sslEnvEnabled,
+    sslRejectUnauthorizedEnv,
+    shouldEnableSslFromUrl,
+    hostLooksLikeSupabase,
+    resolvedSsl: useSsl,
+    resolvedRejectUnauthorized: rejectUnauthorized,
+  });
+}
+
 const baseOptions = {
   dialect: 'postgres',
   logging: process.env.NODE_ENV === 'development' ? console.log : false,
