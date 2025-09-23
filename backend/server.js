@@ -2,7 +2,17 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
-require('dotenv').config();
+const path = require('path');
+
+const envFile = process.env.ENV_FILE
+  ? path.resolve(__dirname, process.env.ENV_FILE)
+  : path.resolve(__dirname, '.env');
+
+const envResult = require('dotenv').config({ path: envFile });
+
+if (process.env.ENV_FILE && envResult.error) {
+  console.warn(`⚠️  Impossibile caricare il file di ambiente ${envFile}:`, envResult.error.message);
+}
 
 const authRoutes = require('./src/routes/auth');
 const userRoutes = require('./src/routes/users');
@@ -74,9 +84,21 @@ async function startServer() {
     
     // Start server
     app.listen(PORT, () => {
+      const dbLabel = (() => {
+        if (process.env.DATABASE_URL) {
+          try {
+            const parsed = new URL(process.env.DATABASE_URL);
+            return `${parsed.pathname.replace('/', '')}@${parsed.hostname}:${parsed.port || '5432'}`;
+          } catch (err) {
+            return process.env.DATABASE_URL;
+          }
+        }
+        return `${process.env.DB_NAME}@${process.env.DB_HOST}:${process.env.DB_PORT}`;
+      })();
+
       console.log(`🚀 PinkCare API server running on port ${PORT}`);
       console.log(`📊 Environment: ${process.env.NODE_ENV}`);
-      console.log(`🗄️  Database: ${process.env.DB_NAME}@${process.env.DB_HOST}:${process.env.DB_PORT}`);
+      console.log(`🗄️  Database: ${dbLabel}`);
     });
   } catch (error) {
     console.error('❌ Unable to start server:', error);

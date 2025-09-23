@@ -5,7 +5,10 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "start:supabase": "ENV_FILE=.env.supabase NODE_ENV=production node server.js",
     "dev": "nodemon server.js",
+    "dev:local": "ENV_FILE=.env.local NODE_ENV=development nodemon server.js",
+    "dev:supabase": "ENV_FILE=.env.supabase NODE_ENV=development nodemon server.js",
     "test": "jest",
     "build": "echo 'No build step required for Node.js'",
     "vercel-build": "echo 'No build step required for Node.js'"

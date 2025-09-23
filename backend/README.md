@@ -15,14 +15,19 @@ Express.js API backend migrato dal sistema Java Spring esistente, mantenendo la 
 # Installa le dipendenze
 npm install
 
-# Configura le variabili d'ambiente
-cp .env.example .env
-# Modifica .env con le tue configurazioni
+# Configura i file di ambiente (non committare quelli reali)
+cp .env.local.example .env.local          # Postgres locale / Docker
+cp .env.example .env.supabase            # Connessione a Supabase
 ```
 
 ### Configurazione Database
 
-Il backend è configurato per connettersi al database PostgreSQL esistente:
+Il backend legge la configurazione dal file indicato nella variabile `ENV_FILE`.
+
+- `.env.local` → ambiente locale/Sviluppo (Postgres locale o container con il dump)
+- `.env.supabase` → ambiente remoto (Supabase). Impostare `DB_SSL=true` oppure usare `DATABASE_URL`.
+
+Esempio locale:
 
 ```env
 DB_HOST=localhost
@@ -30,17 +35,45 @@ DB_PORT=5432
 DB_NAME=PINKCARE_DB
 DB_USER=postgres
 DB_PASSWORD=pinkcare2025
+DB_SSL=false
+```
+
+Esempio Supabase (Session Pooler IPv4):
+
+```env
+DB_HOST=aws-1-eu-north-1.pooler.supabase.com
+DB_PORT=5432
+DB_NAME=postgres
+DB_USER=postgres.<project-ref>
+DB_PASSWORD=***
+DB_SSL=true
 ```
 
 ### Avvio
 
 ```bash
-# Sviluppo (con hot reload)
-npm run dev
+# Sviluppo (hot reload) con DB locale
+npm run dev:local
 
-# Produzione
+# Sviluppo puntando a Supabase (usa credenziali di test!)
+npm run dev:supabase
+
+# Esecuzione production-like su Supabase
+npm run start:supabase
+
+# Avvio legacy (usa il file .env di default, se presente)
+npm run dev
 npm start
 ```
+
+#### Workflow consigliato
+
+1. Importa periodicamente un dump di Supabase in Postgres locale (`.env.local`) per avere dati aggiornati:
+   - `pg_dump --no-owner --no-acl -h aws-1-eu-north-1.pooler.supabase.com -p 5432 -U postgres.<project-ref> -d postgres > backup.sql`
+   - `psql -h localhost -U postgres -d PINKCARE_DB -f backup.sql`
+2. Usa `npm run dev:local` come default per sviluppo e test, così eviti scritture accidentali sull'ambiente remoto.
+3. Passa a `npm run dev:supabase` solo quando devi validare comportamenti contro il database gestito da Supabase.
+4. Valuta la creazione di un ruolo Supabase read-only per debug, lasciando le credenziali dell'utente amministratore solo agli script di migrazione.
 
 L'API sarà disponibile su: `http://localhost:3001`
 
@@ -145,9 +178,12 @@ src/
 
 ### Scripts
 ```bash
-npm run dev          # Sviluppo con nodemon
-npm run start        # Produzione
-npm run test         # Test (TODO)
+npm run dev:local     # Dev con Postgres locale
+npm run dev:supabase  # Dev puntando a Supabase (SSL)
+npm run dev           # Dev usando il file .env di default (se presente)
+npm run start         # Avvio standard (usa .env)
+npm run start:supabase# Avvio production-like su Supabase
+npm run test          # Test (TODO)
 ```
 
 ### Testing
