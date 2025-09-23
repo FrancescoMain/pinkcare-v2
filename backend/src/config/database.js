@@ -1,5 +1,5 @@
 // Explicitly require pg so Vercel bundles the driver when Sequelize loads it dynamically
-require('pg');
+const pg = require('pg');
 const { Sequelize } = require('sequelize');
 
 const toBoolean = (value, defaultValue = false) => {
@@ -9,7 +9,19 @@ const toBoolean = (value, defaultValue = false) => {
   return value.toString().toLowerCase() === 'true';
 };
 
-// Database connection configuration (from data-access-config.xml)
+const createSslOptions = ({ useSsl, rejectUnauthorized }) => {
+  if (!useSsl) {
+    return undefined;
+  }
+
+  return {
+    ssl: {
+      require: true,
+      rejectUnauthorized,
+    },
+  };
+};
+
 const databaseUrl = process.env.DATABASE_URL;
 let urlHost = '';
 let urlSslMode = '';
@@ -30,11 +42,11 @@ const hostLooksLikeSupabase =
   urlHost.includes('.supabase.');
 
 const sslEnvEnabled = toBoolean(process.env.DB_SSL);
+const sslRejectUnauthorizedEnv = process.env.DB_SSL_REJECT_UNAUTHORIZED;
 const shouldEnableSslFromUrl = Boolean(databaseUrl) && (urlSslMode ? urlSslMode !== 'disable' : hostLooksLikeSupabase);
-
 const useSsl = sslEnvEnabled || shouldEnableSslFromUrl;
 const rejectUnauthorized = toBoolean(
-  process.env.DB_SSL_REJECT_UNAUTHORIZED,
+  sslRejectUnauthorizedEnv,
   hostLooksLikeSupabase ? false : true
 );
 
@@ -42,26 +54,29 @@ const baseOptions = {
   dialect: 'postgres',
   logging: process.env.NODE_ENV === 'development' ? console.log : false,
   pool: {
-    max: 40,          // maxPoolSize from Spring config
-    min: 10,          // minPoolSize from Spring config
-    acquire: 60000,   // maximum time to get connection
-    idle: 300000      // maxIdleTimeExcessConnections from Spring config
+    max: 40,
+    min: 10,
+    acquire: 60000,
+    idle: 300000,
   },
   define: {
-    // Use snake_case for database columns but camelCase in JavaScript
     underscored: true,
-    // Don't add timestamps by default (we'll add them manually where needed)
-    timestamps: false
-  }
+    timestamps: false,
+  },
 };
 
-if (useSsl) {
-  baseOptions.dialectOptions = {
-    ssl: {
-      require: true,
-      rejectUnauthorized
-    }
+const sslOptions = createSslOptions({ useSsl, rejectUnauthorized });
+
+if (sslOptions) {
+  baseOptions.dialectOptions = sslOptions;
+  // Set pg global defaults as a fallback for drivers that skip dialectOptions
+  pg.defaults.ssl = {
+    require: true,
+    rejectUnauthorized,
   };
+} else {
+  // Ensure pg defaults don't linger with relaxed SSL if local dev disables it
+  pg.defaults.ssl = false;
 }
 
 if (!databaseUrl) {
@@ -75,7 +90,7 @@ const sequelize = databaseUrl
       process.env.DB_NAME || 'PINKCARE_DB',
       process.env.DB_USER || 'postgres',
       process.env.DB_PASSWORD || 'pinkcare2025',
-      baseOptions
+      baseOptions,
     );
 
 module.exports = { sequelize };
