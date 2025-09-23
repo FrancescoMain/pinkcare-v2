@@ -4,7 +4,14 @@
   "builds": [
     {
       "src": "server.js",
-      "use": "@vercel/node"
+      "use": "@vercel/node",
+      "config": {
+        "bundler": "nft",
+        "externalNodeModules": [
+          "pg"
+        ],
+        "maxDuration": 30
+      }
     }
   ],
   "routes": [
