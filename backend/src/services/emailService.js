@@ -74,6 +74,46 @@ class EmailService {
   }
 
   /**
+   * Send welcome email replicating legacy behaviour
+   * @param {string} email - Recipient email
+   * @param {string} fullName - Recipient full name
+   * @param {string} plainPassword - Password chosen during registration
+   */
+  async sendWelcomeEmail(email, fullName, plainPassword) {
+    if (!this.transporter) {
+      console.log('Email service not configured');
+      return false;
+    }
+
+    const siteUrl = process.env.APP_URL || 'https://www.pinkcare.it';
+    const loginUrl = `${siteUrl.replace(/\/$/, '')}/login`;
+
+    const mailOptions = {
+      from: process.env.FROM_EMAIL || 'PINKCARE <no-reply@pinkcare.it>',
+      to: email,
+      subject: 'Benvenuto su PinkCare',
+      html: `
+        <p>Gentile <strong>${fullName || 'utente'}</strong>,</p>
+        <p>il tuo account è stato correttamente attivato.</p>
+        <p>Questi sono i tuoi dati d'accesso:</p>
+        <p>Username: <strong>${email}</strong><br/>Password: <strong>${plainPassword}</strong></p>
+        <p>Per accedere visita il seguente indirizzo:<br/>
+        <a href="${loginUrl}">${loginUrl}</a></p>
+        <p>Il team PinkCare</p>
+      `
+    };
+
+    try {
+      const info = await this.transporter.sendMail(mailOptions);
+      console.log('Welcome email sent:', info.messageId);
+      return true;
+    } catch (error) {
+      console.error('Error sending welcome email:', error);
+      return false;
+    }
+  }
+
+  /**
    * Send password recovery email
    * @param {string} email - Recipient email
    * @param {string} name - User name

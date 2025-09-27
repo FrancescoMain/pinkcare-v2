@@ -13,6 +13,15 @@ export class AuthService {
   static async registerConsumer(userData) {
     return ApiClient.post(API_CONFIG.ENDPOINTS.AUTH.REGISTER_CONSUMER, userData);
   }
+
+  /**
+   * Registrazione nuovo utente business (doctor/clinic)
+   * @param {Object} businessData - Dati della struttura
+   * @returns {Promise}
+   */
+  static async registerBusiness(businessData) {
+    return ApiClient.post(API_CONFIG.ENDPOINTS.AUTH.REGISTER_BUSINESS, businessData);
+  }
   
   /**
    * Login utente

@@ -21,6 +21,7 @@ if (process.env.ENV_FILE && envResult.error) {
 
 const authRoutes = require('./src/routes/auth');
 const userRoutes = require('./src/routes/users');
+const referenceRoutes = require('./src/routes/reference');
 const { sequelize } = require('./src/config/database');
 
 const app = express();
@@ -48,6 +49,7 @@ app.get('/health', (req, res) => {
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/reference', referenceRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

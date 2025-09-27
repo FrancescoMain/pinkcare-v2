@@ -81,6 +81,7 @@ L'API sarà disponibile su: `http://localhost:3001`
 
 ### Authentication
 - `POST /api/auth/register-consumer` - Registrazione utente consumatore
+- `POST /api/auth/register-business` - Registrazione medico/struttura
 - `POST /api/auth/login` - Login utente
 - `POST /api/auth/logout` - Logout utente
 - `POST /api/auth/forgot-password` - Richiesta reset password
@@ -91,6 +92,10 @@ L'API sarà disponibile su: `http://localhost:3001`
 - `GET /api/users/profile` - Profilo utente corrente
 - `PUT /api/users/profile` - Aggiornamento profilo utente
 - `GET /api/users/:userId` - Profilo utente per ID (solo admin o proprietario)
+
+### Reference Data
+- `GET /api/reference/medical-titles` - Elenco specializzazioni mediche
+- `GET /api/reference/municipalities` - Ricerca comuni italiani (autocomplete)
 
 ### Health Check
 - `GET /health` - Status dell'API

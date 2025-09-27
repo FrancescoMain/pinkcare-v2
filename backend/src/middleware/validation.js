@@ -73,6 +73,128 @@ class ValidationMiddleware {
       .isMobilePhone('it-IT')
       .withMessage('Numero di telefono non valido')
   ];
+
+  /**
+   * Validation rules for business registration (doctor/clinic)
+   */
+  static validateBusinessRegistration = [
+    body('businessType')
+      .trim()
+      .notEmpty()
+      .withMessage('Tipo struttura obbligatorio')
+      .isIn(['DOCTOR', 'CLINIC', 'doctor', 'clinic'])
+      .withMessage('Tipo struttura non valido'),
+
+    body('name')
+      .trim()
+      .notEmpty()
+      .withMessage('Nome è obbligatorio')
+      .isLength({ min: 2, max: 50 })
+      .withMessage('Nome deve essere tra 2 e 50 caratteri'),
+
+    body('surname')
+      .trim()
+      .notEmpty()
+      .withMessage('Cognome è obbligatorio')
+      .isLength({ min: 2, max: 50 })
+      .withMessage('Cognome deve essere tra 2 e 50 caratteri'),
+
+    body('email')
+      .trim()
+      .toLowerCase()
+      .isEmail()
+      .withMessage('Email non valida')
+      .normalizeEmail(),
+
+    body('password')
+      .isLength({ min: 8 })
+      .withMessage('Password deve essere di almeno 8 caratteri')
+      .matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d_@./#+-]{8,}$/)
+      .withMessage('Formato password non corretto'),
+
+    body('gender')
+      .optional()
+      .isIn(['true', 'false', true, false])
+      .withMessage('Genere non valido'),
+
+    body('nickName')
+      .optional()
+      .trim()
+      .isLength({ min: 2, max: 30 })
+      .withMessage('Nick name deve essere tra 2 e 30 caratteri'),
+
+    body('structureName')
+      .if((value, { req }) => (req.body.businessType || '').toUpperCase() === 'CLINIC')
+      .trim()
+      .notEmpty()
+      .withMessage('Nome struttura obbligatorio')
+      .isLength({ min: 2, max: 120 })
+      .withMessage('Nome struttura deve essere tra 2 e 120 caratteri'),
+
+    body('medicalTitle')
+      .if((value, { req }) => (req.body.businessType || '').toUpperCase() === 'DOCTOR')
+      .trim()
+      .notEmpty()
+      .withMessage('Specializzazione obbligatoria'),
+
+    body('address.streetType')
+      .trim()
+      .notEmpty()
+      .withMessage('Tipologia indirizzo obbligatoria'),
+
+    body('address.street')
+      .trim()
+      .notEmpty()
+      .withMessage('Via obbligatoria'),
+
+    body('address.streetNumber')
+      .trim()
+      .notEmpty()
+      .withMessage('Civico obbligatorio'),
+
+    body('address.postCode')
+      .trim()
+      .notEmpty()
+      .withMessage('CAP obbligatorio')
+      .isLength({ min: 4, max: 10 })
+      .withMessage('CAP non valido'),
+
+    body('address.municipality')
+      .trim()
+      .notEmpty()
+      .withMessage('Comune obbligatorio'),
+
+    body('address.province')
+      .trim()
+      .notEmpty()
+      .withMessage('Provincia obbligatoria')
+      .isLength({ min: 2, max: 2 })
+      .withMessage('Provincia deve essere sigla di due lettere'),
+
+    body('agreeConditionAndPrivacy')
+      .custom(value => value === true || value === 'true')
+      .withMessage('Devi accettare i termini e condizioni per il trattamento dei dati sensibili'),
+
+    body('agreeToBeShown')
+      .custom(value => value === true || value === 'true')
+      .withMessage('Devi acconsentire ad essere visibile sul portale'),
+
+    body('agreeMarketing')
+      .optional()
+      .isBoolean()
+      .withMessage('Consenso marketing non valido'),
+
+    body('agreeNewsletter')
+      .optional()
+      .isBoolean()
+      .withMessage('Consenso newsletter non valido'),
+
+    body('mobilePhone')
+      .optional()
+      .trim()
+      .isMobilePhone('it-IT')
+      .withMessage('Numero di telefono non valido')
+  ];
   
   /**
    * Validation rules for user login

@@ -27,6 +27,7 @@ export const API_CONFIG = {
     // Auth endpoints
     AUTH: {
       REGISTER_CONSUMER: '/api/auth/register-consumer',
+      REGISTER_BUSINESS: '/api/auth/register-business',
       LOGIN: '/api/auth/login',
       LOGOUT: '/api/auth/logout',
       FORGOT_PASSWORD: '/api/auth/forgot-password',
@@ -37,6 +38,10 @@ export const API_CONFIG = {
     USERS: {
       PROFILE: '/api/users/profile',
       UPDATE_PROFILE: '/api/users/profile'
+    },
+    REFERENCE: {
+      MEDICAL_TITLES: '/api/reference/medical-titles',
+      MUNICIPALITIES: '/api/reference/municipalities'
     }
   },
   // Timeout configurazione

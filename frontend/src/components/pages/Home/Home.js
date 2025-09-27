@@ -241,7 +241,7 @@ const Home = ({ userVO = null, errorHandler }) => {
             </div>
             <div className="col-md-6 col-sm-6 col-xs-6 tab-button tab-inactive">
               <h5>
-                <a href="login?page=register_business" style={{ color: '#e42080', textDecoration: 'none' }}>
+                <a href="/login?page=register_business" style={{ color: '#e42080', textDecoration: 'none' }}>
                   Struttura / Medico
                 </a>
               </h5>

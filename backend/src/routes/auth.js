@@ -20,6 +20,16 @@ router.post('/register-consumer',
 );
 
 /**
+ * @route POST /api/auth/register-business
+ * @desc Register new doctor/clinic user
+ * @access Public
+ */
+router.post('/register-business',
+  ValidationMiddleware.validateBusinessRegistration,
+  authController.registerBusiness.bind(authController)
+);
+
+/**
  * @route POST /api/auth/login
  * @desc User login
  * @access Public

@@ -8,55 +8,71 @@ const { sequelize } = require('../config/database');
  * Based on it.tione.pinkcare.service.impl.UserServiceImpl.java
  */
 class UserService {
-  
-  /**
-   * Create new user (registration)
-   * @param {object} userData - User registration data
-   * @returns {Promise<User>} Created user
-   */
-  async createUser(userData) {
+  toBoolean(value) {
+    if (value === null || value === undefined) {
+      return null;
+    }
+    if (typeof value === 'boolean') {
+      return value;
+    }
+    if (typeof value === 'string') {
+      const normalized = value.trim().toLowerCase();
+      if (normalized === 'true') {
+        return true;
+      }
+      if (normalized === 'false') {
+        return false;
+      }
+    }
+    return Boolean(value);
+  }
+
+  async ensureUserDoesNotExist(email, options = {}) {
+    const existingUser = await User.findOne({
+      where: {
+        [Op.or]: [
+          { email },
+          { username: email }
+        ]
+      },
+      transaction: options.transaction
+    });
+
+    if (existingUser) {
+      throw new Error('Email già registrata');
+    }
+  }
+
+  async insertUserRecord(userPayload, options = {}) {
     const {
-      name,
-      surname,
       email,
       password,
+      name,
+      surname,
       birthday,
       gender,
       nickName,
+      mobilePhone,
       agreeConditionAndPrivacy,
+      agreeToBeShown,
       agreeMarketing,
-      agreeNewsletter,
-      mobilePhone
-    } = userData;
-    
-    // Validate password strength
+      agreeNewsletter
+    } = userPayload;
+
     const passwordValidation = PasswordUtils.validatePasswordStrength(password);
     if (!passwordValidation.isValid) {
       throw new Error(passwordValidation.errors.join(', '));
     }
-    
-    // Check if user already exists
-    const existingUser = await User.findOne({
-      where: {
-        [Op.or]: [
-          { email: email.toLowerCase() },
-          { username: email.toLowerCase() }
-        ]
-      }
-    });
-    
-    if (existingUser) {
-      throw new Error('Email già registrata');
-    }
-    
-    // Encode password using MD5 (for compatibility with Java system)
+
+    const normalizedEmail = email.toLowerCase().trim();
+    await this.ensureUserDoesNotExist(normalizedEmail, options);
+
     const hashedPassword = PasswordUtils.encodeMD5(password);
-    
-    // Create user using raw SQL to properly handle sequence
     const userBirthday = birthday ? new Date(birthday) : null;
     const insertDate = new Date();
-    
-    const [userResult] = await sequelize.query(`
+    const genderValue = this.toBoolean(gender);
+
+    const sql = `
       INSERT INTO app_user (
         id,
         accountnonexpired,
@@ -72,8 +88,10 @@ class UserService {
         last_modify_username,
         mobile_phone,
         name,
+        name_to_validate,
         password,
         surname,
+        surname_to_validate,
         username,
         password_recovery,
         birthday,
@@ -81,6 +99,7 @@ class UserService {
         agree_condition_and_privacy,
         agree_marketing,
         agree_newsletter,
+        agree_to_be_shown,
         nick_name,
         filled_personal_form,
         sedentary_lifestyle,
@@ -100,8 +119,10 @@ class UserService {
         :lastModifyUsername,
         :mobilePhone,
         :name,
+        :nameToValidate,
         :password,
         :surname,
+        :surnameToValidate,
         :username,
         :passwordRecovery,
         :birthday,
@@ -109,50 +130,100 @@ class UserService {
         :agreeConditionAndPrivacy,
         :agreeMarketing,
         :agreeNewsletter,
+        :agreeToBeShown,
         :nickName,
         :filledPersonalForm,
         :sedentaryLifestyle,
         :regularityMenstruation
       ) RETURNING *
-    `, {
-      replacements: {
-        name: name.trim(),
-        surname: surname.trim(),
-        email: email.toLowerCase().trim(),
-        username: email.toLowerCase().trim(),
-        password: hashedPassword,
-        birthday: userBirthday,
-        gender: gender === 'true' || gender === true,
-        nickName: nickName?.trim() || null,
-        agreeConditionAndPrivacy: agreeConditionAndPrivacy === true,
-        agreeMarketing: agreeMarketing === true,
-        agreeNewsletter: agreeNewsletter === true,
-        mobilePhone: mobilePhone?.trim() || null,
-        insertionDate: insertDate,
-        insertionUsername: null,
-        lastModifyDate: insertDate,
-        lastModifyUsername: null,
-        passwordRecovery: null,
-        filledPersonalForm: false,
-        sedentaryLifestyle: false,
-        regularityMenstruation: false,
-        accountNonExpired: 'Y',
-        accountNonLocked: 'Y',
-        credentialsNonExpired: 'Y',
-        deleted: false,
-        enabled: 'Y',
-        helpPassword: null
-      },
+    `;
+
+    const replacements = {
+      name: name ? name.trim() : null,
+      nameToValidate: null,
+      surname: surname ? surname.trim() : null,
+      surnameToValidate: null,
+      email: normalizedEmail,
+      username: normalizedEmail,
+      password: hashedPassword,
+      birthday: userBirthday,
+      gender: genderValue === null ? null : genderValue,
+      nickName: nickName?.trim() || null,
+      agreeConditionAndPrivacy: agreeConditionAndPrivacy === true,
+      agreeMarketing: agreeMarketing === true,
+      agreeNewsletter: agreeNewsletter === true,
+      agreeToBeShown: agreeToBeShown === true,
+      mobilePhone: mobilePhone?.trim() || null,
+      insertionDate: insertDate,
+      insertionUsername: null,
+      lastModifyDate: insertDate,
+      lastModifyUsername: null,
+      passwordRecovery: null,
+      filledPersonalForm: false,
+      sedentaryLifestyle: false,
+      regularityMenstruation: false,
+      accountNonExpired: 'Y',
+      accountNonLocked: 'Y',
+      credentialsNonExpired: 'Y',
+      deleted: false,
+      enabled: 'Y',
+      helpPassword: null
+    };
+
+    const [userResult] = await sequelize.query(sql, {
+      replacements,
+      transaction: options.transaction,
       type: sequelize.QueryTypes.INSERT
     });
-    
-    const user = userResult[0];
-    
-    // Assign default role (CONSUMER)
-    await this.assignRole(user.id, 'ROLE_CONSUMER');
-    
-    // Return user with roles populated
-    return await this.getUserProfile(user.id);
+
+    return userResult[0];
+  }
+
+  async assignRoles(userId, roles = [], options = {}) {
+    for (const roleName of roles) {
+      await this.assignRole(userId, roleName, options);
+    }
+  }
+
+  /**
+   * Create new consumer user (legacy private registration)
+   * @param {object} userData
+   * @param {object} options
+   * @returns {Promise<User>}
+   */
+  async createUser(userData, options = {}) {
+    const user = await this.insertUserRecord({
+      ...userData,
+      agreeToBeShown: userData.agreeToBeShown === true
+    }, options);
+
+    await this.assignRoles(user.id, ['ROLE_USER', 'ROLE_CONSUMER'], options);
+
+    return this.getUserProfile(user.id, options);
+  }
+
+  /**
+   * Create new business user (doctor/clinic)
+   * @param {object} userData
+   * @param {object} options
+   * @returns {Promise<User>}
+   */
+  async createBusinessUser(userData, options = {}) {
+    if (!userData.agreeConditionAndPrivacy) {
+      throw new Error('Devi accettare i termini e condizioni per il trattamento dei dati sensibili');
+    }
+    if (!userData.agreeToBeShown) {
+      throw new Error('Devi acconsentire ad essere visibile sul portale');
+    }
+
+    const user = await this.insertUserRecord({
+      ...userData,
+      agreeToBeShown: true
+    }, options);
+
+    await this.assignRoles(user.id, ['ROLE_USER', 'ROLE_BUSINESS'], options);
+
+    return this.getUserProfile(user.id, options);
   }
   
   /**
@@ -207,10 +278,11 @@ class UserService {
    * @param {string} roleName - Role name
    * @returns {Promise<UserRole>} Created user role
    */
-  async assignRole(userId, roleName) {
+  async assignRole(userId, roleName, options = {}) {
     // Find role by name
     const role = await Role.findOne({
-      where: { name: roleName }
+      where: { name: roleName },
+      transaction: options.transaction
     });
     
     if (!role) {
@@ -222,7 +294,8 @@ class UserService {
       where: {
         userId: userId,
         roleId: role.id
-      }
+      },
+      transaction: options.transaction
     });
     
     if (existingUserRole) {
@@ -236,7 +309,7 @@ class UserService {
       insertion: true,
       modification: false,
       cancellation: false
-    });
+    }, { transaction: options.transaction });
   }
   
   /**
@@ -244,13 +317,14 @@ class UserService {
    * @param {number} userId - User ID
    * @returns {Promise<User|null>} User with roles
    */
-  async getUserProfile(userId) {
+  async getUserProfile(userId, options = {}) {
     return await User.findByPk(userId, {
       include: [{
         model: Role,
         as: 'roles',
         attributes: ['id', 'name', 'description']
-      }]
+      }],
+      transaction: options.transaction
     });
   }
   

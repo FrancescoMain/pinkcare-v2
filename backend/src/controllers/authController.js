@@ -1,6 +1,8 @@
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
+const { sequelize } = require('../config/database');
 const userService = require('../services/userService');
+const teamService = require('../services/teamService');
 const emailService = require('../services/emailService');
 
 /**
@@ -84,6 +86,134 @@ class AuthController {
         });
       }
       
+      next(error);
+    }
+  }
+
+  /**
+   * Register new business user (doctor/clinic)
+   * POST /api/auth/register-business
+   */
+  async registerBusiness(req, res, next) {
+    const transaction = await sequelize.transaction();
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        await transaction.rollback();
+        return res.status(400).json({
+          error: 'Validation Error',
+          details: errors.array()
+        });
+      }
+
+      const {
+        name,
+        surname,
+        email,
+        password,
+        gender,
+        nickName,
+        mobilePhone,
+        businessType,
+        medicalTitle,
+        structureName,
+        address,
+        agreeConditionAndPrivacy,
+        agreeToBeShown,
+        agreeMarketing,
+        agreeNewsletter,
+        taxCode,
+        vatNumber,
+        landlinePhone,
+        website,
+        secondEmail
+      } = req.body;
+
+      const user = await userService.createBusinessUser({
+        name,
+        surname,
+        email,
+        password,
+        gender,
+        nickName,
+        mobilePhone,
+        agreeConditionAndPrivacy,
+        agreeToBeShown,
+        agreeMarketing,
+        agreeNewsletter
+      }, { transaction });
+
+      const team = await teamService.createBusinessTeam({
+        user,
+        businessData: {
+          businessType,
+          medicalTitle,
+          name: structureName,
+          address,
+          email: secondEmail || email,
+          taxCode,
+          vatNumber,
+          landlinePhone,
+          mobilePhone,
+          website,
+          secondEmail
+        }
+      }, { transaction });
+
+      await transaction.commit();
+
+      // Send welcome email (failure does not block registration)
+      try {
+        await emailService.sendWelcomeEmail(user.email, `${user.name || ''} ${user.surname || ''}`.trim(), password);
+      } catch (emailError) {
+        console.error('Failed to send welcome email:', emailError);
+      }
+
+      const userResponse = {
+        id: user.id,
+        name: user.name,
+        surname: user.surname,
+        email: user.email,
+        roles: user.roles?.map(role => ({
+          id: role.id,
+          nome: role.name,
+          descrizione: role.description
+        })) || []
+      };
+
+      res.status(201).json({
+        message: 'Registrazione completata. Controlla la tua email per proseguire.',
+        user: userResponse,
+        team: {
+          id: team.id,
+          name: team.name,
+          typeId: team.typeId,
+          titleId: team.titleId,
+          medicalTitle: team.medicalTitle
+        }
+      });
+    } catch (error) {
+      await transaction.rollback();
+      console.error('Business registration error:', error);
+
+      if (error.message.includes('già registrata')) {
+        return res.status(409).json({
+          error: error.message
+        });
+      }
+
+      if (error.message.includes('Password')) {
+        return res.status(400).json({
+          error: error.message
+        });
+      }
+
+      if (error.message.includes('termini') || error.message.includes('visibile')) {
+        return res.status(400).json({
+          error: error.message
+        });
+      }
+
       next(error);
     }
   }

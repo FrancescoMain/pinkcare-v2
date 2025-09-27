@@ -12,6 +12,7 @@ import Header from "./components/layout/Header";
 import MainContainer from "./components/layout/MainContainer";
 import Footer from "./components/layout/Footer";
 import CookieBanner from "./components/CookieBanner";
+import LoginPage from "./components/pages/Login/Login";
 import { useErrorHandler } from "./hooks/useErrorHandler";
 // Importa stili globali PinkCare - DEVE essere caricato per ultimo
 import "./styles/global.css";
@@ -38,7 +39,8 @@ function App() {
         <Routes>
           {/* Route standalone senza layout */}
           <Route path="/disclosure" element={<Disclosure />} />
-          
+          <Route path="/login/*" element={<LoginPage errorHandler={errorHandler} />} />
+
           {/* Route con layout completo */}
           <Route path="/*" element={
             <>
