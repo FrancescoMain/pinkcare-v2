@@ -147,7 +147,45 @@ class TeamService {
       secondEmail: businessData.secondEmail || null,
     };
 
-    const team = await Team.create(teamPayload, { transaction });
+    // Use raw SQL to force PostgreSQL sequence usage for team creation
+    const [teamResult] = await sequelize.query(`
+      INSERT INTO app_team (
+        id, active, deleted, insertion_date, last_modify_date, name, medical_title,
+        email, searchable, registration_code, tax_code, vat_number, landline_phone,
+        mobile_phone, website, second_email, address_id, representative_id, title_id, type_id
+      ) VALUES (
+        nextval('app_team_id_seq'), :active, :deleted, :insertionDate, :lastModifyDate,
+        :name, :medicalTitle, :email, :searchable, :registrationCode, :taxCode,
+        :vatNumber, :landlinePhone, :mobilePhone, :website, :secondEmail,
+        :addressId, :representativeId, :titleId, :typeId
+      ) RETURNING *
+    `, {
+      replacements: {
+        active: teamPayload.active,
+        deleted: teamPayload.deleted,
+        insertionDate: new Date(),
+        lastModifyDate: new Date(),
+        name: teamPayload.name,
+        medicalTitle: teamPayload.medicalTitle,
+        email: teamPayload.email,
+        searchable: teamPayload.searchable,
+        registrationCode: teamPayload.registrationCode,
+        taxCode: teamPayload.taxCode,
+        vatNumber: teamPayload.vatNumber,
+        landlinePhone: teamPayload.landlinePhone,
+        mobilePhone: teamPayload.mobilePhone,
+        website: teamPayload.website,
+        secondEmail: teamPayload.secondEmail,
+        addressId: teamPayload.addressId,
+        representativeId: teamPayload.representativeId,
+        titleId: teamPayload.titleId,
+        typeId: teamPayload.typeId
+      },
+      type: sequelize.QueryTypes.INSERT,
+      transaction
+    });
+
+    const team = teamResult[0];
 
     await UserTeam.create({
       userId: user.id,
