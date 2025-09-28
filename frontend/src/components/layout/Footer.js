@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import './Footer.css';
 
 const Footer = () => {
@@ -13,10 +14,10 @@ const Footer = () => {
           <div className="row list_link">
             {/* Information Links Section - exactly as in original */}
             <div className="col-md-6 col-sm-4 col-xs-12">
-              <a href="public">{t('standard_public.home', 'HOME')}</a>
-              <a href="public?tab=about_us">{t('standard_public.about_us', 'CHI SIAMO')}</a>
-              <a href="public?tab=blog_list">{t('standard_public.blog', 'BLOG')}</a>
-              <a href="public?tab=accreditation_pinkcare">{t('standard_public.pinkcare_accreditation', 'ACCREDITAMENTO PINKCARE')}</a>
+              <Link to="/public">{t('standard_public.home', 'HOME')}</Link>
+              <Link to="/public?tab=about_us">{t('standard_public.about_us', 'CHI SIAMO')}</Link>
+              <Link to="/public?tab=blog_list">{t('standard_public.blog', 'BLOG')}</Link>
+              <Link to="/public?tab=accreditation_pinkcare">{t('standard_public.pinkcare_accreditation', 'ACCREDITAMENTO PINKCARE')}</Link>
               
               <ul style={{ listStyleType: 'none', marginTop: '10px', paddingLeft: '0' }}>
                 <li>
@@ -43,7 +44,7 @@ const Footer = () => {
               {t('standard_public.designed_by', 'Designed By')} <a href="http://www.t1srl.it/">TiOne Technology Srl</a>
             </p>
             <p className="pull-right">
-              <a href="public?tab=general_policy" target="_blank">Privacy policy</a>
+              <Link to="/public?tab=general_policy" target="_blank">Privacy policy</Link>
             </p>
           </div>
         </div>
