@@ -99,8 +99,11 @@ class TeamService {
       throw new Error('Tipologia BASIC non trovata');
     }
 
+    // Rimuoviamo il campo id dall'address per permettere l'auto-increment
+    const { id, ...addressDataWithoutId } = businessData.address || {};
+
     const address = await Address.create({
-      ...businessData.address,
+      ...addressDataWithoutId,
       nation: 'IT',
       deleted: false
     }, { transaction });
