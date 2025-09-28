@@ -102,10 +102,10 @@ class TeamService {
     // Rimuoviamo il campo id dall'address per permettere l'auto-increment
     const { id, ...addressDataWithoutId } = businessData.address || {};
 
-    // Usa una query INSERT diretta per evitare problemi con l'auto-increment
+    // Usa una query INSERT diretta con nextval per forzare l'auto-increment
     const [addressResult] = await sequelize.query(`
-      INSERT INTO app_address (nation, province, post_code, municipality, street, street_type, street_number, deleted)
-      VALUES (:nation, :province, :postCode, :municipality, :street, :streetType, :streetNumber, :deleted)
+      INSERT INTO app_address (id, nation, province, post_code, municipality, street, street_type, street_number, deleted)
+      VALUES (nextval('app_address_id_seq'), :nation, :province, :postCode, :municipality, :street, :streetType, :streetNumber, :deleted)
       RETURNING *
     `, {
       replacements: {
