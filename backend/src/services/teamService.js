@@ -102,11 +102,27 @@ class TeamService {
     // Rimuoviamo il campo id dall'address per permettere l'auto-increment
     const { id, ...addressDataWithoutId } = businessData.address || {};
 
-    const address = await Address.create({
-      ...addressDataWithoutId,
-      nation: 'IT',
-      deleted: false
-    }, { transaction });
+    // Usa una query INSERT diretta per evitare problemi con l'auto-increment
+    const [addressResult] = await sequelize.query(`
+      INSERT INTO app_address (nation, province, post_code, municipality, street, street_type, street_number, deleted)
+      VALUES (:nation, :province, :postCode, :municipality, :street, :streetType, :streetNumber, :deleted)
+      RETURNING *
+    `, {
+      replacements: {
+        nation: 'IT',
+        province: addressDataWithoutId.province,
+        postCode: addressDataWithoutId.postCode,
+        municipality: addressDataWithoutId.municipality,
+        street: addressDataWithoutId.street,
+        streetType: addressDataWithoutId.streetType,
+        streetNumber: addressDataWithoutId.streetNumber,
+        deleted: false
+      },
+      type: sequelize.QueryTypes.INSERT,
+      transaction
+    });
+
+    const address = addressResult[0];
 
     const isDoctor = teamTypeId === Typology.IDS.DOCTOR;
     const representativeName = `${user.name || ''} ${user.surname || ''}`.trim();

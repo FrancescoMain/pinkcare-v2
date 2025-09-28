@@ -6,7 +6,8 @@ const Address = sequelize.define('Address', {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
-    autoIncrement: true
+    autoIncrement: true,
+    allowNull: false
   },
   nation: {
     type: DataTypes.STRING,
