@@ -34,17 +34,17 @@ class ValidationMiddleware {
     body('password')
       .isLength({ min: 8 })
       .withMessage('Password deve essere di almeno 8 caratteri')
-      .matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d_@./#+-]{8,}$/)
+      .matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d_@.\/#!?&*+\-]{8,}$/)
       .withMessage('Formato password non corretto'),
-      
+
     body('birthday')
       .optional()
       .isDate()
       .withMessage('Data di nascita non valida'),
-      
+
     body('gender')
-      .optional()
-      .isIn(['true', 'false', true, false])
+      .optional({ nullable: true })
+      .isIn(['true', 'false', true, false, null])
       .withMessage('Genere non valido'),
       
     body('nickName')
@@ -68,7 +68,7 @@ class ValidationMiddleware {
       .withMessage('Consenso newsletter non valido'),
       
     body('mobilePhone')
-      .optional()
+      .optional({ checkFalsy: true })
       .trim()
       .isMobilePhone('it-IT')
       .withMessage('Numero di telefono non valido')
@@ -109,12 +109,12 @@ class ValidationMiddleware {
     body('password')
       .isLength({ min: 8 })
       .withMessage('Password deve essere di almeno 8 caratteri')
-      .matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d_@./#+-]{8,}$/)
+      .matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d_@.\/#!?&*+\-]{8,}$/)
       .withMessage('Formato password non corretto'),
 
     body('gender')
-      .optional()
-      .isIn(['true', 'false', true, false])
+      .optional({ nullable: true })
+      .isIn(['true', 'false', true, false, null])
       .withMessage('Genere non valido'),
 
     body('nickName')
@@ -190,7 +190,7 @@ class ValidationMiddleware {
       .withMessage('Consenso newsletter non valido'),
 
     body('mobilePhone')
-      .optional()
+      .optional({ checkFalsy: true })
       .trim()
       .isMobilePhone('it-IT')
       .withMessage('Numero di telefono non valido')
@@ -242,7 +242,7 @@ class ValidationMiddleware {
     body('newPassword')
       .isLength({ min: 8 })
       .withMessage('Password deve essere di almeno 8 caratteri')
-      .matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d_@./#+-]{8,}$/)
+      .matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d_@.\/#\+\-]{8,}$/)
       .withMessage('Formato password non corretto')
   ];
   
@@ -279,7 +279,7 @@ class ValidationMiddleware {
       .withMessage('Genere non valido'),
       
     body('mobilePhone')
-      .optional()
+      .optional({ checkFalsy: true })
       .trim()
       .isMobilePhone('it-IT')
       .withMessage('Numero di telefono non valido'),

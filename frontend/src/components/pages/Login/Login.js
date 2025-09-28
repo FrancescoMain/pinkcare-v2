@@ -1,10 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import './style.css';
 import PageHead from '../../layout/PageHead';
 import { ApiError } from '../../../config/api';
 import { AuthService } from '../../../services/authService';
+import { useAuth } from '../../../context/AuthContext';
 import ReferenceService from '../../../services/referenceService';
 import { pageConfig } from '../../../config/pageConfig';
 
@@ -13,6 +14,46 @@ const STREET_TYPES = [
   'Circonvallazione', 'Galleria', 'Parco', 'Rotonda', 'Traversa',
   'Lungomare', 'Strada', 'Stretto', 'SC', 'SP', 'SR', 'SS',
 ];
+
+// Componente select isolato per debug
+const SimpleSelect = ({ value, onChange, name, options, placeholder }) => {
+  console.log('SimpleSelect render - value:', value, 'name:', name);
+  const selectRef = useRef(null);
+
+  useEffect(() => {
+    if (selectRef.current && value) {
+      console.log('Force setting DOM value to:', value);
+      selectRef.current.value = value;
+      console.log('DOM value after force set:', selectRef.current.value);
+
+      // Force visual update
+      selectRef.current.style.fontWeight = 'bold';
+      selectRef.current.style.color = '#e42080';
+      setTimeout(() => {
+        selectRef.current.style.fontWeight = 'normal';
+        selectRef.current.style.color = '#515365';
+      }, 200);
+    }
+  }, [value]);
+
+  return (
+    <select
+      ref={selectRef}
+      name={name}
+      className="form-select"
+      defaultValue={value || ''}
+      onChange={onChange}
+      required
+    >
+      <option value="">{placeholder}</option>
+      {options.map((option) => (
+        <option key={option} value={option}>
+          {option}
+        </option>
+      ))}
+    </select>
+  );
+};
 
 const createEmptyAddress = () => ({
   streetType: '',
@@ -50,6 +91,8 @@ const getInitialClinicData = () => ({
 const LoginPage = ({ errorHandler }) => {
   const { t } = useTranslation();
   const location = useLocation();
+  const navigate = useNavigate();
+  const { login } = useAuth();
   const { showSuccessMessage, showErrorMessage } = errorHandler || {};
   const loginPageConfig = pageConfig.login || {};
 
@@ -85,6 +128,7 @@ const LoginPage = ({ errorHandler }) => {
   const [medicalTitles, setMedicalTitles] = useState([]);
   const [municipalitySuggestions, setMunicipalitySuggestions] = useState([]);
   const [skipMunicipalitySearch, setSkipMunicipalitySearch] = useState(false);
+
 
   useEffect(() => {
     document.body.classList.add('login-page-active');
@@ -142,6 +186,24 @@ const LoginPage = ({ errorHandler }) => {
     setActiveTab(defaultTab);
   }, [defaultTab]);
 
+  // Chiudi autocomplete quando si clicca fuori
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      const municipalityField = document.getElementById(businessType === 'DOCTOR' ? 'doctor-municipality' : 'clinic-municipality');
+      const autocompleteList = municipalityField?.parentElement?.querySelector('.autocomplete-list');
+
+      if (municipalityField && autocompleteList && !municipalityField.contains(event.target) && !autocompleteList.contains(event.target)) {
+        setMunicipalitySuggestions([]);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [businessType]);
+
+
   const handleLoginInputChange = useCallback((event) => {
     const { name, value, type, checked } = event.target;
     setLoginData((prev) => ({
@@ -169,21 +231,38 @@ const LoginPage = ({ errorHandler }) => {
     setIsSubmittingLogin(true);
 
     try {
-      const response = await AuthService.login(
+      console.log('🚀 Starting login process with:', loginData.email);
+
+      const response = await login(
         loginData.email,
         loginData.password,
         loginData.rememberMe,
       );
 
-      if (response?.token) {
-        AuthService.setToken(response.token);
-      }
+      console.log('✅ Login response received:', response);
+      console.log('👤 User role:', response?.user?.role);
 
       showSuccessMessage(
         t('authentication.login_success', 'Accesso effettuato'),
         t('authentication.login_welcome', 'Benvenuto in PinkCare!'),
       );
+
+      // Redirect based on user role, matching legacy behavior
+      setTimeout(() => {
+        console.log('⏰ Redirect timeout triggered, navigating...');
+        if (response?.user?.role === 'ADMIN') {
+          console.log('🎯 Redirecting to admin dashboard');
+          navigate('/admin/dashboard');
+        } else {
+          console.log('🎯 Redirecting to profile page');
+          navigate('/profile'); // Default redirect like legacy /app/profile
+        }
+      }, 1500);
     } catch (error) {
+      console.error('❌ Login error caught:', error);
+      console.error('Error type:', typeof error);
+      console.error('Is ApiError:', error instanceof ApiError);
+
       if (error instanceof ApiError) {
         showErrorMessage(
           t('authentication.login_error', 'Errore di autenticazione'),
@@ -198,7 +277,7 @@ const LoginPage = ({ errorHandler }) => {
     } finally {
       setIsSubmittingLogin(false);
     }
-  }, [loginData, showErrorMessage, showSuccessMessage, t]);
+  }, [loginData, showErrorMessage, showSuccessMessage, t, login, navigate]);
 
   const handleForgotPassword = useCallback(async () => {
     if (!showSuccessMessage || !showErrorMessage) {
@@ -324,8 +403,17 @@ const LoginPage = ({ errorHandler }) => {
         },
       }));
     }
-    setSkipMunicipalitySearch(true);
+    // Forza la chiusura dell'autocomplete
     setMunicipalitySuggestions([]);
+    setSkipMunicipalitySearch(true);
+
+    // Rimuovi il focus dal campo per assicurare la chiusura
+    setTimeout(() => {
+      const activeElement = document.activeElement;
+      if (activeElement && (activeElement.id === 'doctor-municipality' || activeElement.id === 'clinic-municipality')) {
+        activeElement.blur();
+      }
+    }, 100);
   };
 
   const toggleBusinessPasswordVisibility = () => {
@@ -401,23 +489,27 @@ const LoginPage = ({ errorHandler }) => {
             email: doctorData.email,
             password: doctorData.password,
             gender: doctorData.gender === '' ? null : doctorData.gender === 'true',
-            medicalTitle: doctorData.medicalTitle,
-            structureName: null,
-            nickName: null,
+            nickName: doctorData.name + ' ' + doctorData.surname,
             mobilePhone: null,
+            medicalTitle: doctorData.medicalTitle,
+            structureName: '',
+            address: {
+              streetType: doctorData.address.streetType || '',
+              street: doctorData.address.street || '',
+              streetNumber: doctorData.address.streetNumber || '1',
+              postCode: doctorData.address.postCode || '',
+              municipality: doctorData.address.municipality || '',
+              province: (doctorData.address.province || '').toUpperCase()
+            },
             agreeConditionAndPrivacy: true,
             agreeToBeShown: doctorData.agreeToBeShown,
             agreeMarketing: doctorData.agreeMarketing,
             agreeNewsletter: doctorData.agreeNewsletter,
-            taxCode: null,
-            vatNumber: null,
-            landlinePhone: null,
-            website: null,
-            secondEmail: null,
-            address: {
-              ...doctorData.address,
-              province: doctorData.address.province ? doctorData.address.province.toUpperCase() : '',
-            },
+            taxCode: '',
+            vatNumber: '',
+            landlinePhone: '',
+            website: '',
+            secondEmail: ''
           }
         : {
             businessType,
@@ -426,24 +518,30 @@ const LoginPage = ({ errorHandler }) => {
             email: clinicData.email,
             password: clinicData.password,
             gender: null,
-            medicalTitle: null,
-            structureName: clinicData.structureName,
-            nickName: null,
+            nickName: clinicData.structureName,
             mobilePhone: null,
+            medicalTitle: '',
+            structureName: clinicData.structureName,
+            address: {
+              streetType: clinicData.address.streetType || '',
+              street: clinicData.address.street || '',
+              streetNumber: clinicData.address.streetNumber || '1',
+              postCode: clinicData.address.postCode || '',
+              municipality: clinicData.address.municipality || '',
+              province: (clinicData.address.province || '').toUpperCase()
+            },
             agreeConditionAndPrivacy: true,
             agreeToBeShown: clinicData.agreeToBeShown,
             agreeMarketing: clinicData.agreeMarketing,
             agreeNewsletter: clinicData.agreeNewsletter,
-            taxCode: null,
-            vatNumber: null,
-            landlinePhone: null,
-            website: null,
-            secondEmail: null,
-            address: {
-              ...clinicData.address,
-              province: clinicData.address.province ? clinicData.address.province.toUpperCase() : '',
-            },
+            taxCode: '',
+            vatNumber: '',
+            landlinePhone: '',
+            website: '',
+            secondEmail: ''
           };
+
+      console.log('Registration payload:', payload);
 
       const result = await AuthService.registerBusiness(payload);
 
@@ -453,6 +551,11 @@ const LoginPage = ({ errorHandler }) => {
       setClinicData(getInitialClinicData());
       setShowBusinessPassword(false);
       setMunicipalitySuggestions([]);
+
+      // Redirect al login dopo 2 secondi per permettere all'utente di leggere il messaggio di successo
+      setTimeout(() => {
+        navigate('/login?page=authentication');
+      }, 2000);
     } catch (error) {
       if (error instanceof ApiError) {
         if (error.isValidationError()) {
@@ -619,32 +722,29 @@ const LoginPage = ({ errorHandler }) => {
             </div>
           </div>
 
-          <div className="col col-12">
+          <div className="col col-12 section-break">
             <h5 className="section-divider">{t('authentication.address', 'Indirizzo studio')}</h5>
           </div>
 
+        </div>
+        <div className="row">
           <div className="col col-12 col-xl-3 col-lg-3 col-md-4 col-sm-12">
             <div className="form-group label-floating is-select">
               <label className="control-label" htmlFor="doctor-street-type">
                 {t('authentication.street_type', 'Tipo via')}
               </label>
-              <select
-                id="doctor-street-type"
-                name="streetType"
-                className="form-control"
+              <SimpleSelect
                 value={doctorData.address.streetType}
                 onChange={handleDoctorAddressChange}
-                required
-              >
-                <option value="">---</option>
-                {STREET_TYPES.map((type) => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
+                name="streetType"
+                options={STREET_TYPES}
+                placeholder="Seleziona tipo via"
+              />
             </div>
           </div>
+        </div>
+
+        <div className="row">
 
           <div className="col col-12 col-xl-5 col-lg-5 col-md-4 col-sm-12">
             <div className="form-group label-floating is-empty">
@@ -718,10 +818,9 @@ const LoginPage = ({ errorHandler }) => {
             </div>
           </div>
 
-          <div className="col col-12">
-            <p className="field-hint">
-              {t('authentication.city_hint', 'Seleziona il comune dall\'elenco per compilare automaticamente CAP e provincia.')}
-            </p>
+
+          <div className="col col-12 form-section-break">
+            <div className="row-break"></div>
           </div>
 
           <div className="col col-12 col-xl-6 col-lg-6 col-md-6 col-sm-12">
@@ -730,14 +829,13 @@ const LoginPage = ({ errorHandler }) => {
                 {t('authentication.specialized_in', 'Specializzato in')}
               </label>
               <select
-                id="doctor-medical-title"
                 name="medicalTitle"
-                className="form-control"
+                className="form-select"
                 value={doctorData.medicalTitle}
                 onChange={handleDoctorInputChange}
                 required
               >
-                <option value="">---</option>
+                <option value="">Seleziona specializzazione</option>
                 {medicalTitles.map((title) => (
                   <option key={title.id} value={title.label}>
                     {title.label}
@@ -753,18 +851,18 @@ const LoginPage = ({ errorHandler }) => {
                 {t('authentication.gender', 'Genere')}
               </label>
               <select
-                id="doctor-gender"
                 name="gender"
-                className="form-control"
+                className="form-select"
                 value={doctorData.gender}
                 onChange={handleDoctorInputChange}
               >
-                <option value="">---</option>
+                <option value="">Seleziona genere</option>
                 <option value="true">{t('authentication.male', 'Maschio')}</option>
                 <option value="false">{t('authentication.female', 'Femmina')}</option>
               </select>
             </div>
           </div>
+
 
           <div className="col col-12">
             <div className="consent-section">
@@ -802,7 +900,7 @@ const LoginPage = ({ errorHandler }) => {
             </div>
           </div>
 
-          <div className="col col-12">
+          <div className="col col-12 button-container">
             <button type="submit" className="btn btn-primary btn-register">
               {t('authentication.complete_registration', 'Completa registrazione')}
             </button>
@@ -833,24 +931,25 @@ const LoginPage = ({ errorHandler }) => {
             </div>
           </div>
 
-          <div className="col col-12">
+          <div className="col col-12 section-break">
             <h5 className="section-divider">{t('authentication.address', 'Indirizzo struttura')}</h5>
           </div>
 
+        </div>
+        <div className="row">
           <div className="col col-12 col-md-3">
             <div className="form-group label-floating is-select">
               <label className="control-label" htmlFor="clinic-street-type">
                 {t('authentication.street_type', 'Tipo via')}
               </label>
               <select
-                id="clinic-street-type"
                 name="streetType"
-                className="form-control"
+                className="form-select"
                 value={clinicData.address.streetType}
                 onChange={handleClinicAddressChange}
                 required
               >
-                <option value="">---</option>
+                <option value="">Seleziona tipo via</option>
                 {STREET_TYPES.map((type) => (
                   <option key={type} value={type}>
                     {type}
@@ -859,6 +958,9 @@ const LoginPage = ({ errorHandler }) => {
               </select>
             </div>
           </div>
+        </div>
+
+        <div className="row">
 
           <div className="col col-12 col-md-6">
             <div className="form-group label-floating is-empty">
@@ -932,10 +1034,9 @@ const LoginPage = ({ errorHandler }) => {
             </div>
           </div>
 
-          <div className="col col-12">
-            <p className="field-hint">
-              {t('authentication.city_hint', 'Seleziona il comune dall\'elenco per compilare automaticamente CAP e provincia.')}
-            </p>
+
+          <div className="col col-12 form-section-break">
+            <div className="row-break"></div>
           </div>
 
           <div className="col col-12 col-xl-6 col-lg-6 col-md-6 col-sm-12">
@@ -974,6 +1075,7 @@ const LoginPage = ({ errorHandler }) => {
             </div>
           </div>
 
+
           <div className="col col-12">
             <div className="consent-section">
               <p className="consent-text">
@@ -1010,7 +1112,7 @@ const LoginPage = ({ errorHandler }) => {
             </div>
           </div>
 
-          <div className="col col-12">
+          <div className="col col-12 button-container">
             <button type="submit" className="btn btn-primary btn-register">
               {t('authentication.complete_registration', 'Completa registrazione')}
             </button>

@@ -4,7 +4,7 @@ const { sequelize } = require('../config/database');
 // Address model based on it.tione.pinkcare.model.Address.java
 const Address = sequelize.define('Address', {
   id: {
-    type: DataTypes.BIGINT,
+    type: DataTypes.INTEGER,
     primaryKey: true,
     autoIncrement: true
   },

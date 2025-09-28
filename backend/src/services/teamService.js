@@ -99,7 +99,11 @@ class TeamService {
       throw new Error('Tipologia BASIC non trovata');
     }
 
-    const address = await this.createAddress(businessData.address || {}, { transaction });
+    const address = await Address.create({
+      ...businessData.address,
+      nation: 'IT',
+      deleted: false
+    }, { transaction });
 
     const isDoctor = teamTypeId === Typology.IDS.DOCTOR;
     const representativeName = `${user.name || ''} ${user.surname || ''}`.trim();

@@ -13,6 +13,9 @@ import MainContainer from "./components/layout/MainContainer";
 import Footer from "./components/layout/Footer";
 import CookieBanner from "./components/CookieBanner";
 import LoginPage from "./components/pages/Login/Login";
+import Profile from "./components/pages/Profile/Profile";
+import ProtectedRoute from "./components/common/ProtectedRoute";
+import { AuthProvider } from "./context/AuthContext";
 import { useErrorHandler } from "./hooks/useErrorHandler";
 // Importa stili globali PinkCare - DEVE essere caricato per ultimo
 import "./styles/global.css";
@@ -34,12 +37,20 @@ function App() {
   const [simulatedUser, setSimulatedUser] = useState(null);
 
   return (
-    <Router>
-      <div className="App">
+    <AuthProvider>
+      <Router>
+        <div className="App">
         <Routes>
           {/* Route standalone senza layout */}
           <Route path="/disclosure" element={<Disclosure />} />
           <Route path="/login/*" element={<LoginPage errorHandler={errorHandler} />} />
+
+          {/* Protected routes */}
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          } />
 
           {/* Route con layout completo */}
           <Route path="/*" element={
@@ -81,8 +92,9 @@ function App() {
         />
 
         <CookieBanner />
-      </div>
-    </Router>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 

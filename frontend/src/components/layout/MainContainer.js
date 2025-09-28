@@ -1,10 +1,15 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { AuthService } from '../../services/authService';
 import './MainContainer.css';
 
 const MainContainer = ({ userVO = null, children, errorHandler }) => {
   const { t } = useTranslation();
   const { showSuccessMessage, showErrorMessage } = errorHandler;
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
   // Stati per form di login mobile
   const [mobileLoginData, setMobileLoginData] = useState({
@@ -21,23 +26,44 @@ const MainContainer = ({ userVO = null, children, errorHandler }) => {
     }));
   };
 
-  const handleMobileLogin = (e) => {
+  const handleMobileLogin = async (e) => {
     e.preventDefault();
     console.log('Mobile Login:', mobileLoginData);
-    
-    // Simulazione login
-    if (mobileLoginData.j_username === 'error@test.com') {
+
+    try {
+      const response = await login(
+        mobileLoginData.j_username,
+        mobileLoginData.j_password,
+        mobileLoginData._spring_security_remember_me
+      );
+
+      console.log('✅ Mobile Login response received:', response);
+      showSuccessMessage('Login Mobile', 'Login effettuato con successo');
+
+      // Navigate to profile page after successful login
+      navigate('/profile');
+
+    } catch (error) {
+      console.error('❌ Mobile Login error:', error);
       showErrorMessage(t('authentication.authentication_error', 'Errore di autenticazione'));
-      return;
     }
-    
-    showSuccessMessage('Login Mobile', 'Login effettuato con successo');
   };
 
 
-  const handlePasswordForgot = () => {
-    console.log('Password dimenticata per:', mobileLoginData.j_username);
-    showSuccessMessage('Recovery', 'Email di recupero inviata');
+  const handlePasswordForgot = async () => {
+    if (!mobileLoginData.j_username) {
+      showErrorMessage('Errore', 'Inserisci prima il tuo indirizzo email');
+      return;
+    }
+
+    try {
+      console.log('Password dimenticata per:', mobileLoginData.j_username);
+      await AuthService.forgotPassword(mobileLoginData.j_username);
+      showSuccessMessage('Recovery', 'Email di recupero inviata');
+    } catch (error) {
+      console.error('❌ Forgot password error:', error);
+      showErrorMessage('Errore', 'Errore durante l\'invio della email di recupero');
+    }
   };
 
 

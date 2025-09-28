@@ -1,0 +1,74 @@
+.profile-page {
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  padding-top: 2rem;
+}
+
+.profile-page .card {
+  border: none;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  border-radius: 0.75rem;
+}
+
+.profile-page .card-header {
+  background: linear-gradient(135deg, #e42080 0%, #c71868 100%);
+  color: white;
+  border-radius: 0.75rem 0.75rem 0 0 !important;
+  border: none;
+  padding: 1.5rem;
+}
+
+.profile-page .card-body {
+  padding: 2rem;
+}
+
+.profile-page .form-label {
+  color: #6c757d;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.profile-page .form-control-plaintext {
+  border-bottom: 1px solid #e9ecef;
+  padding-left: 0;
+  margin-bottom: 0.5rem;
+  color: #495057;
+}
+
+.profile-page .badge {
+  font-size: 0.875rem;
+  padding: 0.5rem 1rem;
+}
+
+.profile-page .alert-info {
+  background-color: #e8f4fd;
+  border-color: #b3d7f0;
+  color: #0c5460;
+  border-radius: 0.5rem;
+}
+
+.profile-page .btn-primary {
+  background: linear-gradient(135deg, #e42080 0%, #c71868 100%);
+  border-color: #e42080;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+}
+
+.profile-page .btn-primary:hover {
+  background: linear-gradient(135deg, #c71868 0%, #a61356 100%);
+  border-color: #c71868;
+}
+
+.profile-page .btn-outline-secondary {
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+}
+
+.profile-page .btn-warning {
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+}
+
+.profile-page .btn-outline-danger {
+  border-radius: 0.375rem;
+}

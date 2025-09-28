@@ -9,7 +9,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 // Base URLs per diversi ambienti
 const API_BASE_URLS = {
-  development: 'http://localhost:3001',
+  development: 'http://localhost:3002',
   production: process.env.REACT_APP_API_URL || 'https://api.pinkcare.it', // Da configurare in production
   staging: process.env.REACT_APP_API_URL || 'https://staging-api.pinkcare.it'
 };
