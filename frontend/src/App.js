@@ -5,6 +5,7 @@ import About from "./components/pages/About";
 import Home from "./components/pages/Home/Home";
 import Disclosure from "./components/pages/Disclosure";
 import Accreditation from "./components/pages/Accreditation";
+import Forum from "./components/pages/Forum/Forum";
 import ErrorDialog from "./components/ErrorDialog";
 import LoadingDialog from "./components/LoadingDialog";
 import Growl from "./components/Growl";
@@ -65,6 +66,7 @@ function App() {
                   <Route path="/public" element={<Home userVO={simulatedUser} errorHandler={errorHandler} />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/accreditation" element={<Accreditation />} />
+                  <Route path="/forum" element={<Forum />} />
                   {/* Altre route da aggiungere qui */}
                 </Routes>
               </MainContainer>

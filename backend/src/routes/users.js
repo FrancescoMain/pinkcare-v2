@@ -42,4 +42,15 @@ router.get('/:userId',
   userController.getUserById
 );
 
+/**
+ * @route PUT /api/users/password
+ * @desc Change user password
+ * @access Private
+ */
+router.put('/password',
+  AuthMiddleware.verifyToken,
+  ValidationMiddleware.validatePasswordChange,
+  userController.changePassword
+);
+
 module.exports = router;

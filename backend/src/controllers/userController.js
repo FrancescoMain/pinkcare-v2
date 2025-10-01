@@ -146,13 +146,13 @@ class UserController {
     try {
       const { userId } = req.params;
       const user = await userService.getUserProfile(parseInt(userId));
-      
+
       if (!user) {
         return res.status(404).json({
           error: 'Utente non trovato'
         });
       }
-      
+
       // Return limited profile information
       const userProfile = {
         id: user.id,
@@ -167,11 +167,56 @@ class UserController {
           description: role.description
         })) || []
       };
-      
+
       res.json(userProfile);
-      
+
     } catch (error) {
       console.error('Get user by ID error:', error);
+      next(error);
+    }
+  }
+
+  /**
+   * Change password
+   * PUT /api/users/password
+   * Replicates legacy UserService.save(user, password) behavior
+   */
+  async changePassword(req, res, next) {
+    try {
+      // Check validation errors
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          error: 'Validation Error',
+          details: errors.array()
+        });
+      }
+
+      const userId = req.user.id;
+      const { currentPassword, newPassword } = req.body;
+
+      // Change password using service
+      await userService.changePassword(userId, currentPassword, newPassword);
+
+      res.json({
+        message: 'Password aggiornata con successo'
+      });
+
+    } catch (error) {
+      console.error('Change password error:', error);
+
+      if (error.message === 'User not found') {
+        return res.status(404).json({
+          error: 'Utente non trovato'
+        });
+      }
+
+      if (error.message === 'Invalid current password') {
+        return res.status(400).json({
+          error: 'Password attuale non corretta'
+        });
+      }
+
       next(error);
     }
   }

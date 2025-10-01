@@ -1,0 +1,190 @@
+/* ProfileEdit.css - Replica esatta dello stile legacy */
+
+.profile-edit-page {
+  padding: 20px 0;
+}
+
+/* Replica classi legacy ui-block */
+.ui-block {
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+.ui-block-title {
+  padding: 20px 25px;
+  border-bottom: 1px solid #e6ecf5;
+}
+
+.ui-block-title .title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #515365;
+}
+
+.ui-block-content {
+  padding: 25px;
+}
+
+/* Form styles - replica legacy */
+.profile-edit-page form .row {
+  margin-right: -15px;
+  margin-left: -15px;
+}
+
+.profile-edit-page form .col {
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-bottom: 20px;
+}
+
+.profile-edit-page form label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #515365;
+  font-size: 14px;
+}
+
+.profile-edit-page form .control-label {
+  font-weight: 500;
+  color: #515365;
+}
+
+.profile-edit-page form .form-control {
+  display: block;
+  width: 100%;
+  padding: 10px 15px;
+  font-size: 14px;
+  line-height: 1.42857143;
+  color: #515365;
+  background-color: #fff;
+  background-image: none;
+  border: 1px solid #e6ecf5;
+  border-radius: 5px;
+  transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+}
+
+.profile-edit-page form .form-control:focus {
+  border-color: #e42080;
+  outline: 0;
+  box-shadow: 0 0 0 0.2rem rgba(228, 32, 128, 0.15);
+}
+
+/* Password field with toggle icon */
+.field-icon {
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+  z-index: 2;
+}
+
+.toggle-password {
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-password:hover {
+  color: #e42080;
+}
+
+/* Password strength indicator - replica legacy PrimeFaces */
+.password-strength-indicator {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  margin-top: 5px;
+  padding: 8px 12px;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 10;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.password-strength-indicator.password-weak {
+  color: #d9534f;
+  border-color: #d9534f;
+  background-color: #f2dede;
+}
+
+.password-strength-indicator.password-good {
+  color: #f0ad4e;
+  border-color: #f0ad4e;
+  background-color: #fcf8e3;
+}
+
+.password-strength-indicator.password-strong {
+  color: #5cb85c;
+  border-color: #5cb85c;
+  background-color: #dff0d8;
+}
+
+/* Button styles - replica legacy */
+.profile-edit-page form .btn {
+  display: inline-block;
+  padding: 10px 30px;
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.42857143;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  user-select: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.profile-edit-page form .btn-primary {
+  color: #fff;
+  background-color: #e42080;
+  border-color: #e42080;
+}
+
+.profile-edit-page form .btn-primary:hover:not(:disabled) {
+  background-color: #c91b6f;
+  border-color: #c91b6f;
+}
+
+.profile-edit-page form .btn-primary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* Small text helper */
+.form-text {
+  display: block;
+  margin-top: 5px;
+  font-size: 12px;
+}
+
+.text-muted {
+  color: #888;
+}
+
+/* Responsive adjustments - replica legacy grid */
+@media (max-width: 991px) {
+  .profile-edit-page form .col-lg-6 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 767px) {
+  .ui-block-content {
+    padding: 15px;
+  }
+
+  .profile-edit-page form .col {
+    margin-bottom: 15px;
+  }
+}

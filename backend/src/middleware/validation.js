@@ -341,6 +341,28 @@ class ValidationMiddleware {
       .isBoolean()
       .withMessage('Consenso newsletter non valido')
   ];
+
+  /**
+   * Validation rules for password change
+   * Based on legacy personal_form.xhtml password validation
+   */
+  static validatePasswordChange = [
+    body('currentPassword')
+      .notEmpty()
+      .withMessage('Password attuale è obbligatoria'),
+
+    body('newPassword')
+      .isLength({ min: 8 })
+      .withMessage('La nuova password deve essere di almeno 8 caratteri')
+      .matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d_@.\/#\+\-]{8,}$/)
+      .withMessage('Formato password non corretto (almeno 8 caratteri alfanumerici)'),
+
+    body('confirmPassword')
+      .notEmpty()
+      .withMessage('Conferma password è obbligatoria')
+      .custom((value, { req }) => value === req.body.newPassword)
+      .withMessage('Le password non corrispondono')
+  ];
 }
 
 module.exports = ValidationMiddleware;

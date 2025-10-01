@@ -412,22 +412,57 @@ class UserService {
     if (!passwordValidation.isValid) {
       throw new Error(passwordValidation.errors.join(', '));
     }
-    
+
     const hashedToken = PasswordUtils.encodeMD5(token);
-    
+
     const user = await User.findOne({
       where: { passwordRecovery: hashedToken }
     });
-    
+
     if (!user) {
       throw new Error('Token di recupero non valido');
     }
-    
+
     // Update password and clear recovery token
     user.password = PasswordUtils.encodeMD5(newPassword);
     user.passwordRecovery = null;
     user.lastModifyDate = new Date();
-    
+
+    await user.save();
+    return true;
+  }
+
+  /**
+   * Change user password
+   * Replicates legacy UserService.save(user, password) behavior
+   * @param {number} userId - User ID
+   * @param {string} currentPassword - Current password for verification
+   * @param {string} newPassword - New password
+   * @returns {Promise<boolean>} Success status
+   */
+  async changePassword(userId, currentPassword, newPassword) {
+    const user = await User.findByPk(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Verify current password
+    const isCurrentPasswordValid = PasswordUtils.verifyMD5(currentPassword, user.password);
+    if (!isCurrentPasswordValid) {
+      throw new Error('Invalid current password');
+    }
+
+    // Validate new password strength
+    const passwordValidation = PasswordUtils.validatePasswordStrength(newPassword);
+    if (!passwordValidation.isValid) {
+      throw new Error(passwordValidation.errors.join(', '));
+    }
+
+    // Update password (using MD5 like legacy system)
+    user.password = PasswordUtils.encodeMD5(newPassword);
+    user.lastModifyDate = new Date();
+    user.lastModifyUsername = user.username;
+
     await user.save();
     return true;
   }
