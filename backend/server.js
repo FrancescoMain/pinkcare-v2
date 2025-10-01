@@ -22,6 +22,7 @@ if (process.env.ENV_FILE && envResult.error) {
 const authRoutes = require('./src/routes/auth');
 const userRoutes = require('./src/routes/users');
 const referenceRoutes = require('./src/routes/reference');
+const dashboardRoutes = require('./src/routes/dashboard');
 const { sequelize } = require('./src/config/database');
 
 const app = express();
@@ -39,8 +40,8 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
+  res.json({
+    status: 'OK',
     timestamp: new Date().toISOString(),
     version: '1.0.0'
   });
@@ -50,6 +51,7 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/reference', referenceRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

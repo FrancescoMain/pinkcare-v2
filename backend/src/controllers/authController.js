@@ -37,17 +37,18 @@ class AuthController {
       
       // Create user
       const user = await userService.createUser(userData);
-      
-      // Send confirmation email
+
+      // Send welcome email (legacy behavior - sends password in plain text)
       try {
-        await emailService.sendRegistrationConfirmation(
-          user.email, 
-          user.name, 
-          'temp-confirmation-token-' + user.id
+        const fullName = `${user.name} ${user.surname}`;
+        await emailService.sendWelcomeEmail(
+          user.email,
+          fullName,
+          userData.password // Plain password for welcome email (like legacy)
         );
-        console.log('Registration confirmation email sent to:', user.email);
+        console.log('Welcome email sent to:', user.email);
       } catch (emailError) {
-        console.error('Failed to send registration email:', emailError);
+        console.error('Failed to send welcome email:', emailError);
         // Don't fail registration if email fails
       }
       
@@ -73,19 +74,37 @@ class AuthController {
       
     } catch (error) {
       console.error('Registration error:', error);
-      
+
+      // Handle unique constraint errors
+      if (error.name === 'SequelizeUniqueConstraintError') {
+        const field = error.errors?.[0]?.path;
+        if (field === 'email' || field === 'username') {
+          return res.status(409).json({
+            error: 'Email già registrata'
+          });
+        }
+        if (field === 'nick_name') {
+          return res.status(409).json({
+            error: 'Nickname già utilizzato, scegline un altro'
+          });
+        }
+        return res.status(409).json({
+          error: 'Questo valore è già stato utilizzato'
+        });
+      }
+
       if (error.message.includes('già registrata')) {
         return res.status(409).json({
           error: error.message
         });
       }
-      
+
       if (error.message.includes('Password')) {
         return res.status(400).json({
           error: error.message
         });
       }
-      
+
       next(error);
     }
   }

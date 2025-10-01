@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link, useNavigate } from "react-router-dom";
 import "./Header.css";
 import { useErrorHandler } from "../../hooks/useErrorHandler";
+import { useAuth } from "../../context/AuthContext";
 import ErrorDialog from "../ErrorDialog";
 
 const Header = ({ userVO = null }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
   const {
     showSuccessMessage,
     showErrorMessage,
@@ -111,7 +115,7 @@ const Header = ({ userVO = null }) => {
               <input type="hidden" id="j_action" name="j_action" value="null" />
 
               <div className="row login_pk hidden-xs">
-                {!userVO?.team && (
+                {!isAuthenticated && (
                   <>
                     <div className="col-xs-12 col-md-5">
                       <label>{t("authentication.email", "Email")}</label>
@@ -157,17 +161,17 @@ const Header = ({ userVO = null }) => {
                 )}
               </div>
 
-              {userVO?.team && (
-                <a
-                  href={getRestrictedAreaLink()}
+              {isAuthenticated && (
+                <Link
+                  to="/profile"
                   className="btn btn-transparent"
-                  style={{ margin: "15px" }}
+                  style={{ margin: "15px", color: "white", textDecoration: "none" }}
                 >
                   {t("standard_public.restricted_area", "Area riservata")}
-                </a>
+                </Link>
               )}
 
-              {!userVO?.team && (
+              {!isAuthenticated && (
                 <div className="hidden-xs">
                   <div className="col-md-6">
                     <label>

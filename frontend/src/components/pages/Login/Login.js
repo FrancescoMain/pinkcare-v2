@@ -117,7 +117,7 @@ const LoginPage = ({ errorHandler }) => {
       }
     }
 
-    return 'BUSINESS';
+    return 'AUTH';
   }, [location.search]);
 
   const [activeTab, setActiveTab] = useState(defaultTab);

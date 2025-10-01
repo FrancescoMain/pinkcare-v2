@@ -6,10 +6,13 @@ import Home from "./components/pages/Home/Home";
 import Disclosure from "./components/pages/Disclosure";
 import Accreditation from "./components/pages/Accreditation";
 import Forum from "./components/pages/Forum/Forum";
+import Dashboard from "./components/pages/Dashboard/Dashboard";
 import ErrorDialog from "./components/ErrorDialog";
 import LoadingDialog from "./components/LoadingDialog";
 import Growl from "./components/Growl";
 import Header from "./components/layout/Header";
+import AuthenticatedHeader from "./components/layout/AuthenticatedHeader";
+import AuthenticatedLayout from "./components/layout/AuthenticatedLayout";
 import MainContainer from "./components/layout/MainContainer";
 import Footer from "./components/layout/Footer";
 import CookieBanner from "./components/CookieBanner";
@@ -46,10 +49,20 @@ function App() {
           <Route path="/disclosure" element={<Disclosure />} />
           <Route path="/login/*" element={<LoginPage errorHandler={errorHandler} />} />
 
-          {/* Protected routes */}
+          {/* Route autenticate con AuthenticatedLayout */}
           <Route path="/profile" element={
             <ProtectedRoute>
-              <Profile />
+              <AuthenticatedLayout>
+                <Dashboard />
+              </AuthenticatedLayout>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/forum" element={
+            <ProtectedRoute>
+              <AuthenticatedLayout>
+                <Forum />
+              </AuthenticatedLayout>
             </ProtectedRoute>
           } />
 
@@ -67,6 +80,14 @@ function App() {
                   <Route path="/about" element={<About />} />
                   <Route path="/accreditation" element={<Accreditation />} />
                   <Route path="/forum" element={<Forum />} />
+
+                  {/* Protected routes - TEMPORANEAMENTE disabilitate */}
+                  {/* <Route path="/profile" element={
+                    <ProtectedRoute>
+                      <Dashboard />
+                    </ProtectedRoute>
+                  } /> */}
+
                   {/* Altre route da aggiungere qui */}
                 </Routes>
               </MainContainer>

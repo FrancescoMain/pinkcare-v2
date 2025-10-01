@@ -1,0 +1,296 @@
+/* Dashboard.css - Replica esatta dello stile di home.xhtml */
+
+.dashboard-container {
+  width: 100%;
+  padding: 20px 0;
+}
+
+.dashboard-loading,
+.dashboard-error {
+  text-align: center;
+  padding: 50px 20px;
+  font-size: 18px;
+  color: #515365;
+}
+
+/* Banner Questionario - Replica: ui-block-container.questionario */
+.ui-block-container.questionario {
+  background: linear-gradient(135deg, #e42080 0%, #ff6b9d 100%);
+  color: white;
+  padding: 30px;
+  border-radius: 5px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(228, 32, 128, 0.3);
+}
+
+.ui-block-container.questionario:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(228, 32, 128, 0.4);
+}
+
+.ui-block .tile {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+
+/* Available Widget - Replica: ui-block.available-widget */
+.ui-block.available-widget {
+  background: #fff;
+  border: 1px solid #e6ecf5;
+  border-radius: 5px;
+  padding: 20px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.3s ease;
+}
+
+.ui-block.available-widget:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-color: #e42080;
+}
+
+.ui-block.available-widget .title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #515365;
+  flex: 1;
+}
+
+.ui-block.available-widget .more {
+  display: flex;
+  align-items: center;
+}
+
+/* Button styles - Replica: btn.btn-xs.bg-blue */
+.btn.btn-xs {
+  padding: 5px 15px;
+  font-size: 12px;
+  border-radius: 3px;
+}
+
+.btn.bg-blue {
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  text-decoration: none;
+  display: inline-block;
+  transition: background-color 0.3s ease;
+}
+
+.btn.bg-blue:hover {
+  background-color: #1976D2;
+  color: white;
+}
+
+/* Blog Post - Replica: article.hentry.post structure */
+.hentry.post {
+  background: #fff;
+  border-radius: 5px;
+  padding: 30px;
+  margin-bottom: 30px;
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* Control buttons - Social sharing */
+.control-block-button.post-control-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 8px;
+}
+
+.btn.btn-control {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn.btn-control.bg-facebook {
+  background-color: #3b5998;
+  color: white;
+}
+
+.btn.btn-control.bg-twitter {
+  background-color: #0077b5;
+  color: white;
+}
+
+.btn.btn-control.bg-google {
+  background-color: #dd4b39;
+  color: white;
+}
+
+.btn.btn-control:hover {
+  transform: scale(1.1);
+}
+
+/* Post author */
+.post__author {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.post__author img {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-right: 15px;
+}
+
+.post__author .author-date h3 {
+  margin: 0 0 5px 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #515365;
+}
+
+.post__author .post__date {
+  font-size: 13px;
+  color: #9a9fbf;
+}
+
+/* Post thumbnail */
+.post-thumb {
+  margin: 20px 0;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.post-thumb img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Post content */
+.post-read-more {
+  color: #515365;
+  font-size: 15px;
+  line-height: 1.8;
+  margin-bottom: 15px;
+}
+
+.post-read-more p {
+  margin-bottom: 15px;
+}
+
+.post-read-more img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 5px;
+  margin: 15px 0;
+}
+
+/* Card accordion structure */
+.card {
+  border: none;
+  background: transparent;
+}
+
+.card-header {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.card-header .mb-0 {
+  margin-bottom: 0;
+}
+
+/* Read more button - Replica: btn.btn-md-2.btn-border-think */
+.btn.btn-md-2 {
+  padding: 10px 30px;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.btn.btn-border-think {
+  border: 2px solid;
+  background: transparent;
+  border-radius: 30px;
+  transition: all 0.3s ease;
+}
+
+.btn.c-grey {
+  color: #9a9fbf;
+  border-color: #9a9fbf;
+}
+
+.btn.c-grey:hover {
+  background-color: #e42080;
+  border-color: #e42080;
+  color: white;
+}
+
+.btn.btn-transparent {
+  background-color: transparent;
+}
+
+.btn.custom-color {
+  cursor: pointer;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767px) {
+  .control-block-button.post-control-button {
+    position: static;
+    margin-bottom: 15px;
+    justify-content: center;
+  }
+
+  .hentry.post {
+    padding: 20px 15px;
+  }
+
+  .post__author .author-date h3 {
+    font-size: 16px;
+  }
+
+  .ui-block.available-widget {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+
+  .ui-block.available-widget .more {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Hide scrollbar - Replica: style from home.xhtml head */
+::-webkit-scrollbar {
+  width: 0px;
+}
+
+::-webkit-scrollbar-track {
+  background: #edf2f6;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #edf2f6;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #edf2f6;
+}

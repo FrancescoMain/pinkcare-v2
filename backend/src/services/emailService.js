@@ -74,7 +74,51 @@ class EmailService {
   }
 
   /**
+   * Get email template parts (replicating legacy getPartTemplateEmail)
+   * @param {string} part - 'parte_1' or 'parte_2'
+   * @returns {string} HTML template part
+   */
+  getPartTemplateEmail(part) {
+    const url = process.env.APP_URL || 'https://www.pinkcare.it';
+
+    const parte_1 = `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>PINKCARE</title>
+</head>
+
+<body >
+<table style="margin:0 auto;width:680px;border:0;padding:0;border-spacing: 0;">
+<tr style="margin:3px 0 0 3px;background: #e42080;">
+<td><img style="height:55px; width:163px" src="${url}/styles/public/upload/base-logo-mail.png" /></td>
+</tr>
+<tr>
+<td style="border: 3px solid #e42080;padding: 20px;height: 350px;">`;
+
+    const parte_2 = `Cordiali saluti<br /><br />
+<strong style="line-height:30px">Servizio clienti PINKCARE</strong><br />
+<br style="line-height:20px;" />
+
+</div>
+</td>
+</tr>
+</table>
+</body>
+</html>`;
+
+    if (part === 'parte_1') {
+      return parte_1;
+    } else if (part === 'parte_2') {
+      return parte_2;
+    }
+
+    return '';
+  }
+
+  /**
    * Send welcome email replicating legacy behaviour
+   * Replicates EmailServiceImpl.sendWelcomeEmail() exactly
    * @param {string} email - Recipient email
    * @param {string} fullName - Recipient full name
    * @param {string} plainPassword - Password chosen during registration
@@ -85,22 +129,32 @@ class EmailService {
       return false;
     }
 
-    const siteUrl = process.env.APP_URL || 'https://www.pinkcare.it';
-    const loginUrl = `${siteUrl.replace(/\/$/, '')}/login`;
+    const url = process.env.APP_URL || 'https://www.pinkcare.it';
+    const loginUrl = `${url}/login`;
+
+    // Build email body exactly like legacy EmailServiceImpl.sendWelcomeEmail()
+    let testo = '';
+    testo += this.getPartTemplateEmail('parte_1');
+    testo += `Gentile <strong> ${fullName || 'utente'},</strong><br /> `;
+    testo += ` il suo account &egrave; stato correttamente attivato. `;
+    testo += `<br />`;
+    testo += `<br />`;
+    testo += `Questi sono i tuoi dati  d'accesso:`;
+    testo += `<br />`;
+    testo += `Username: ${email}`;
+    testo += `<br />`;
+    testo += `Password: ${plainPassword}`;
+    testo += `<br />`;
+    testo += `<br />`;
+    testo += `si colleghi al seguente indirizzo `;
+    testo += `<br /> <a href="${loginUrl}">${loginUrl}</a><br /><br />`;
+    testo += this.getPartTemplateEmail('parte_2');
 
     const mailOptions = {
       from: process.env.FROM_EMAIL || 'PINKCARE <no-reply@pinkcare.it>',
       to: email,
       subject: 'Benvenuto su PinkCare',
-      html: `
-        <p>Gentile <strong>${fullName || 'utente'}</strong>,</p>
-        <p>il tuo account è stato correttamente attivato.</p>
-        <p>Questi sono i tuoi dati d'accesso:</p>
-        <p>Username: <strong>${email}</strong><br/>Password: <strong>${plainPassword}</strong></p>
-        <p>Per accedere visita il seguente indirizzo:<br/>
-        <a href="${loginUrl}">${loginUrl}</a></p>
-        <p>Il team PinkCare</p>
-      `
+      html: testo
     };
 
     try {

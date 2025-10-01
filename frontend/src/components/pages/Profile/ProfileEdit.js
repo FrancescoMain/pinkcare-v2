@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../context/AuthContext';
-import { ApiService } from '../../../services/apiService';
+import { ApiClient } from '../../../config/api';
 import './ProfileEdit.css';
 
 /**
@@ -174,11 +174,11 @@ const ProfileEdit = ({ errorHandler }) => {
         gender: formData.gender === '' ? null : formData.gender === 'true'
       };
 
-      const profileResponse = await ApiService.put('/api/users/profile', updatePayload);
+      const profileResponse = await ApiClient.put('/api/users/profile', updatePayload);
 
       // Update password if provided
       if (isChangingPassword) {
-        await ApiService.put('/api/users/password', {
+        await ApiClient.put('/api/users/password', {
           currentPassword: passwordData.currentPassword,
           newPassword: passwordData.newPassword,
           confirmPassword: passwordData.confirmPassword

@@ -1,0 +1,26 @@
+/* AuthenticatedLayout.css */
+
+.authenticated-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #edf2f6;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px 0;
+  background: #edf2f6;
+}
+
+.container-fluid {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 15px;
+}
+
+@media (max-width: 768px) {
+  .main-content {
+    padding: 10px 0;
+  }
+}
