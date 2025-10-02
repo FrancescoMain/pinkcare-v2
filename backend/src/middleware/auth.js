@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const { User, Role } = require('../models');
+const { User, Role, Team } = require('../models');
 
 /**
  * Authentication middleware
@@ -23,28 +23,36 @@ class AuthMiddleware {
       // Verify JWT token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       
-      // Get user with roles
+      // Get user with roles and teams
       const user = await User.findByPk(decoded.userId, {
-        include: [{
-          model: Role,
-          as: 'roles',
-          attributes: ['id', 'name', 'description']
-        }]
+        include: [
+          {
+            model: Role,
+            as: 'roles',
+            attributes: ['id', 'name', 'description']
+          },
+          {
+            model: Team,
+            as: 'teams',
+            attributes: ['id', 'name', 'logo']
+          }
+        ]
       });
-      
+
       if (!user) {
         return res.status(401).json({
           error: 'Utente non trovato'
         });
       }
-      
+
       // Add user info to request
       req.user = {
         id: user.id,
         email: user.email,
         name: user.name,
         surname: user.surname,
-        roles: user.roles?.map(role => role.name) || []
+        roles: user.roles?.map(role => role.name) || [],
+        teams: user.teams || []
       };
       
       req.token = decoded;
@@ -140,20 +148,28 @@ class AuthMiddleware {
       
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       const user = await User.findByPk(decoded.userId, {
-        include: [{
-          model: Role,
-          as: 'roles',
-          attributes: ['id', 'name', 'description']
-        }]
+        include: [
+          {
+            model: Role,
+            as: 'roles',
+            attributes: ['id', 'name', 'description']
+          },
+          {
+            model: Team,
+            as: 'teams',
+            attributes: ['id', 'name', 'logo']
+          }
+        ]
       });
-      
+
       if (user) {
         req.user = {
           id: user.id,
           email: user.email,
           name: user.name,
           surname: user.surname,
-          roles: user.roles?.map(role => role.name) || []
+          roles: user.roles?.map(role => role.name) || [],
+          teams: user.teams || []
         };
         req.token = decoded;
       }

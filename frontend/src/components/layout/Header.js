@@ -9,7 +9,7 @@ import ErrorDialog from "../ErrorDialog";
 const Header = ({ userVO = null }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, login } = useAuth();
   const {
     showSuccessMessage,
     showErrorMessage,
@@ -38,21 +38,48 @@ const Header = ({ userVO = null }) => {
     }));
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    // Qui implementeresti la logica di login
-    console.log("Login attempt:", formData);
 
-    // Simulazione di errore di autenticazione
-    if (formData.j_username === "error@test.com") {
+    if (!formData.j_username || !formData.j_password) {
       showErrorMessage(
-        t("authentication.authentication_error", "Errore di autenticazione")
+        t("authentication.login_error", "Errore di autenticazione"),
+        t("authentication.login_missing_fields", "Inserisci email e password per continuare.")
       );
       return;
     }
 
-    // Simulazione di login riuscito
-    showSuccessMessage("Login", "Login effettuato con successo");
+    try {
+      console.log("🚀 Starting login from header with:", formData.j_username);
+
+      const response = await login(
+        formData.j_username,
+        formData.j_password,
+        formData._spring_security_remember_me
+      );
+
+      console.log("✅ Login successful:", response);
+
+      showSuccessMessage(
+        t("authentication.login_success", "Accesso effettuato"),
+        t("authentication.login_welcome", "Benvenuto in PinkCare!")
+      );
+
+      // Redirect based on user role
+      setTimeout(() => {
+        if (response?.user?.role === "ADMIN") {
+          navigate("/admin/dashboard");
+        } else {
+          navigate("/profile");
+        }
+      }, 1000);
+    } catch (error) {
+      console.error("❌ Login error:", error);
+      showErrorMessage(
+        t("authentication.login_error", "Errore di autenticazione"),
+        error.message || t("authentication.invalid_credentials", "Credenziali non valide")
+      );
+    }
   };
 
   const valorizeUsernameHidden = () => {
@@ -117,7 +144,7 @@ const Header = ({ userVO = null }) => {
               <div className="row login_pk hidden-xs">
                 {!isAuthenticated && (
                   <>
-                    <div className="col-xs-12 col-md-5">
+                    <div className="col-xs-12 col-md-8">
                       <label>{t("authentication.email", "Email")}</label>
                       <input
                         id="j_username"
@@ -130,7 +157,7 @@ const Header = ({ userVO = null }) => {
                       />
                     </div>
 
-                    <div className="col-xs-12 col-md-5">
+                    <div className="col-xs-12 col-md-8">
                       <label>{t("authentication.password", "Password")}</label>
                       <input
                         id="j_password"
@@ -144,7 +171,7 @@ const Header = ({ userVO = null }) => {
 
                     <div
                       className="col-xs-12 col-md-2"
-                      style={{ display: "flex", marginBottom: 0 }}
+                      style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", marginBottom: 0 }}
                     >
                       <button
                         id="signin"
@@ -154,8 +181,6 @@ const Header = ({ userVO = null }) => {
                       >
                         {t("authentication.login_caps", "LOGIN")}
                       </button>
-
-                      <div className="item" style={{ height: "35px" }}></div>
                     </div>
                   </>
                 )}

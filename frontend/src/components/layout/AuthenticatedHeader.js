@@ -288,57 +288,44 @@ const AuthenticatedHeader = () => {
           )}
         </div>
 
-        {/* User Controls */}
-        <div className="control-block-button">
-          <a href="#" className="btn btn-control bg-primary">
-            <i className="fas fa-bell"></i>
-          </a>
-
-          <div className="author-page author vcard inline-items more">
-            <div className="author-thumb">
-              <img
-                src={user?.team?.logo || '/styles/olympus/assets/images/avatar.jpg'}
-                alt="User"
-                className="avatar"
-              />
-              <span className="icon-status online"></span>
-            </div>
-            <span className="author-name fn">
-              {user?.name || 'Utente'}
-            </span>
-
-            {/* Dropdown menu */}
-            <div className="more-dropdown more-with-triangle">
+        {/* Control Block - come nel legacy */}
+        <div className="control-block">
+          {/* Notifiche con dropdown */}
+          <div className="control-icon more has-items">
+            <i className="fas fa-bell" style={{color: '#fff'}}></i>
+            <div className="more-dropdown more-with-triangle triangle-top-center">
+              <div className="ui-block-title ui-block-title-small">
+                <h6 className="title">Notifiche</h6>
+              </div>
               <div className="mCustomScrollbar">
-                <ul className="account-settings">
+                <ul className="notification-list">
                   <li>
-                    <Link to="/settings">
-                      <i className="fas fa-cog"></i>
-                      <span>{t('resourceBundle.Settings', 'Impostazioni')}</span>
-                    </Link>
-                  </li>
-                  <li>
-                    <a href="#" onClick={(e) => { e.preventDefault(); logout(); }}>
-                      <i className="fas fa-sign-out-alt"></i>
-                      <span>{t('resourceBundle.Logout', 'Esci')}</span>
-                    </a>
+                    <p>Nessuna notifiche da leggere</p>
                   </li>
                 </ul>
               </div>
+              <Link to="/profile?tab=2" className="view-all bg-primary">
+                Mostra tutte
+              </Link>
             </div>
           </div>
 
-          <div className="more">
-            <i className="fas fa-ellipsis-h"></i>
+          {/* Pulsante Logout */}
+          <div className="nav-item">
+            <a href="#" onClick={(e) => { e.preventDefault(); logout(); }} className="nav-link logout" title="Logout">
+              <i className="fas fa-power-off"></i>
+            </a>
+          </div>
+
+          {/* Pulsante Premium */}
+          <div className="nav-item">
+            <a href="#" className="nav-link premium">
+              <i className="fas fa-crown"></i>
+              <span>{t('resourceBundle.Premium', 'Passa a Premium')}</span>
+            </a>
           </div>
         </div>
       </div>
-
-      {/* Pulsante Premium */}
-      <a href="#" className="btn btn-control premium-button">
-        <i className="fas fa-crown"></i>
-        {t('resourceBundle.Premium', 'Passa a Premium')}
-      </a>
     </header>
   );
 };

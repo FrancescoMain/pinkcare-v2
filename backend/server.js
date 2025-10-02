@@ -23,6 +23,7 @@ const authRoutes = require('./src/routes/auth');
 const userRoutes = require('./src/routes/users');
 const referenceRoutes = require('./src/routes/reference');
 const dashboardRoutes = require('./src/routes/dashboard');
+const blogRoutes = require('./src/routes/blog');
 const { sequelize } = require('./src/config/database');
 
 const app = express();
@@ -52,6 +53,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/reference', referenceRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/blog', blogRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -7,6 +7,14 @@ const Team = require('./Team');
 const Typology = require('./Typology');
 const Municipality = require('./Municipality');
 const UserTeam = require('./UserTeam');
+const BlogPost = require('./BlogPost');
+const BlogPostAgeRange = require('./BlogPostAgeRange');
+const BlogPostCategory = require('./BlogPostCategory');
+const BlogPostThematicArea = require('./BlogPostThematicArea');
+const BlogPostPathology = require('./BlogPostPathology');
+const Protocol = require('./Protocol');
+const ThematicArea = require('./ThematicArea');
+const ExaminationPathology = require('./ExaminationPathology');
 
 // Define associations
 User.belongsToMany(Role, {
@@ -88,6 +96,72 @@ UserTeam.belongsTo(Team, {
   as: 'team'
 });
 
+// Blog associations
+BlogPost.belongsTo(Team, {
+  foreignKey: 'team_id',
+  as: 'team'
+});
+
+BlogPost.hasMany(BlogPostAgeRange, {
+  foreignKey: 'blog_post_id',
+  as: 'age_ranges'
+});
+
+BlogPost.hasMany(BlogPostCategory, {
+  foreignKey: 'blog_post_id',
+  as: 'categories'
+});
+
+BlogPost.hasMany(BlogPostThematicArea, {
+  foreignKey: 'blog_post_id',
+  as: 'thematic_areas'
+});
+
+BlogPost.hasMany(BlogPostPathology, {
+  foreignKey: 'blog_post_id',
+  as: 'pathologies'
+});
+
+BlogPostAgeRange.belongsTo(BlogPost, {
+  foreignKey: 'blog_post_id',
+  as: 'blog_post'
+});
+
+BlogPostAgeRange.belongsTo(Protocol, {
+  foreignKey: 'age_range_id',
+  as: 'age_range'
+});
+
+BlogPostCategory.belongsTo(BlogPost, {
+  foreignKey: 'blog_post_id',
+  as: 'blog_post'
+});
+
+BlogPostCategory.belongsTo(Typology, {
+  foreignKey: 'category_id',
+  as: 'category'
+});
+
+BlogPostThematicArea.belongsTo(BlogPost, {
+  foreignKey: 'blog_post_id',
+  as: 'blog_post'
+});
+
+BlogPostThematicArea.belongsTo(ThematicArea, {
+  foreignKey: 'thematic_area_id',
+  as: 'thematic_area'
+});
+
+BlogPostPathology.belongsTo(BlogPost, {
+  foreignKey: 'blog_post_id',
+  as: 'blog_post'
+});
+
+BlogPostPathology.belongsTo(ExaminationPathology, {
+  foreignKey: 'pathology_id',
+  as: 'pathology'
+});
+
 module.exports = {
   sequelize,
   User,
@@ -97,5 +171,13 @@ module.exports = {
   Team,
   Typology,
   Municipality,
-  UserTeam
+  UserTeam,
+  BlogPost,
+  BlogPostAgeRange,
+  BlogPostCategory,
+  BlogPostThematicArea,
+  BlogPostPathology,
+  Protocol,
+  ThematicArea,
+  ExaminationPathology
 };

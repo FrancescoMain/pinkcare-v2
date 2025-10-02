@@ -8,15 +8,19 @@
   justify-content: space-between;
   position: relative;
   z-index: 999;
+  min-height: 60px;
+  flex-wrap: nowrap;
 }
 
 .page-title {
-  padding: 15px 20px;
+  padding: 10px 20px;
+  flex-shrink: 0;
 }
 
 .page-title img {
-  height: 40px;
+  height: 35px;
   width: auto;
+  display: block;
 }
 
 .header-content-wrapper {
@@ -41,24 +45,27 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 15px 20px;
+  padding: 10px 15px;
   color: white;
   text-decoration: none;
-  transition: all 0.3s ease;
-  font-size: 12px;
+  transition: background 0.2s ease;
+  font-size: 11px;
   font-weight: 500;
   text-transform: uppercase;
+  min-height: 60px;
+  justify-content: center;
 }
 
 .nav-link i {
-  font-size: 20px;
-  margin-bottom: 5px;
+  font-size: 18px;
+  margin-bottom: 3px;
 }
 
 .nav-link span {
-  font-size: 11px;
+  font-size: 10px;
   text-align: center;
-  line-height: 1.2;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 
 .nav-link:hover {
@@ -72,38 +79,66 @@
 }
 
 /* Control Block */
-.control-block-button {
+.control-block {
   display: flex;
   align-items: center;
   padding: 0 15px;
-  gap: 10px;
+  gap: 0;
+  flex-shrink: 0;
+}
+
+.control-icon {
+  position: relative;
+  padding: 10px 15px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.control-icon:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.control-icon i {
+  font-size: 18px;
 }
 
 .btn-control {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
   cursor: pointer;
-  transition: all 0.3s ease;
-  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.15);
   color: white;
+  text-decoration: none;
 }
 
 .btn-control:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.bg-primary {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 /* Author Section */
 .author-page {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   cursor: pointer;
   position: relative;
+  padding: 5px 10px;
+  border-radius: 20px;
+  transition: background 0.2s ease;
+}
+
+.author-page:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .author-thumb {
@@ -111,20 +146,20 @@
 }
 
 .author-thumb img {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid white;
 }
 
 .icon-status {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   position: absolute;
-  bottom: 0;
-  right: 0;
+  bottom: 2px;
+  right: 2px;
   border: 2px solid #e42080;
 }
 
@@ -135,7 +170,7 @@
 .author-name {
   color: white;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 /* Dropdown */
@@ -198,16 +233,31 @@
 
 /* Premium Button */
 .premium-button {
-  background: linear-gradient(135deg, #ffd700, #ffed4e);
-  color: #333;
-  padding: 10px 20px;
-  margin-right: 15px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
+  padding: 8px 20px;
+  margin: 0 10px;
+  border-radius: 25px;
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
-  gap: 8px;
   white-space: nowrap;
+  flex-shrink: 0;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  letter-spacing: 0.5px;
+}
+
+.bg-blue {
+  background: #088dcd;
+  color: white;
+}
+
+.bg-blue:hover {
+  background: #0779b8;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Storia Clinica Icon - Usa icona FontAwesome invece dell'immagine */
@@ -228,25 +278,106 @@
   color: white;
 }
 
-.premium-button:hover {
-  background: linear-gradient(135deg, #ffed4e, #ffd700);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+/* Notification Dropdown */
+.triangle-top-center::before {
+  left: 50%;
+  transform: translateX(-50%);
 }
 
-.premium-button i {
+.ui-block-title-small {
+  padding: 15px 20px 10px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.ui-block-title-small h6 {
+  margin: 0;
   font-size: 14px;
+  font-weight: 600;
+  color: #515365;
 }
 
-/* More Menu */
-.more {
-  cursor: pointer;
-  padding: 10px;
+.notification-list {
+  list-style: none;
+  padding: 15px 20px;
+  margin: 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.notification-list li p {
+  margin: 0;
+  color: #888;
+  font-size: 13px;
+}
+
+.view-all {
+  display: block;
+  padding: 12px 20px;
+  text-align: center;
+  background: #cb98a3;
+  color: white;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 12px;
+  border-radius: 0 0 5px 5px;
+}
+
+.view-all:hover {
+  background: #b88793;
   color: white;
 }
 
-.more i {
-  font-size: 20px;
+/* Nav items in control block */
+.control-block .nav-item {
+  margin: 0;
+}
+
+.control-block .nav-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 15px;
+  min-height: auto;
+  color: white;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.control-block .nav-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.control-block .nav-link i {
+  font-size: 16px;
+  margin: 0;
+}
+
+.control-block .nav-link span {
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.nav-link.logout i {
+  font-size: 18px;
+}
+
+.nav-link.premium {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 8px 15px;
+}
+
+.nav-link.premium:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.user_img {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid white;
 }
 
 /* Responsive */

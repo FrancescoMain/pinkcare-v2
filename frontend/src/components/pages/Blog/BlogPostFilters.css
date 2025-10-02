@@ -1,0 +1,87 @@
+/* BlogPostFilters.css */
+.filters-fieldset {
+  padding: 20px;
+  background: white;
+  border: none;
+  border-radius: 5px;
+}
+
+.responsive-flex1200 {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.responsive-flex1200 .ui-block-title {
+  flex: 1;
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.w-select {
+  flex: 1;
+  min-width: 200px;
+}
+
+.w-select .title {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #515365;
+  font-size: 14px;
+}
+
+.w-select .form-group {
+  margin-bottom: 0;
+}
+
+.w-select select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e6ecf5;
+  border-radius: 5px;
+  font-size: 14px;
+  background: white;
+}
+
+.form-group.with-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.form-group.with-button input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #e6ecf5;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.search-button {
+  background: #e42080;
+  border: none;
+  color: white;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.search-button:hover {
+  background: #d11a70;
+}
+
+.search-button i {
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  .responsive-flex1200 {
+    flex-direction: column;
+  }
+
+  .w-select {
+    min-width: 100%;
+  }
+}

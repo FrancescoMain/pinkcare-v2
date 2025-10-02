@@ -1,0 +1,139 @@
+/* BlogPostEditor.css */
+.news-feed-form {
+  background: white;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.news-feed-form .nav-tabs {
+  border-bottom: 1px solid #e6ecf5;
+  margin: 0;
+  padding: 0;
+}
+
+.news-feed-form .nav-item {
+  margin: 0;
+}
+
+.news-feed-form .nav-link {
+  padding: 15px 20px;
+  color: #515365;
+  font-weight: 600;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.news-feed-form .nav-link.active {
+  background: white;
+  color: #e42080;
+  border-bottom: 2px solid #e42080;
+}
+
+.news-feed-form .nav-link i {
+  font-size: 16px;
+}
+
+.post-form {
+  padding: 20px;
+}
+
+.post-form .author-thumb {
+  display: inline-block;
+  vertical-align: top;
+  margin-right: 15px;
+}
+
+.post-form .author-thumb img {
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.post-form .form-group {
+  margin-bottom: 15px;
+}
+
+.post-form label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+  color: #515365;
+  font-size: 14px;
+}
+
+.post-form .form-control {
+  width: 100%;
+  padding: 10px 15px;
+  border: 1px solid #e6ecf5;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.post-form .editor-textarea {
+  min-height: 230px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.post-form .image-preview {
+  margin-top: 10px;
+}
+
+.post-form .image-preview img {
+  border-radius: 5px;
+  border: 1px solid #e6ecf5;
+}
+
+.post-form .row {
+  margin-right: -15px;
+  margin-left: -15px;
+}
+
+.post-form .row > div {
+  padding-right: 15px;
+  padding-left: 15px;
+}
+
+.post-form .checkbox-group {
+  margin-bottom: 10px;
+}
+
+.post-form .checkbox-group input[type="checkbox"] {
+  margin-right: 5px;
+}
+
+.post-form select[multiple] {
+  min-height: 150px;
+}
+
+.post-form .btn-md-2 {
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.post-form .btn-primary {
+  background: #e42080;
+  border: none;
+  color: white;
+}
+
+.post-form .btn-primary:hover {
+  background: #d11a70;
+}
+
+.post-form .btn-secondary {
+  background: #6c757d;
+  border: none;
+  color: white;
+}
+
+.post-form .btn-secondary:hover {
+  background: #5a6268;
+}
+
+.add-options-message {
+  margin-top: 20px;
+}

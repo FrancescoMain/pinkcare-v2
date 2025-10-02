@@ -146,18 +146,35 @@ export class ApiClient {
    * @returns {Promise} - Promise con la risposta
    */
   static async request(endpoint, options = {}) {
-    const url = buildApiUrl(endpoint);
+    let url = buildApiUrl(endpoint);
+
+    // Add query parameters if provided
+    if (options.params) {
+      const queryString = new URLSearchParams(
+        Object.entries(options.params)
+          .filter(([_, value]) => value !== null && value !== undefined && value !== '')
+          .map(([key, value]) => [key, String(value)])
+      ).toString();
+
+      if (queryString) {
+        url += (url.includes('?') ? '&' : '?') + queryString;
+      }
+    }
+
     const headers = getAuthHeaders(options.headers || {});
-    
+
     const config = {
       ...options,
       headers,
       timeout: API_CONFIG.TIMEOUT
     };
-    
+
+    // Remove params from config as it's not a valid fetch option
+    delete config.params;
+
     try {
       console.log(`API Call: ${options.method || 'GET'} ${url}`, config.body ? JSON.parse(config.body) : null);
-      
+
       const response = await fetch(url, config);
       const data = await response.json();
       
