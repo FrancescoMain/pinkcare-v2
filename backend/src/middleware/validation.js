@@ -238,14 +238,35 @@ class ValidationMiddleware {
       .withMessage('Token di recupero obbligatorio')
       .isLength({ min: 10 })
       .withMessage('Token non valido'),
-      
+
     body('newPassword')
       .isLength({ min: 8 })
       .withMessage('Password deve essere di almeno 8 caratteri')
       .matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d_@.\/#\+\-]{8,}$/)
       .withMessage('Formato password non corretto')
   ];
-  
+
+  /**
+   * Validation rules for password change
+   */
+  static validateChangePassword = [
+    body('currentPassword')
+      .notEmpty()
+      .withMessage('Password attuale obbligatoria'),
+
+    body('newPassword')
+      .isLength({ min: 8 })
+      .withMessage('La nuova password deve essere di almeno 8 caratteri')
+      .matches(/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d_@.\/#\+\-]{8,}$/)
+      .withMessage('La password deve contenere almeno una lettera e un numero')
+      .custom((value, { req }) => {
+        if (value === req.body.currentPassword) {
+          throw new Error('La nuova password deve essere diversa da quella attuale');
+        }
+        return true;
+      })
+  ];
+
   /**
    * Validation rules for profile update
    */

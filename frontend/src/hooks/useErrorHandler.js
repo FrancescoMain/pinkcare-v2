@@ -74,6 +74,7 @@ export const useErrorHandler = () => {
   // Gestione errori globali JavaScript
   useEffect(() => {
     const handleGlobalError = (event) => {
+      console.error('[GLOBAL ERROR HANDLER]', event);
       const error = {
         message: event.error?.message || event.message || 'Errore JavaScript non gestito',
         stack: event.error?.stack,
@@ -86,6 +87,7 @@ export const useErrorHandler = () => {
     };
 
     const handleUnhandledRejection = (event) => {
+      console.error('[UNHANDLED REJECTION]', event.reason);
       const error = {
         message: event.reason?.message || 'Promise rifiutata non gestita',
         stack: event.reason?.stack,
@@ -93,7 +95,8 @@ export const useErrorHandler = () => {
         type: 'unhandled_promise_rejection'
       };
       showError(error);
-      event.preventDefault(); // Previene il log dell'errore nel console
+      // TEMPORANEAMENTE COMMENTO PER VEDERE L'ERRORE ORIGINALE
+      // event.preventDefault(); // Previene il log dell'errore nel console
     };
 
     // Aggiungi listeners solo se non sono già presenti

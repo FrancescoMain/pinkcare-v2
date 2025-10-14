@@ -280,12 +280,20 @@ const LoginPage = ({ errorHandler }) => {
   }, [loginData, showErrorMessage, showSuccessMessage, t, login, navigate]);
 
   const handleForgotPassword = useCallback(async () => {
+    console.log('[DEBUG] handleForgotPassword called', {
+      hasShowSuccessMessage: !!showSuccessMessage,
+      hasShowErrorMessage: !!showErrorMessage,
+      email: loginData.email
+    });
+
     if (!showSuccessMessage || !showErrorMessage) {
       console.warn('Error handler not available');
+      alert('Error handler not available - funzioni di messaggio mancanti');
       return;
     }
 
     if (!loginData.email) {
+      console.log('[DEBUG] No email provided, showing error');
       showErrorMessage(
         t('authentication.recovery_error', 'Recupero password'),
         t('authentication.recovery_missing_email', 'Inserisci la tua email per ricevere il link di recupero.'),
@@ -294,12 +302,15 @@ const LoginPage = ({ errorHandler }) => {
     }
 
     try {
+      console.log('[DEBUG] Calling forgotPassword API');
       await AuthService.forgotPassword(loginData.email);
+      console.log('[DEBUG] API call successful');
       showSuccessMessage(
         t('authentication.recovery_success_title', 'Recupero password'),
         t('authentication.recovery_success_message', "Se l'indirizzo esiste nei nostri sistemi riceverai una email con le istruzioni."),
       );
     } catch (error) {
+      console.log('[DEBUG] API call failed', error);
       if (error instanceof ApiError) {
         showErrorMessage(
           t('authentication.recovery_error', 'Recupero password'),

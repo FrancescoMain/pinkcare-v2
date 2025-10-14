@@ -433,6 +433,95 @@ class UserService {
   }
 
   /**
+   * Validate legacy-style password recovery link
+   * Legacy format: userId$encodedRecoveryCode
+   * @param {string} code - Recovery code in format userId$hash
+   * @returns {Promise<{success: boolean, error?: number}>}
+   */
+  async validatePasswordRecoveryLink(code) {
+    try {
+      const parts = code.split('$');
+      if (parts.length !== 2) {
+        return { success: false, error: -1 }; // Malformed link
+      }
+
+      const userId = parseInt(parts[0]);
+      const providedHash = parts[1];
+
+      const user = await User.findByPk(userId);
+      if (!user) {
+        return { success: false, error: -1 }; // User not found
+      }
+
+      // Check if recovery process is still active
+      if (!user.passwordRecovery) {
+        return { success: false, error: -2 }; // Already finalized or never started
+      }
+
+      // Verify the recovery code (it's already hashed in DB)
+      if (user.passwordRecovery !== providedHash) {
+        return { success: false, error: -3 }; // Verification code incorrect
+      }
+
+      // Valid! Set the new password and clear recovery
+      user.password = providedHash; // Use the hash as new password
+      user.passwordRecovery = null; // Clear recovery code
+      user.lastModifyDate = new Date();
+      await user.save();
+
+      return { success: true };
+    } catch (error) {
+      console.error('Password recovery validation error:', error);
+      return { success: false, error: -1 };
+    }
+  }
+
+  /**
+   * Initiate password recovery (legacy-compatible)
+   * Generates a temporary password and sends email with link
+   * @param {string} email - User email
+   * @returns {Promise<object>} User data and recovery info
+   */
+  async initiateLegacyPasswordRecovery(email) {
+    const user = await User.findOne({
+      where: {
+        [Op.or]: [
+          { email: email.toLowerCase() },
+          { username: email.toLowerCase() }
+        ]
+      }
+    });
+
+    if (!user) {
+      throw new Error('Email non trovata');
+    }
+
+    // Generate temporary password (9 chars like legacy)
+    const tempPassword = PasswordUtils.generateRandomPassword(9);
+
+    // Encode it with MD5
+    const encodedPassword = PasswordUtils.encodeMD5(tempPassword);
+
+    // Save encoded password as recovery token
+    user.passwordRecovery = encodedPassword;
+    user.lastModifyDate = new Date();
+    await user.save();
+
+    // Return data for email
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        surname: user.surname,
+        username: user.username || user.email
+      },
+      tempPassword: tempPassword,  // Plain text for email
+      encodedPassword: encodedPassword  // Hashed for link
+    };
+  }
+
+  /**
    * Change user password
    * Replicates legacy UserService.save(user, password) behavior
    * @param {number} userId - User ID
@@ -443,13 +532,13 @@ class UserService {
   async changePassword(userId, currentPassword, newPassword) {
     const user = await User.findByPk(userId);
     if (!user) {
-      throw new Error('User not found');
+      throw new Error('Utente non trovato');
     }
 
     // Verify current password
     const isCurrentPasswordValid = PasswordUtils.verifyMD5(currentPassword, user.password);
     if (!isCurrentPasswordValid) {
-      throw new Error('Invalid current password');
+      throw new Error('Password attuale non corretta');
     }
 
     // Validate new password strength

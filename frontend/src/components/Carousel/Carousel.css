@@ -2,6 +2,7 @@
 .carousel {
   position: relative;
   margin-bottom: 4rem;
+  overflow: hidden; /* Prevent controls from causing layout breaks */
 }
 
 .carousel-inner {
@@ -13,6 +14,7 @@
 .carousel-inner > .item {
   position: relative;
   display: none;
+  width: 100%;
   transition: 0.6s ease-in-out left;
 }
 
@@ -91,12 +93,12 @@
 
 .carousel-control .glyphicon-chevron-left,
 .carousel-control .icon-prev {
-  margin-left: -33px;
+  margin-left: 0; /* Changed from -33px to prevent overflow */
 }
 
 .carousel-control .glyphicon-chevron-right,
 .carousel-control .icon-next {
-  margin-right: -33px;
+  margin-right: 0; /* Changed from -33px to prevent overflow */
 }
 
 .carousel-control .glyphicon-chevron-left,
@@ -247,4 +249,21 @@
   /* Remove background gray color and height constraints */
   background-color: transparent;
   height: auto; /* Let images determine natural height */
+}
+
+/* Fix: Use floats with negative margin to overlay items without expanding container */
+.carousel-inner > .item {
+  float: left;
+  margin-right: -100%;
+}
+
+/* Add clearfix to carousel-inner */
+.carousel-inner:before,
+.carousel-inner:after {
+  display: table;
+  content: " ";
+}
+
+.carousel-inner:after {
+  clear: both;
 }

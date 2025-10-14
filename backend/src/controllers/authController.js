@@ -380,6 +380,70 @@ class AuthController {
   }
   
   /**
+   * Validate password recovery link (legacy format: userId$hash)
+   * GET /api/auth/password-recovery
+   */
+  async validateRecoveryLink(req, res) {
+    try {
+      const { code } = req.query;
+
+      if (!code) {
+        return res.redirect(`/login?res=-1`); // Malformed link
+      }
+
+      const result = await userService.validatePasswordRecoveryLink(code);
+
+      if (result.success) {
+        // Success - redirect to login
+        return res.redirect('/login?res=0');
+      } else {
+        // Error - redirect with error code
+        return res.redirect(`/login?res=${result.error}`);
+      }
+
+    } catch (error) {
+      console.error('Recovery link validation error:', error);
+      return res.redirect('/login?res=-1');
+    }
+  }
+
+  /**
+   * Change password for authenticated user
+   * POST /api/auth/change-password
+   */
+  async changePassword(req, res, next) {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({
+          error: 'Validation Error',
+          details: errors.array()
+        });
+      }
+
+      const { currentPassword, newPassword } = req.body;
+      const userId = req.user.userId; // From JWT middleware
+
+      await userService.changePassword(userId, currentPassword, newPassword);
+
+      res.json({
+        message: 'Password modificata con successo'
+      });
+
+    } catch (error) {
+      console.error('Change password error:', error);
+
+      if (error.message.includes('Password') || error.message.includes('Utente')) {
+        return res.status(400).json({
+          error: error.message
+        });
+      }
+
+      next(error);
+    }
+  }
+
+  /**
    * Logout user
    * POST /api/auth/logout
    */

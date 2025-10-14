@@ -168,7 +168,7 @@ class EmailService {
   }
 
   /**
-   * Send password recovery email
+   * Send password recovery email (modern version)
    * @param {string} email - Recipient email
    * @param {string} name - User name
    * @param {string} recoveryToken - Recovery token
@@ -180,7 +180,7 @@ class EmailService {
     }
 
     const recoveryUrl = `${process.env.APP_URL || 'http://localhost:3000'}/reset-password?token=${recoveryToken}`;
-    
+
     const mailOptions = {
       from: process.env.FROM_EMAIL || 'PINKCARE <no-reply@pinkcare.it>',
       to: email,
@@ -199,6 +199,64 @@ class EmailService {
     try {
       const info = await this.transporter.sendMail(mailOptions);
       console.log('Password recovery email sent:', info.messageId);
+      return true;
+    } catch (error) {
+      console.error('Error sending password recovery email:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Send password recovery email (legacy-compatible)
+   * Replicates EmailServiceImpl.sendPasswordRecovery() exactly
+   * @param {string} email - Recipient email
+   * @param {string} fullName - User full name
+   * @param {string} username - Username
+   * @param {string} tempPassword - Temporary password (plain text)
+   * @param {number} userId - User ID
+   * @param {string} encodedPassword - Encoded password for link
+   */
+  async sendPasswordRecoveryLegacy(email, fullName, username, tempPassword, userId, encodedPassword) {
+    if (!this.transporter) {
+      console.log('Email service not configured');
+      return false;
+    }
+
+    const url = process.env.APP_URL || 'https://www.pinkcare.it';
+    const recoveryLink = `${url}/api/auth/password-recovery?code=${userId}$${encodedPassword}`;
+
+    // Build email body exactly like legacy EmailServiceImpl.sendPasswordRecovery()
+    let testo = '';
+    testo += this.getPartTemplateEmail('parte_1');
+    testo += `Gentile <strong>${fullName},</strong><br /> `;
+    testo += `Hai richiesto il recupero password `;
+    testo += `<br />`;
+    testo += `<br />`;
+    testo += `Per completare l'operazione fa click sul link sottostante.`;
+    testo += `<br />`;
+    testo += `I nuovi dati d'accesso saranno i seguenti, e li potrai sempre modificare nella sezione impostazioni`;
+    testo += `<br />`;
+    testo += `<br />`;
+    testo += `Username: ${username}`;
+    testo += `<br />`;
+    testo += `Password: ${tempPassword}`;
+    testo += `<br />`;
+    testo += `<br />`;
+    testo += `Per completare l'operazione fa click sul link sottostante.`;
+    testo += `<br />`;
+    testo += `<a href="${recoveryLink}">${recoveryLink}</a><br /><br />`;
+    testo += this.getPartTemplateEmail('parte_2');
+
+    const mailOptions = {
+      from: process.env.FROM_EMAIL || 'PINKCARE <no-reply@pinkcare.it>',
+      to: email,
+      subject: '[PINKCARE] Recupero Password',
+      html: testo
+    };
+
+    try {
+      const info = await this.transporter.sendMail(mailOptions);
+      console.log('Password recovery email (legacy) sent:', info.messageId);
       return true;
     } catch (error) {
       console.error('Error sending password recovery email:', error);

@@ -1,6 +1,7 @@
 const express = require('express');
 const authController = require('../controllers/authController');
 const ValidationMiddleware = require('../middleware/validation');
+const authMiddleware = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -64,6 +65,24 @@ router.post('/forgot-password',
 router.post('/reset-password',
   ValidationMiddleware.validateResetPassword,
   authController.resetPassword.bind(authController)
+);
+
+/**
+ * @route GET /api/auth/password-recovery
+ * @desc Validate password recovery link (legacy format: userId$hash)
+ * @access Public
+ */
+router.get('/password-recovery', authController.validateRecoveryLink.bind(authController));
+
+/**
+ * @route POST /api/auth/change-password
+ * @desc Change password for authenticated user
+ * @access Private (requires authentication)
+ */
+router.post('/change-password',
+  authMiddleware,
+  ValidationMiddleware.validateChangePassword,
+  authController.changePassword.bind(authController)
 );
 
 /**
