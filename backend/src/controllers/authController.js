@@ -307,37 +307,42 @@ class AuthController {
           details: errors.array()
         });
       }
-      
+
       const { email } = req.body;
-      
+
       try {
-        const result = await userService.initiatePasswordRecovery(email);
-        
-        if (result && result.user && result.token) {
-          // Send recovery email
+        // Use LEGACY password recovery method to match Java implementation
+        const result = await userService.initiateLegacyPasswordRecovery(email);
+
+        if (result && result.user && result.tempPassword) {
+          // Send LEGACY recovery email
+          const fullName = `${result.user.name} ${result.user.surname}`;
           try {
-            await emailService.sendPasswordRecovery(
+            await emailService.sendPasswordRecoveryLegacy(
               result.user.email,
-              result.user.name,
-              result.token
+              fullName,
+              result.user.username || result.user.email,
+              result.tempPassword,
+              result.user.id,
+              result.encodedPassword
             );
             console.log('Password recovery email sent to:', result.user.email);
           } catch (emailError) {
             console.error('Failed to send password recovery email:', emailError);
           }
         }
-        
+
         res.json({
           message: 'Se l\'email esiste nel sistema, riceverai le istruzioni per il recupero password'
         });
-        
+
       } catch (error) {
         // Don't expose whether email exists or not
         res.json({
           message: 'Se l\'email esiste nel sistema, riceverai le istruzioni per il recupero password'
         });
       }
-      
+
     } catch (error) {
       console.error('Forgot password error:', error);
       next(error);
@@ -386,24 +391,25 @@ class AuthController {
   async validateRecoveryLink(req, res) {
     try {
       const { code } = req.query;
+      const frontendUrl = process.env.APP_URL || 'http://localhost:3000';
 
       if (!code) {
-        return res.redirect(`/login?res=-1`); // Malformed link
+        return res.redirect(`${frontendUrl}/login?res=-1`); // Malformed link
       }
 
       const result = await userService.validatePasswordRecoveryLink(code);
 
       if (result.success) {
         // Success - redirect to login
-        return res.redirect('/login?res=0');
+        return res.redirect(`${frontendUrl}/login?res=0`);
       } else {
         // Error - redirect with error code
-        return res.redirect(`/login?res=${result.error}`);
+        return res.redirect(`${frontendUrl}/login?res=${result.error}`);
       }
 
     } catch (error) {
       console.error('Recovery link validation error:', error);
-      return res.redirect('/login?res=-1');
+      return res.redirect(`${frontendUrl}/login?res=-1`);
     }
   }
 

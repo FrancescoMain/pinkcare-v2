@@ -88,18 +88,19 @@ class EmailService {
 <title>PINKCARE</title>
 </head>
 
-<body >
+<body>
 <table style="margin:0 auto;width:680px;border:0;padding:0;border-spacing: 0;">
 <tr style="margin:3px 0 0 3px;background: #e42080;">
 <td><img style="height:55px; width:163px" src="${url}/styles/public/upload/base-logo-mail.png" /></td>
 </tr>
 <tr>
-<td style="border: 3px solid #e42080;padding: 20px;height: 350px;">`;
+<td style="border: 3px solid #e42080;padding: 20px;height: 350px;">
+<div>`;
 
-    const parte_2 = `Cordiali saluti<br /><br />
+    const parte_2 = `<br />
+Cordiali saluti<br /><br />
 <strong style="line-height:30px">Servizio clienti PINKCARE</strong><br />
 <br style="line-height:20px;" />
-
 </div>
 </td>
 </tr>
@@ -222,8 +223,9 @@ class EmailService {
       return false;
     }
 
-    const url = process.env.APP_URL || 'https://www.pinkcare.it';
-    const recoveryLink = `${url}/api/auth/password-recovery?code=${userId}$${encodedPassword}`;
+    // Use API_URL for the recovery endpoint (backend), falls back to APP_URL for production
+    const apiUrl = process.env.API_URL || process.env.APP_URL || 'https://www.pinkcare.it';
+    const recoveryLink = `${apiUrl}/api/auth/password-recovery?code=${userId}$${encodedPassword}`;
 
     // Build email body exactly like legacy EmailServiceImpl.sendPasswordRecovery()
     let testo = '';

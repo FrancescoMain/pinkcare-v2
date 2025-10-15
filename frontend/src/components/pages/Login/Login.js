@@ -96,6 +96,14 @@ const LoginPage = ({ errorHandler }) => {
   const { showSuccessMessage, showErrorMessage } = errorHandler || {};
   const loginPageConfig = pageConfig.login || {};
 
+  // Debug: log errorHandler status
+  console.log('[LoginPage] Component rendered', {
+    hasErrorHandler: !!errorHandler,
+    hasShowSuccessMessage: !!showSuccessMessage,
+    hasShowErrorMessage: !!showErrorMessage,
+    errorHandlerKeys: errorHandler ? Object.keys(errorHandler) : []
+  });
+
   const [loginData, setLoginData] = useState({
     email: '',
     password: '',
@@ -151,6 +159,53 @@ const LoginPage = ({ errorHandler }) => {
       isMounted = false;
     };
   }, []);
+
+  // Handle password recovery result from URL query parameter (run once on mount)
+  useEffect(() => {
+    if (!showSuccessMessage || !showErrorMessage) return;
+
+    const params = new URLSearchParams(location.search);
+    const res = params.get('res');
+
+    if (res !== null) {
+      // Show message based on result code
+      switch (res) {
+        case '0':
+          showSuccessMessage(
+            t('authentication.recovery_complete_title', 'Password ripristinata'),
+            t('authentication.recovery_complete_message', 'La tua password è stata ripristinata con successo. Controlla la tua email per la nuova password temporanea.')
+          );
+          break;
+        case '-1':
+          showErrorMessage(
+            t('authentication.recovery_error', 'Errore recupero password'),
+            t('authentication.recovery_link_malformed', 'Il link di recupero non è valido. Richiedi un nuovo link.')
+          );
+          break;
+        case '-2':
+          showErrorMessage(
+            t('authentication.recovery_error', 'Errore recupero password'),
+            t('authentication.recovery_already_used', 'Questo link è già stato utilizzato o non è più valido.')
+          );
+          break;
+        case '-3':
+          showErrorMessage(
+            t('authentication.recovery_error', 'Errore recupero password'),
+            t('authentication.recovery_code_incorrect', 'Il codice di recupero non è corretto o è scaduto.')
+          );
+          break;
+        default:
+          showErrorMessage(
+            t('authentication.recovery_error', 'Errore recupero password'),
+            t('authentication.recovery_generic_error', 'Si è verificato un errore durante il recupero password.')
+          );
+      }
+
+      // Clear the query parameter from URL after showing message
+      navigate(location.pathname, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Run only once on mount
 
   useEffect(() => {
     if (skipMunicipalitySearch) {
