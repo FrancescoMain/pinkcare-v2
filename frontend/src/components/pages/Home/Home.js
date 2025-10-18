@@ -92,6 +92,9 @@ const Home = ({ userVO = null, errorHandler }) => {
     if (!confirmed) return;
     
     try {
+      // Log dello stato del form prima della preparazione
+      console.log('Form state before preparation - email:', newUser.email);
+
       // Preparazione dati per il backend
       const registrationData = {
         ...newUser,
@@ -102,8 +105,9 @@ const Home = ({ userVO = null, errorHandler }) => {
         agreeMarketing: newUser.agreeMarketing,
         agreeNewsletter: newUser.agreeNewsletter
       };
-      
-      console.log('Sending registration data:', registrationData);
+
+      console.log('Sending registration data - email:', registrationData.email);
+      console.log('Full registration data:', registrationData);
       
       // Chiamata API tramite AuthService
       const result = await AuthService.registerConsumer(registrationData);
