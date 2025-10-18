@@ -39,6 +39,12 @@ class UserService {
     });
 
     if (existingUser) {
+      console.log(`[UserService] Email check failed: "${email}" already exists as:`, {
+        id: existingUser.id,
+        email: existingUser.email,
+        username: existingUser.username,
+        insertionDate: existingUser.insertionDate
+      });
       throw new Error('Email già registrata');
     }
   }
