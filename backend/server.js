@@ -24,7 +24,7 @@ const userRoutes = require('./src/routes/users');
 const referenceRoutes = require('./src/routes/reference');
 const dashboardRoutes = require('./src/routes/dashboard');
 const blogRoutes = require('./src/routes/blog');
-const { sequelize } = require('./src/config/database');
+const { testConnection } = require('./src/config/database');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -86,13 +86,12 @@ app.use('*', (req, res) => {
 // Database connection and server start
 async function startServer() {
   try {
-    // Test database connection
-    await sequelize.authenticate();
-    console.log('✓ Database connection established successfully.');
-    
+    // Test database connection with retry logic
+    await testConnection();
+
     // Skip model sync to use existing database structure
     console.log('✓ Using existing database structure.');
-    
+
     // Start server
     app.listen(PORT, () => {
       const dbLabel = (() => {

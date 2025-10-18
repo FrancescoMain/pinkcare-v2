@@ -62,18 +62,45 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
+// Detect if running in serverless environment (AWS Lambda, Vercel, etc.)
+const isServerless = !!(process.env.AWS_LAMBDA_FUNCTION_NAME || process.env.VERCEL);
+
+// Configure pool based on environment
+const poolConfig = isServerless
+  ? {
+      // Serverless-optimized pool configuration
+      max: 5,           // Lower max connections for Lambda
+      min: 0,           // No minimum - let connections close when idle
+      acquire: 30000,   // 30 seconds to acquire connection
+      idle: 10000,      // 10 seconds idle before releasing (Lambda freezes quickly)
+      evict: 5000,      // Check for idle connections every 5 seconds
+    }
+  : {
+      // Traditional server pool configuration
+      max: 40,
+      min: 10,
+      acquire: 60000,
+      idle: 300000,
+    };
+
 const baseOptions = {
   dialect: 'postgres',
   logging: process.env.NODE_ENV === 'development' ? console.log : false,
-  pool: {
-    max: 40,
-    min: 10,
-    acquire: 60000,
-    idle: 300000,
-  },
+  pool: poolConfig,
   define: {
     underscored: true,
     timestamps: false,
+  },
+  // Retry connection attempts for transient errors
+  retry: {
+    max: 3,
+    match: [
+      /ECONNRESET/,
+      /ETIMEDOUT/,
+      /EHOSTUNREACH/,
+      /ECONNREFUSED/,
+      /ConnectionError/,
+    ],
   },
 };
 
@@ -105,4 +132,63 @@ const sequelize = databaseUrl
       baseOptions,
     );
 
-module.exports = { sequelize };
+// Add connection validation hooks for serverless environments
+if (isServerless) {
+  // Validate connection before each query
+  sequelize.beforeConnect(async () => {
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[DB] Establishing new connection...');
+    }
+  });
+
+  // Handle connection errors gracefully
+  sequelize.afterConnect(() => {
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[DB] Connection established successfully');
+    }
+  });
+}
+
+/**
+ * Test and validate database connection
+ * Automatically retries on connection errors
+ */
+async function testConnection(retries = 3) {
+  for (let attempt = 1; attempt <= retries; attempt++) {
+    try {
+      await sequelize.authenticate();
+      console.log('[DB] Connection has been established successfully.');
+      return true;
+    } catch (error) {
+      console.error(`[DB] Connection attempt ${attempt}/${retries} failed:`, error.message);
+
+      if (attempt === retries) {
+        console.error('[DB] All connection attempts failed. Database may be unavailable.');
+        throw error;
+      }
+
+      // Wait before retrying (exponential backoff)
+      const delay = Math.min(1000 * Math.pow(2, attempt - 1), 5000);
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+  }
+}
+
+/**
+ * Safely close all database connections
+ * Important for Lambda cleanup
+ */
+async function closeConnection() {
+  try {
+    await sequelize.close();
+    console.log('[DB] All connections closed successfully.');
+  } catch (error) {
+    console.error('[DB] Error closing connections:', error.message);
+  }
+}
+
+module.exports = {
+  sequelize,
+  testConnection,
+  closeConnection
+};
