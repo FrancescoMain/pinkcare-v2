@@ -28,8 +28,7 @@ class ValidationMiddleware {
       .trim()
       .toLowerCase()
       .isEmail()
-      .withMessage('Email non valida')
-      .normalizeEmail(),
+      .withMessage('Email non valida'),
       
     body('password')
       .isLength({ min: 8 })
@@ -103,8 +102,7 @@ class ValidationMiddleware {
       .trim()
       .toLowerCase()
       .isEmail()
-      .withMessage('Email non valida')
-      .normalizeEmail(),
+      .withMessage('Email non valida'),
 
     body('password')
       .isLength({ min: 8 })
@@ -204,8 +202,7 @@ class ValidationMiddleware {
       .trim()
       .toLowerCase()
       .isEmail()
-      .withMessage('Email non valida')
-      .normalizeEmail(),
+      .withMessage('Email non valida'),
       
     body('password')
       .notEmpty()
