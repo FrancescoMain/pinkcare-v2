@@ -8,59 +8,6 @@ const { sequelize } = require('../config/database');
  * Based on it.tione.pinkcare.service.impl.UserServiceImpl.java
  */
 class UserService {
-  /**
-   * Normalizza un indirizzo email per gestire correttamente gli alias
-   * - Gmail: rimuove i punti e tutto dopo il + prima della @
-   *   (test.user+alias@gmail.com → testuser@gmail.com)
-   * - Googlemail: converte in gmail.com
-   * - Altri provider: solo lowercase e trim
-   *
-   * @param {string} email - Email da normalizzare
-   * @returns {string} - Email normalizzata
-   */
-  normalizeEmail(email) {
-    if (!email || typeof email !== 'string') {
-      return '';
-    }
-
-    // Converti in lowercase e rimuovi spazi
-    let normalized = email.toLowerCase().trim();
-
-    // Estrai la parte locale (prima di @) e il dominio (dopo @)
-    const atIndex = normalized.lastIndexOf('@');
-    if (atIndex === -1) {
-      return normalized; // Email non valida, restituisci così com'è
-    }
-
-    let localPart = normalized.substring(0, atIndex);
-    let domain = normalized.substring(atIndex + 1);
-
-    // Gestione speciale per Gmail/Googlemail
-    const gmailDomains = ['gmail.com', 'googlemail.com'];
-    if (gmailDomains.includes(domain)) {
-      // Per Gmail:
-      // 1. Rimuovi tutti i punti dalla parte locale
-      localPart = localPart.replace(/\./g, '');
-
-      // 2. Rimuovi tutto dopo il + (alias)
-      const plusIndex = localPart.indexOf('+');
-      if (plusIndex !== -1) {
-        localPart = localPart.substring(0, plusIndex);
-      }
-
-      // 3. Normalizza googlemail.com → gmail.com
-      domain = 'gmail.com';
-    } else {
-      // Per altri provider, rimuovi solo gli alias dopo il +
-      const plusIndex = localPart.indexOf('+');
-      if (plusIndex !== -1) {
-        localPart = localPart.substring(0, plusIndex);
-      }
-    }
-
-    return `${localPart}@${domain}`;
-  }
-
   toBoolean(value) {
     if (value === null || value === undefined) {
       return null;
@@ -117,8 +64,8 @@ class UserService {
       throw new Error(passwordValidation.errors.join(', '));
     }
 
-    // Normalizza l'email per gestire alias Gmail (es: test+alias@gmail.com → test@gmail.com)
-    const normalizedEmail = this.normalizeEmail(email);
+    // Basic email normalization (lowercase and trim only, allow Gmail aliases)
+    const normalizedEmail = email.toLowerCase().trim();
     await this.ensureUserDoesNotExist(normalizedEmail, options);
 
     const hashedPassword = PasswordUtils.encodeMD5(password);
@@ -291,8 +238,8 @@ class UserService {
       return null;
     }
 
-    // Normalizza l'email per gestire alias Gmail
-    const normalizedEmail = this.normalizeEmail(email);
+    // Basic email normalization (lowercase and trim only)
+    const normalizedEmail = email.toLowerCase().trim();
 
     // Find user by email/username
     const user = await User.findOne({
@@ -426,8 +373,8 @@ class UserService {
    * @returns {Promise<object>} User data and recovery token
    */
   async initiatePasswordRecovery(email) {
-    // Normalizza l'email per gestire alias Gmail
-    const normalizedEmail = this.normalizeEmail(email);
+    // Basic email normalization (lowercase and trim only)
+    const normalizedEmail = email.toLowerCase().trim();
 
     const user = await User.findOne({
       where: {
@@ -543,8 +490,8 @@ class UserService {
    * @returns {Promise<object>} User data and recovery info
    */
   async initiateLegacyPasswordRecovery(email) {
-    // Normalizza l'email per gestire alias Gmail
-    const normalizedEmail = this.normalizeEmail(email);
+    // Basic email normalization (lowercase and trim only)
+    const normalizedEmail = email.toLowerCase().trim();
 
     const user = await User.findOne({
       where: {
