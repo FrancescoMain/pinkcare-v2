@@ -72,6 +72,7 @@ class UserService {
 
     // Basic email normalization (lowercase and trim only, allow Gmail aliases)
     const normalizedEmail = email.toLowerCase().trim();
+    console.log(`[UserService] insertUserRecord - Original email: "${email}", Normalized: "${normalizedEmail}"`);
     await this.ensureUserDoesNotExist(normalizedEmail, options);
 
     const hashedPassword = PasswordUtils.encodeMD5(password);
