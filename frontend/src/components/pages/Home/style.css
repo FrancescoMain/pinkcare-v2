@@ -80,3 +80,79 @@
 .you_video iframe {
   width: 100%;
 }
+
+/* Password field icon positioning - override global.css */
+.field-icon.toggle-password {
+  position: absolute;
+  right: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #888;
+  z-index: 10;
+  font-size: 16px;
+  margin: 0 !important;
+  float: none !important;
+}
+
+/* Select styling */
+select.form-control {
+  width: 100%;
+  height: auto;
+  padding: 0.75rem;
+  border: 1px solid #c4c7cc;
+  border-radius: 4px;
+  color: #515365;
+  font-size: 14px;
+  background-color: #fff;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  cursor: pointer;
+}
+
+select.form-control:focus {
+  border-color: #e42080;
+  box-shadow: 0 0 0 0.2rem rgba(228, 32, 128, 0.25);
+  outline: none;
+}
+
+/* Placeholder styling for select - gray out the first option */
+select.form-control option[value=""] {
+  color: #888da8;
+  font-style: italic;
+}
+
+/* When select has no value selected, make it gray */
+select.form-control:invalid {
+  color: #888da8;
+}
+
+/* Button styling */
+.btn.btn-secondary {
+  background-color: #e42080;
+  border-color: #e42080;
+  padding: 12px 30px;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  border-radius: 4px;
+  color: white;
+  width: 100%;
+  margin-top: 20px;
+  display: block;
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(228, 32, 128, 0.3);
+}
+
+.btn.btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(228, 32, 128, 0.4);
+  background-color: #d01c70;
+  border-color: #d01c70;
+}
+
+.btn.btn-secondary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(228, 32, 128, 0.3);
+}

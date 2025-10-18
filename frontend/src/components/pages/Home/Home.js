@@ -364,8 +364,9 @@ const Home = ({ userVO = null, errorHandler }) => {
                   value={newUser.gender || ''}
                   onChange={handleInputChange}
                   className="form-control"
+                  required
                 >
-                  <option value="">{t('authentication.gender', 'Sesso')}</option>
+                  <option value="" disabled>{t('authentication.gender', 'Sesso')}</option>
                   <option value="true">{t('authentication.male', 'Uomo')}</option>
                   <option value="false">{t('authentication.female', 'Donna')}</option>
                 </select>
@@ -419,9 +420,12 @@ const Home = ({ userVO = null, errorHandler }) => {
                     {' '}{t('authentication.yes_newsletter', 'Mi piacerebbe ricevere la newsletter di PinkCare')}
                   </label>
                 </div>
+              </div>
+              <div className="col-xs-12 col-sm-12">
                 <button
                   type="submit"
                   className="btn btn-secondary"
+                  style={{ padding: 0 }}
                 >
                   {t('authentication.complete_registration', 'REGISTRATI')}
                 </button>
