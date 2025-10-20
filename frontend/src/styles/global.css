@@ -65,6 +65,14 @@ input {
 }
 
 /* Pulsanti */
+button,
+.btn,
+input[type="button"],
+input[type="submit"],
+input[type="reset"],
+.ui-button {
+  padding: 0 !important;
+}
 
 /* Form inputs avanzati */
 input.ui-inputfield {

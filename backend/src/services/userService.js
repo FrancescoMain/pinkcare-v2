@@ -70,7 +70,7 @@ class UserService {
       throw new Error(passwordValidation.errors.join(', '));
     }
 
-    // Basic email normalization (lowercase and trim only, allow Gmail aliases)
+    // Basic email normalization (lowercase and trim only, allow aliases like +tag)
     const normalizedEmail = email.toLowerCase().trim();
     console.log(`[UserService] insertUserRecord - Original email: "${email}", Normalized: "${normalizedEmail}"`);
     await this.ensureUserDoesNotExist(normalizedEmail, options);
@@ -245,7 +245,7 @@ class UserService {
       return null;
     }
 
-    // Basic email normalization (lowercase and trim only)
+    // Basic email normalization (lowercase and trim only, allow aliases like +tag)
     const normalizedEmail = email.toLowerCase().trim();
 
     // Find user by email/username
@@ -380,7 +380,7 @@ class UserService {
    * @returns {Promise<object>} User data and recovery token
    */
   async initiatePasswordRecovery(email) {
-    // Basic email normalization (lowercase and trim only)
+    // Basic email normalization (lowercase and trim only, allow aliases like +tag)
     const normalizedEmail = email.toLowerCase().trim();
 
     const user = await User.findOne({
@@ -497,7 +497,7 @@ class UserService {
    * @returns {Promise<object>} User data and recovery info
    */
   async initiateLegacyPasswordRecovery(email) {
-    // Basic email normalization (lowercase and trim only)
+    // Basic email normalization (lowercase and trim only, allow aliases like +tag)
     const normalizedEmail = email.toLowerCase().trim();
 
     const user = await User.findOne({
