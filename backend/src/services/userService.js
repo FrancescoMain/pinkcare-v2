@@ -246,11 +246,13 @@ class UserService {
    */
   async authenticateUser(email, password) {
     if (!email || !password) {
+      console.log('[UserService] authenticateUser - Missing email or password');
       return null;
     }
 
     // Basic email normalization (lowercase and trim only, allow aliases like +tag)
     const normalizedEmail = email.toLowerCase().trim();
+    console.log('[UserService] authenticateUser - Email:', normalizedEmail);
 
     // Find user by email/username
     const user = await User.findOne({
@@ -266,24 +268,30 @@ class UserService {
         attributes: ['id', 'name', 'description']
       }]
     });
-    
+
     if (!user) {
+      console.log('[UserService] User not found with email:', normalizedEmail);
       return null;
     }
-    
+
+    console.log('[UserService] User found:', { id: user.id, email: user.email });
+
     // Verify password using MD5
     const isPasswordValid = PasswordUtils.verifyMD5(password, user.password);
+    console.log('[UserService] Password valid:', isPasswordValid);
+
     if (!isPasswordValid) {
       return null;
     }
-    
+
     // Update first login date if not set
     if (!user.firstLoginDate) {
       user.firstLoginDate = new Date();
       user.lastModifyDate = new Date();
       await user.save();
     }
-    
+
+    console.log('[UserService] Authentication successful for user:', user.id);
     return user;
   }
   
@@ -458,35 +466,57 @@ class UserService {
    */
   async validatePasswordRecoveryLink(code) {
     try {
+      console.log('[UserService] validatePasswordRecoveryLink - Code:', code);
+
       const parts = code.split('$');
       if (parts.length !== 2) {
+        console.log('[UserService] Malformed code - parts length:', parts.length);
         return { success: false, error: -1 }; // Malformed link
       }
 
       const userId = parseInt(parts[0]);
       const providedHash = parts[1];
+      console.log('[UserService] Parsed - userId:', userId, 'hash length:', providedHash.length);
 
       const user = await User.findByPk(userId);
       if (!user) {
+        console.log('[UserService] User not found with ID:', userId);
         return { success: false, error: -1 }; // User not found
       }
 
+      console.log('[UserService] User found:', {
+        id: user.id,
+        email: user.email,
+        hasPasswordRecovery: !!user.passwordRecovery
+      });
+
       // Check if recovery process is still active
       if (!user.passwordRecovery) {
+        console.log('[UserService] No password recovery in progress for user:', userId);
         return { success: false, error: -2 }; // Already finalized or never started
       }
 
       // Verify the recovery code (it's already hashed in DB)
-      if (user.passwordRecovery !== providedHash) {
+      const hashesMatch = user.passwordRecovery === providedHash;
+      console.log('[UserService] Hash comparison:', {
+        stored: user.passwordRecovery.substring(0, 10) + '...',
+        provided: providedHash.substring(0, 10) + '...',
+        match: hashesMatch
+      });
+
+      if (!hashesMatch) {
+        console.log('[UserService] Recovery code mismatch');
         return { success: false, error: -3 }; // Verification code incorrect
       }
 
       // Valid! Set the new password and clear recovery
+      console.log('[UserService] Recovery link validated successfully, setting new password');
       user.password = providedHash; // Use the hash as new password
       user.passwordRecovery = null; // Clear recovery code
       user.lastModifyDate = new Date();
       await user.save();
 
+      console.log('[UserService] Password updated successfully for user:', userId);
       return { success: true };
     } catch (error) {
       console.error('Password recovery validation error:', error);
@@ -503,6 +533,7 @@ class UserService {
   async initiateLegacyPasswordRecovery(email) {
     // Basic email normalization (lowercase and trim only, allow aliases like +tag)
     const normalizedEmail = email.toLowerCase().trim();
+    console.log('[UserService] initiateLegacyPasswordRecovery - Email:', normalizedEmail);
 
     const user = await User.findOne({
       where: {
@@ -514,19 +545,26 @@ class UserService {
     });
 
     if (!user) {
+      console.log('[UserService] User not found with email:', normalizedEmail);
       throw new Error('Email non trovata');
     }
 
+    console.log('[UserService] User found:', { id: user.id, email: user.email });
+
     // Generate temporary password (9 chars like legacy)
     const tempPassword = PasswordUtils.generateRandomPassword(9);
+    console.log('[UserService] Generated temp password:', tempPassword);
 
     // Encode it with MD5
     const encodedPassword = PasswordUtils.encodeMD5(tempPassword);
+    console.log('[UserService] Encoded password (first 10 chars):', encodedPassword.substring(0, 10) + '...');
 
     // Save encoded password as recovery token
     user.passwordRecovery = encodedPassword;
     user.lastModifyDate = new Date();
     await user.save();
+
+    console.log('[UserService] Password recovery initiated for user:', user.id);
 
     // Return data for email
     return {
