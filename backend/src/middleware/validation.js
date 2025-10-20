@@ -223,7 +223,6 @@ class ValidationMiddleware {
       .toLowerCase()
       .isEmail()
       .withMessage('Email non valida')
-      .normalizeEmail()
   ];
   
   /**

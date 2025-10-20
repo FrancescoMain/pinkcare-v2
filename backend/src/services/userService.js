@@ -28,6 +28,8 @@ class UserService {
   }
 
   async ensureUserDoesNotExist(email, options = {}) {
+    console.log(`[UserService] ensureUserDoesNotExist - Checking for email: "${email}"`);
+
     const existingUser = await User.findOne({
       where: {
         [Op.or]: [
@@ -47,6 +49,8 @@ class UserService {
       });
       throw new Error('Email già registrata');
     }
+
+    console.log(`[UserService] Email "${email}" is available`);
   }
 
   async insertUserRecord(userPayload, options = {}) {
