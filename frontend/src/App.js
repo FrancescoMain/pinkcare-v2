@@ -19,6 +19,7 @@ import CookieBanner from "./components/CookieBanner";
 import LoginPage from "./components/pages/Login/Login";
 import Profile from "./components/pages/Profile/Profile";
 import PasswordRecovery from "./components/pages/PasswordRecovery";
+import PasswordRecoveryTest from "./components/pages/PasswordRecoveryTest";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import { useErrorHandler } from "./hooks/useErrorHandler";
@@ -49,6 +50,7 @@ function App() {
           {/* Route standalone senza layout */}
           <Route path="/disclosure" element={<Disclosure />} />
           <Route path="/login/*" element={<LoginPage errorHandler={errorHandler} />} />
+          <Route path="/password-recovery-test" element={<PasswordRecoveryTest />} />
           <Route path="/api/auth/password-recovery" element={<PasswordRecovery />} />
 
           {/* Route autenticate con AuthenticatedLayout */}

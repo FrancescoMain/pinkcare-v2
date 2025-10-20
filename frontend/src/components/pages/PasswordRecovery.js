@@ -26,14 +26,19 @@ const PasswordRecovery = () => {
 
       try {
         console.log('[PasswordRecovery] Processing recovery code:', code);
+        console.log('[PasswordRecovery] API_URL:', API_URL);
+
+        const backendUrl = `${API_URL}/api/auth/password-recovery?code=${encodeURIComponent(code)}`;
+        console.log('[PasswordRecovery] Calling backend URL:', backendUrl);
 
         // Call the backend API endpoint
-        const response = await fetch(`${API_URL}/api/auth/password-recovery?code=${encodeURIComponent(code)}`, {
+        const response = await fetch(backendUrl, {
           method: 'GET',
-          redirect: 'manual' // Don't follow redirects automatically
+          redirect: 'follow' // Follow redirects
         });
 
         console.log('[PasswordRecovery] Response status:', response.status);
+        console.log('[PasswordRecovery] Response type:', response.type);
 
         // Check if the response is a redirect
         if (response.type === 'opaqueredirect' || response.status === 0) {

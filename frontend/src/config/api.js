@@ -21,6 +21,9 @@ const getApiBaseUrl = () => {
   return API_BASE_URLS.production;
 };
 
+// Export diretto dell'API_URL per uso semplice
+export const API_URL = getApiBaseUrl();
+
 export const API_CONFIG = {
   BASE_URL: getApiBaseUrl(),
   ENDPOINTS: {
