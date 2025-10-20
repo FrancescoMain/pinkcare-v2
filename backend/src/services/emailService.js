@@ -223,9 +223,12 @@ Cordiali saluti<br /><br />
       return false;
     }
 
-    // Use API_URL for the recovery endpoint (backend), falls back to APP_URL for production
-    const apiUrl = process.env.API_URL || process.env.APP_URL || 'https://www.pinkcare.it';
-    const recoveryLink = `${apiUrl}/api/auth/password-recovery?code=${userId}$${encodedPassword}`;
+    // Use APP_URL (frontend) for the recovery endpoint - frontend will proxy to backend
+    // The frontend route /api/auth/password-recovery will handle the recovery and redirect
+    const frontendUrl = process.env.APP_URL || 'https://www.pinkcare.it';
+    const recoveryLink = `${frontendUrl}/api/auth/password-recovery?code=${userId}$${encodedPassword}`;
+
+    console.log('[EmailService] Generated recovery link:', recoveryLink);
 
     // Build email body exactly like legacy EmailServiceImpl.sendPasswordRecovery()
     let testo = '';
