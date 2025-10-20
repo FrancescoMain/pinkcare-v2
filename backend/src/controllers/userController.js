@@ -228,7 +228,7 @@ class UserController {
    */
   async assignAllRoles(req, res, next) {
     try {
-      const userId = req.user.userId;
+      const userId = req.user.id; // Use req.user.id, not req.user.userId
       console.log('[DEBUG] Assigning all roles to user:', userId);
 
       // Assign all possible roles
