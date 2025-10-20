@@ -77,6 +77,38 @@ const BlogPostCard = ({ post, index, canEdit, onEdit, onDelete }) => {
               {formatDate(post.insertion_date)}
               &nbsp; Da &nbsp; <b>{post.insertion_username}</b>
             </div>
+
+            {/* Social Share Icons */}
+            <ul className="sm-links">
+              <li>
+                <a
+                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Condividi su Facebook"
+                >
+                  <i className="fab fa-facebook-f"></i>
+                </a>
+              </li>
+              <li>
+                <a
+                  href={`https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(window.location.href)}&title=${encodeURIComponent(post.headline)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  title="Condividi su LinkedIn"
+                >
+                  <i className="fab fa-linkedin-in"></i>
+                </a>
+              </li>
+              <li>
+                <a
+                  href={`mailto:?subject=${encodeURIComponent(post.headline)}&body=${encodeURIComponent(window.location.href)}`}
+                  title="Condividi via Email"
+                >
+                  <i className="fas fa-envelope"></i>
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
 

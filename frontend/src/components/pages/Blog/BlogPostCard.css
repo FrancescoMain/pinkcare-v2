@@ -184,3 +184,63 @@
   color: white;
   border-color: #c8cddc;
 }
+
+/* Social Share Icons */
+.sm-links {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0 0;
+  display: flex;
+  gap: 10px;
+}
+
+.sm-links li {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+}
+
+.sm-links li a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  font-size: 18px;
+}
+
+.sm-links li a:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Facebook */
+.sm-links li a[href*="facebook"] {
+  background-color: #3b5998;
+}
+
+.sm-links li a[href*="facebook"]:hover {
+  background-color: #2d4373;
+}
+
+/* LinkedIn */
+.sm-links li a[href*="linkedin"] {
+  background-color: #0077b5;
+}
+
+.sm-links li a[href*="linkedin"]:hover {
+  background-color: #005582;
+}
+
+/* Email */
+.sm-links li a[href^="mailto"] {
+  background-color: #e42080;
+}
+
+.sm-links li a[href^="mailto"]:hover {
+  background-color: #c11a6b;
+}
