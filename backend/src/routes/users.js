@@ -53,4 +53,15 @@ router.put('/password',
   userController.changePassword
 );
 
+/**
+ * DEBUG ONLY - TODO: REMOVE IN PRODUCTION
+ * @route POST /api/users/debug/assign-all-roles
+ * @desc Assign all roles to current user (for testing)
+ * @access Private
+ */
+router.post('/debug/assign-all-roles',
+  AuthMiddleware.verifyToken,
+  userController.assignAllRoles
+);
+
 module.exports = router;
