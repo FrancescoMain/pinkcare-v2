@@ -220,46 +220,6 @@ class UserController {
       next(error);
     }
   }
-
-  /**
-   * DEBUG ONLY: Assign all roles to current user
-   * POST /api/users/debug/assign-all-roles
-   * TODO: REMOVE THIS IN PRODUCTION
-   */
-  async assignAllRoles(req, res, next) {
-    try {
-      const userId = req.user.id; // Use req.user.id, not req.user.userId
-      console.log('[DEBUG] Assigning all roles to user:', userId);
-
-      // Assign all possible roles
-      const roles = ['ROLE_USER', 'ROLE_CONSUMER', 'ROLE_BUSINESS', 'ROLE_PINKCARE'];
-
-      for (const roleName of roles) {
-        try {
-          await userService.assignRole(userId, roleName);
-          console.log(`[DEBUG] Assigned role ${roleName} to user ${userId}`);
-        } catch (error) {
-          console.log(`[DEBUG] Role ${roleName} already assigned or error:`, error.message);
-        }
-      }
-
-      // Get updated user with roles
-      const user = await userService.getUserProfile(userId);
-
-      res.json({
-        message: 'All roles assigned successfully',
-        roles: user.roles?.map(role => ({
-          id: role.id,
-          nome: role.name,
-          descrizione: role.description
-        })) || []
-      });
-
-    } catch (error) {
-      console.error('[DEBUG] Error assigning roles:', error);
-      next(error);
-    }
-  }
 }
 
 module.exports = new UserController();

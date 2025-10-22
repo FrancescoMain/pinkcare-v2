@@ -66,57 +66,8 @@ const Dashboard = () => {
 
   const { user, suggestedScreening, blogPosts } = dashboardData;
 
-  // DEBUG ONLY - TODO: REMOVE IN PRODUCTION
-  const assignAllRoles = async () => {
-    if (!window.confirm('⚠️ DEBUG: Assegnare tutti i ruoli al tuo utente?\n\nQuesto è solo per test. Rimuovere in produzione!')) {
-      return;
-    }
-
-    try {
-      const response = await ApiClient.post('/api/users/debug/assign-all-roles');
-      alert('✅ Ruoli assegnati con successo!\n\n' +
-            'Ruoli: ' + response.roles.map(r => r.nome).join(', ') +
-            '\n\nRicarica la pagina per vedere le modifiche.');
-      window.location.reload();
-    } catch (error) {
-      console.error('Error assigning roles:', error);
-      alert('❌ Errore durante l\'assegnazione dei ruoli: ' + (error.message || 'Errore sconosciuto'));
-    }
-  };
-
   return (
     <div className="dashboard-container">
-      {/* DEBUG BUTTON - TODO: REMOVE IN PRODUCTION */}
-      <div style={{
-        position: 'fixed',
-        bottom: '20px',
-        right: '20px',
-        zIndex: 9999,
-        background: '#ff9800',
-        padding: '10px 15px',
-        borderRadius: '5px',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
-      }}>
-        <button
-          onClick={assignAllRoles}
-          style={{
-            background: '#f44336',
-            color: 'white',
-            border: 'none',
-            padding: '10px 20px',
-            borderRadius: '5px',
-            cursor: 'pointer',
-            fontWeight: 'bold',
-            fontSize: '14px'
-          }}
-        >
-          🔧 DEBUG: Assegna Tutti i Ruoli
-        </button>
-        <div style={{ fontSize: '10px', color: '#fff', marginTop: '5px', textAlign: 'center' }}>
-          (Rimuovere in produzione)
-        </div>
-      </div>
-
       {/* Banner Questionario - Replica: <div class="ui-block"> with questionario class */}
       {!user.filledPersonalForm && (
         <div className="ui-block">
