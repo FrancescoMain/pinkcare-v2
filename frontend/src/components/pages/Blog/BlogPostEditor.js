@@ -75,10 +75,34 @@ const BlogPostEditor = ({ post, filterOptions, onPublish, onCancel }) => {
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      const base64String = reader.result;
-      setFormData(prev => ({ ...prev, image: base64String }));
-      setImagePreview(base64String);
-      setImageFile(file);
+      const img = new Image();
+      img.onload = () => {
+        // Create canvas for compression
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        // Resize if image is too large (max 1200px width)
+        const maxWidth = 1200;
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convert to base64 with compression (0.7 quality for JPEG)
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+
+        setFormData(prev => ({ ...prev, image: compressedBase64 }));
+        setImagePreview(compressedBase64);
+        setImageFile(file);
+      };
+      img.src = reader.result;
     };
     reader.readAsDataURL(file);
   };
