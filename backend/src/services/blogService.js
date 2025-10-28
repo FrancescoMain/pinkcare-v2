@@ -219,8 +219,17 @@ class BlogService {
 
       postData.team_id = userTeamId;
 
+      // Extract arrays before creating post (they will be handled separately)
+      const {
+        age_ranges,
+        categories,
+        thematic_areas,
+        pathologies,
+        ...postDataWithoutArrays
+      } = postData;
+
       // Create the post
-      const post = await db.BlogPost.create(postData, { transaction });
+      const post = await db.BlogPost.create(postDataWithoutArrays, { transaction });
 
       // Save age ranges
       if (postData.age_ranges && !postData.all_age_ranges) {
