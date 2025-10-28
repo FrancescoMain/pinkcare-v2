@@ -232,8 +232,8 @@ class BlogService {
       const post = await db.BlogPost.create(postDataWithoutArrays, { transaction });
 
       // Save age ranges
-      if (postData.age_ranges && !postData.all_age_ranges) {
-        for (const ageRangeId of postData.age_ranges) {
+      if (age_ranges && !postDataWithoutArrays.all_age_ranges) {
+        for (const ageRangeId of age_ranges) {
           await db.BlogPostAgeRange.create({
             blog_post_id: post.id,
             age_range_id: ageRangeId
@@ -242,8 +242,8 @@ class BlogService {
       }
 
       // Save categories
-      if (postData.categories && !postData.all_categories) {
-        for (const categoryId of postData.categories) {
+      if (categories && !postDataWithoutArrays.all_categories) {
+        for (const categoryId of categories) {
           await db.BlogPostCategory.create({
             blog_post_id: post.id,
             category_id: categoryId
@@ -252,8 +252,8 @@ class BlogService {
       }
 
       // Save thematic areas
-      if (postData.thematic_areas && !postData.all_thematic_areas) {
-        for (const thematicAreaId of postData.thematic_areas) {
+      if (thematic_areas && !postDataWithoutArrays.all_thematic_areas) {
+        for (const thematicAreaId of thematic_areas) {
           await db.BlogPostThematicArea.create({
             blog_post_id: post.id,
             thematic_area_id: thematicAreaId
@@ -262,8 +262,8 @@ class BlogService {
       }
 
       // Save pathologies
-      if (postData.pathologies && !postData.all_pathologies) {
-        for (const pathologyId of postData.pathologies) {
+      if (pathologies && !postDataWithoutArrays.all_pathologies) {
+        for (const pathologyId of pathologies) {
           await db.BlogPostPathology.create({
             blog_post_id: post.id,
             pathology_id: pathologyId
