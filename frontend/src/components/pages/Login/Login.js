@@ -907,33 +907,37 @@ const LoginPage = ({ errorHandler }) => {
             </div>
           </div>
 
-          <div className="col col-12 col-xl-6 col-lg-6 col-md-6 col-sm-12 position-relative">
-            <div className="form-group label-floating is-empty">
+          <div className="col col-12 col-xl-6 col-lg-6 col-md-6 col-sm-12">
+            <div className="form-group label-floating is-empty" style={{ position: 'relative' }}>
               <label className="control-label" htmlFor="doctor-municipality">
                 {t('authentication.city', 'Comune')}
               </label>
-              <input
-                id="doctor-municipality"
-                name="municipality"
-                className="form-control"
-                value={doctorData.address.municipality}
-                onChange={handleDoctorAddressChange}
-                required
-                autoComplete="off"
-                style={{ paddingRight: isLoadingMunicipalities ? '40px' : '12px' }}
-              />
-              {isLoadingMunicipalities && (
-                <span className="municipality-loading-icon" style={{
-                  position: 'absolute',
-                  right: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  pointerEvents: 'none',
-                  color: '#e42080'
-                }}>
-                  <i className="fa fa-spinner fa-spin"></i>
-                </span>
-              )}
+              <div style={{ position: 'relative' }}>
+                <input
+                  id="doctor-municipality"
+                  name="municipality"
+                  className="form-control"
+                  value={doctorData.address.municipality}
+                  onChange={handleDoctorAddressChange}
+                  required
+                  autoComplete="off"
+                  style={{ paddingRight: isLoadingMunicipalities ? '45px' : '12px' }}
+                />
+                {isLoadingMunicipalities && (
+                  <span className="municipality-loading-icon" style={{
+                    position: 'absolute',
+                    right: '15px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    pointerEvents: 'none',
+                    color: '#e42080',
+                    fontSize: '16px',
+                    zIndex: 10
+                  }}>
+                    <i className="fa fa-spinner fa-spin"></i>
+                  </span>
+                )}
+              </div>
               {municipalitySuggestions.length > 0 && (
                 <ul className="autocomplete-list">
                   {municipalitySuggestions.map((item) => (
@@ -1138,33 +1142,37 @@ const LoginPage = ({ errorHandler }) => {
             </div>
           </div>
 
-          <div className="col col-12 col-md-9 position-relative">
-            <div className="form-group label-floating is-empty">
+          <div className="col col-12 col-md-9">
+            <div className="form-group label-floating is-empty" style={{ position: 'relative' }}>
               <label className="control-label" htmlFor="clinic-municipality">
                 {t('authentication.city', 'Comune')}
               </label>
-              <input
-                id="clinic-municipality"
-                name="municipality"
-                className="form-control"
-                value={clinicData.address.municipality}
-                onChange={handleClinicAddressChange}
-                required
-                autoComplete="off"
-                style={{ paddingRight: isLoadingMunicipalities ? '40px' : '12px' }}
-              />
-              {isLoadingMunicipalities && (
-                <span className="municipality-loading-icon" style={{
-                  position: 'absolute',
-                  right: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  pointerEvents: 'none',
-                  color: '#e42080'
-                }}>
-                  <i className="fa fa-spinner fa-spin"></i>
-                </span>
-              )}
+              <div style={{ position: 'relative' }}>
+                <input
+                  id="clinic-municipality"
+                  name="municipality"
+                  className="form-control"
+                  value={clinicData.address.municipality}
+                  onChange={handleClinicAddressChange}
+                  required
+                  autoComplete="off"
+                  style={{ paddingRight: isLoadingMunicipalities ? '45px' : '12px' }}
+                />
+                {isLoadingMunicipalities && (
+                  <span className="municipality-loading-icon" style={{
+                    position: 'absolute',
+                    right: '15px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    pointerEvents: 'none',
+                    color: '#e42080',
+                    fontSize: '16px',
+                    zIndex: 10
+                  }}>
+                    <i className="fa fa-spinner fa-spin"></i>
+                  </span>
+                )}
+              </div>
               {municipalitySuggestions.length > 0 && (
                 <ul className="autocomplete-list">
                   {municipalitySuggestions.map((item) => (
