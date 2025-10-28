@@ -210,22 +210,38 @@ const LoginPage = ({ errorHandler }) => {
 
   useEffect(() => {
     if (skipMunicipalitySearch) {
+      console.log('[Municipality] Skipping search due to skipMunicipalitySearch flag');
       setSkipMunicipalitySearch(false);
       return;
     }
 
     const activeAddress = businessType === 'DOCTOR' ? doctorData.address : clinicData.address;
     const query = activeAddress.municipality;
+
+    // Non fare la ricerca se:
+    // 1. Il campo è vuoto o troppo corto
+    // 2. Il comune è già stato selezionato (ha provincia e CAP compilati)
     if (!query || query.length < 3) {
       setMunicipalitySuggestions([]);
       return;
     }
+
+    // Se il comune ha già provincia e CAP, significa che è stato selezionato dall'autocomplete
+    // Non fare una nuova ricerca
+    if (activeAddress.province && activeAddress.postCode) {
+      console.log('[Municipality] Skipping search - municipality already selected with province and postCode');
+      setMunicipalitySuggestions([]);
+      return;
+    }
+
+    console.log('[Municipality] Searching for:', query);
 
     let ignore = false;
     (async () => {
       try {
         const results = await ReferenceService.searchMunicipalities(query);
         if (!ignore) {
+          console.log('[Municipality] Found results:', results?.length || 0);
           setMunicipalitySuggestions(results || []);
         }
       } catch (err) {
@@ -236,7 +252,7 @@ const LoginPage = ({ errorHandler }) => {
     return () => {
       ignore = true;
     };
-  }, [businessType, doctorData.address.municipality, clinicData.address.municipality, skipMunicipalitySearch]);
+  }, [businessType, doctorData.address.municipality, clinicData.address.municipality, doctorData.address.province, doctorData.address.postCode, clinicData.address.province, clinicData.address.postCode, skipMunicipalitySearch]);
 
   useEffect(() => {
     setActiveTab(defaultTab);
@@ -420,7 +436,9 @@ const LoginPage = ({ errorHandler }) => {
       address: {
         ...prev.address,
         [name]: value,
-        ...(name === 'municipality' ? { province: '', region: '' } : {}),
+        // Se l'utente modifica manualmente il comune, resetta provincia, regione e CAP
+        // per permettere una nuova ricerca nell'autocomplete
+        ...(name === 'municipality' ? { province: '', region: '', postCode: '' } : {}),
       },
     }));
   };
@@ -432,7 +450,9 @@ const LoginPage = ({ errorHandler }) => {
       address: {
         ...prev.address,
         [name]: value,
-        ...(name === 'municipality' ? { province: '', region: '' } : {}),
+        // Se l'utente modifica manualmente il comune, resetta provincia, regione e CAP
+        // per permettere una nuova ricerca nell'autocomplete
+        ...(name === 'municipality' ? { province: '', region: '', postCode: '' } : {}),
       },
     }));
   };
@@ -447,6 +467,13 @@ const LoginPage = ({ errorHandler }) => {
   };
 
   const handleMunicipalitySelect = (suggestion) => {
+    console.log('[Municipality] Selected:', suggestion);
+
+    // Prima chiudi l'autocomplete
+    setMunicipalitySuggestions([]);
+    setSkipMunicipalitySearch(true);
+
+    // Poi aggiorna i dati
     if (businessType === 'DOCTOR') {
       setDoctorData((prev) => ({
         ...prev,
@@ -470,9 +497,6 @@ const LoginPage = ({ errorHandler }) => {
         },
       }));
     }
-    // Forza la chiusura dell'autocomplete
-    setMunicipalitySuggestions([]);
-    setSkipMunicipalitySearch(true);
 
     // Rimuovi il focus dal campo per assicurare la chiusura
     setTimeout(() => {
