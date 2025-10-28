@@ -40,6 +40,7 @@ const Home = ({ userVO = null, errorHandler }) => {
   const [passwordStrength, setPasswordStrength] = useState({ score: 0, label: '', className: '' });
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
   const [tooltipPosition, setTooltipPosition] = useState('right');
+  const [isSubmittingRegistration, setIsSubmittingRegistration] = useState(false);
 
   // useEffect per gestire i query parameters dell'URL
   useEffect(() => {
@@ -70,18 +71,21 @@ const Home = ({ userVO = null, errorHandler }) => {
 
   const handleRegistration = async (e) => {
     e.preventDefault();
-    
+
+    // Previeni sottomissioni multiple
+    if (isSubmittingRegistration) return;
+
     if (!showSuccessMessage || !showErrorMessage) {
       console.warn('Error handler not available');
       return;
     }
-    
+
     // Validazione base
     if (!newUser.name || !newUser.surname || !newUser.email || !newUser.password) {
       showErrorMessage('Errore di validazione', 'Tutti i campi obbligatori devono essere compilati');
       return;
     }
-    
+
     if (!newUser.agreeConditionAndPrivacy) {
       showErrorMessage('Errore', 'Devi accettare i termini e condizioni');
       return;
@@ -90,7 +94,9 @@ const Home = ({ userVO = null, errorHandler }) => {
     // Conferma registrazione
     const confirmed = window.confirm(t('authentication.have_you_verified_all_your_data', 'Hai verificato tutti i tuoi dati') + '?');
     if (!confirmed) return;
-    
+
+    setIsSubmittingRegistration(true);
+
     try {
       // Log dello stato del form prima della preparazione
       console.log('Form state before preparation - email:', newUser.email);
@@ -159,6 +165,8 @@ const Home = ({ userVO = null, errorHandler }) => {
         // Errore di connessione o generico
         showErrorMessage('Errore di connessione', 'Impossibile completare la registrazione. Controlla la connessione internet.');
       }
+    } finally {
+      setIsSubmittingRegistration(false);
     }
   };
 
@@ -429,9 +437,22 @@ const Home = ({ userVO = null, errorHandler }) => {
                 <button
                   type="submit"
                   className="btn btn-secondary"
-                  style={{ padding: 0 }}
+                  style={{
+                    padding: 0,
+                    opacity: isSubmittingRegistration ? 0.7 : 1,
+                    cursor: isSubmittingRegistration ? 'not-allowed' : 'pointer',
+                    pointerEvents: isSubmittingRegistration ? 'none' : 'auto'
+                  }}
+                  disabled={isSubmittingRegistration}
                 >
-                  {t('authentication.complete_registration', 'REGISTRATI')}
+                  {isSubmittingRegistration ? (
+                    <>
+                      <i className="fa fa-spinner fa-spin" style={{ marginRight: '8px' }}></i>
+                      {t('authentication.registering', 'Registrazione in corso...')}
+                    </>
+                  ) : (
+                    t('authentication.complete_registration', 'REGISTRATI')
+                  )}
                 </button>
               </div>
             </div>

@@ -29,7 +29,7 @@
 .calendar-icon {
   position: absolute;
   right: 12px;
-  top: 50%;
+  top: 40%;
   transform: translateY(-50%);
   pointer-events: none;
   color: #999;

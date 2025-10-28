@@ -85,7 +85,7 @@
 .field-icon.toggle-password {
   position: absolute;
   right: 18px;
-  top: 50%;
+  top: 60%;
   transform: translateY(-50%);
   cursor: pointer;
   color: #888;

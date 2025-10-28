@@ -136,6 +136,7 @@ const LoginPage = ({ errorHandler }) => {
   const [medicalTitles, setMedicalTitles] = useState([]);
   const [municipalitySuggestions, setMunicipalitySuggestions] = useState([]);
   const [skipMunicipalitySearch, setSkipMunicipalitySearch] = useState(false);
+  const [isSubmittingBusiness, setIsSubmittingBusiness] = useState(false);
 
 
   useEffect(() => {
@@ -489,6 +490,9 @@ const LoginPage = ({ errorHandler }) => {
   const handleBusinessRegistration = async (event) => {
     event.preventDefault();
 
+    // Previeni sottomissioni multiple
+    if (isSubmittingBusiness) return;
+
     if (!showSuccessMessage || !showErrorMessage) {
       console.warn('Error handler not available');
       return;
@@ -545,6 +549,8 @@ const LoginPage = ({ errorHandler }) => {
 
     const confirmed = window.confirm(`${t('authentication.have_you_verified_all_your_data', 'Hai verificato tutti i tuoi dati')}?`);
     if (!confirmed) return;
+
+    setIsSubmittingBusiness(true);
 
     try {
       const payload = isDoctor
@@ -637,6 +643,8 @@ const LoginPage = ({ errorHandler }) => {
       } else {
         showErrorMessage('Errore di connessione', 'Impossibile completare la registrazione. Controlla la connessione internet.');
       }
+    } finally {
+      setIsSubmittingBusiness(false);
     }
   };
 
@@ -967,8 +975,24 @@ const LoginPage = ({ errorHandler }) => {
           </div>
 
           <div className="col col-12 button-container">
-            <button type="submit" className="btn btn-primary btn-register">
-              {t('authentication.complete_registration', 'Completa registrazione')}
+            <button
+              type="submit"
+              className="btn btn-primary btn-register"
+              style={{
+                opacity: isSubmittingBusiness ? 0.7 : 1,
+                cursor: isSubmittingBusiness ? 'not-allowed' : 'pointer',
+                pointerEvents: isSubmittingBusiness ? 'none' : 'auto'
+              }}
+              disabled={isSubmittingBusiness}
+            >
+              {isSubmittingBusiness ? (
+                <>
+                  <i className="fa fa-spinner fa-spin" style={{ marginRight: '8px' }}></i>
+                  {t('authentication.registering', 'Registrazione in corso...')}
+                </>
+              ) : (
+                t('authentication.complete_registration', 'Completa registrazione')
+              )}
             </button>
           </div>
         </div>
@@ -1179,8 +1203,24 @@ const LoginPage = ({ errorHandler }) => {
           </div>
 
           <div className="col col-12 button-container">
-            <button type="submit" className="btn btn-primary btn-register">
-              {t('authentication.complete_registration', 'Completa registrazione')}
+            <button
+              type="submit"
+              className="btn btn-primary btn-register"
+              style={{
+                opacity: isSubmittingBusiness ? 0.7 : 1,
+                cursor: isSubmittingBusiness ? 'not-allowed' : 'pointer',
+                pointerEvents: isSubmittingBusiness ? 'none' : 'auto'
+              }}
+              disabled={isSubmittingBusiness}
+            >
+              {isSubmittingBusiness ? (
+                <>
+                  <i className="fa fa-spinner fa-spin" style={{ marginRight: '8px' }}></i>
+                  {t('authentication.registering', 'Registrazione in corso...')}
+                </>
+              ) : (
+                t('authentication.complete_registration', 'Completa registrazione')
+              )}
             </button>
           </div>
         </div>
