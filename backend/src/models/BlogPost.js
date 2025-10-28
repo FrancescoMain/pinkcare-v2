@@ -5,7 +5,8 @@ const BlogPost = sequelize.define('BlogPost', {
   id: {
     type: DataTypes.BIGINT,
     primaryKey: true,
-    autoIncrement: true
+    autoIncrement: false,
+    allowNull: false
   },
   deleted: {
     type: DataTypes.BOOLEAN,

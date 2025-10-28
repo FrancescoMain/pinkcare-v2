@@ -228,6 +228,13 @@ class BlogService {
         ...postDataWithoutArrays
       } = postData;
 
+      // Get next id from sequence
+      const [result] = await db.sequelize.query(
+        "SELECT nextval('app_blog_post_id_seq') as id",
+        { transaction }
+      );
+      postDataWithoutArrays.id = result[0].id;
+
       // Create the post
       const post = await db.BlogPost.create(postDataWithoutArrays, { transaction });
 
