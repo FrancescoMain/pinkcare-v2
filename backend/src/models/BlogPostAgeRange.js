@@ -5,7 +5,8 @@ const BlogPostAgeRange = sequelize.define('BlogPostAgeRange', {
   id: {
     type: DataTypes.BIGINT,
     primaryKey: true,
-    autoIncrement: true
+    autoIncrement: false,
+    allowNull: false
   },
   blog_post_id: {
     type: DataTypes.BIGINT,

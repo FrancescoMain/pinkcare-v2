@@ -5,7 +5,8 @@ const BlogPostCategory = sequelize.define('BlogPostCategory', {
   id: {
     type: DataTypes.BIGINT,
     primaryKey: true,
-    autoIncrement: true
+    autoIncrement: false,
+    allowNull: false
   },
   blog_post_id: {
     type: DataTypes.BIGINT,

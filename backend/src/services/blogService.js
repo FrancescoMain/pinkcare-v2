@@ -241,7 +241,12 @@ class BlogService {
       // Save age ranges
       if (age_ranges && !postDataWithoutArrays.all_age_ranges) {
         for (const ageRangeId of age_ranges) {
+          const [ageRangeResult] = await db.sequelize.query(
+            "SELECT nextval('app_blog_post_age_range_id_seq') as id",
+            { transaction }
+          );
           await db.BlogPostAgeRange.create({
+            id: ageRangeResult[0].id,
             blog_post_id: post.id,
             age_range_id: ageRangeId
           }, { transaction });
@@ -251,7 +256,12 @@ class BlogService {
       // Save categories
       if (categories && !postDataWithoutArrays.all_categories) {
         for (const categoryId of categories) {
+          const [categoryResult] = await db.sequelize.query(
+            "SELECT nextval('app_blog_post_category_id_seq') as id",
+            { transaction }
+          );
           await db.BlogPostCategory.create({
+            id: categoryResult[0].id,
             blog_post_id: post.id,
             category_id: categoryId
           }, { transaction });
@@ -261,7 +271,12 @@ class BlogService {
       // Save thematic areas
       if (thematic_areas && !postDataWithoutArrays.all_thematic_areas) {
         for (const thematicAreaId of thematic_areas) {
+          const [thematicAreaResult] = await db.sequelize.query(
+            "SELECT nextval('app_blog_post_thematic_area_id_seq') as id",
+            { transaction }
+          );
           await db.BlogPostThematicArea.create({
+            id: thematicAreaResult[0].id,
             blog_post_id: post.id,
             thematic_area_id: thematicAreaId
           }, { transaction });
@@ -271,7 +286,12 @@ class BlogService {
       // Save pathologies
       if (pathologies && !postDataWithoutArrays.all_pathologies) {
         for (const pathologyId of pathologies) {
+          const [pathologyResult] = await db.sequelize.query(
+            "SELECT nextval('app_blog_post_pathology_id_seq') as id",
+            { transaction }
+          );
           await db.BlogPostPathology.create({
+            id: pathologyResult[0].id,
             blog_post_id: post.id,
             pathology_id: pathologyId
           }, { transaction });
