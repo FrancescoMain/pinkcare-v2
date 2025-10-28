@@ -218,18 +218,16 @@ const LoginPage = ({ errorHandler }) => {
     const activeAddress = businessType === 'DOCTOR' ? doctorData.address : clinicData.address;
     const query = activeAddress.municipality;
 
-    // Non fare la ricerca se:
-    // 1. Il campo è vuoto o troppo corto
-    // 2. Il comune è già stato selezionato (ha provincia e CAP compilati)
+    // Non fare la ricerca se il campo è vuoto o troppo corto
     if (!query || query.length < 3) {
       setMunicipalitySuggestions([]);
       return;
     }
 
-    // Se il comune ha già provincia e CAP, significa che è stato selezionato dall'autocomplete
-    // Non fare una nuova ricerca
-    if (activeAddress.province && activeAddress.postCode) {
-      console.log('[Municipality] Skipping search - municipality already selected with province and postCode');
+    // Se il comune ha già la provincia compilata, significa che è stato selezionato dall'autocomplete
+    // Non fare una nuova ricerca (il postCode può essere null dal backend, quindi non lo controlliamo)
+    if (activeAddress.province) {
+      console.log('[Municipality] Skipping search - municipality already selected with province');
       setMunicipalitySuggestions([]);
       return;
     }
@@ -252,7 +250,7 @@ const LoginPage = ({ errorHandler }) => {
     return () => {
       ignore = true;
     };
-  }, [businessType, doctorData.address.municipality, clinicData.address.municipality, doctorData.address.province, doctorData.address.postCode, clinicData.address.province, clinicData.address.postCode, skipMunicipalitySearch]);
+  }, [businessType, doctorData.address.municipality, clinicData.address.municipality, doctorData.address.province, clinicData.address.province, skipMunicipalitySearch]);
 
   useEffect(() => {
     setActiveTab(defaultTab);
@@ -436,9 +434,9 @@ const LoginPage = ({ errorHandler }) => {
       address: {
         ...prev.address,
         [name]: value,
-        // Se l'utente modifica manualmente il comune, resetta provincia, regione e CAP
-        // per permettere una nuova ricerca nell'autocomplete
-        ...(name === 'municipality' ? { province: '', region: '', postCode: '' } : {}),
+        // Se l'utente modifica manualmente il comune, resetta solo provincia e regione
+        // Il postCode rimane manuale (può essere null dal backend)
+        ...(name === 'municipality' ? { province: '', region: '' } : {}),
       },
     }));
   };
@@ -450,9 +448,9 @@ const LoginPage = ({ errorHandler }) => {
       address: {
         ...prev.address,
         [name]: value,
-        // Se l'utente modifica manualmente il comune, resetta provincia, regione e CAP
-        // per permettere una nuova ricerca nell'autocomplete
-        ...(name === 'municipality' ? { province: '', region: '', postCode: '' } : {}),
+        // Se l'utente modifica manualmente il comune, resetta solo provincia e regione
+        // Il postCode rimane manuale (può essere null dal backend)
+        ...(name === 'municipality' ? { province: '', region: '' } : {}),
       },
     }));
   };
