@@ -5,6 +5,8 @@ import "./Header.css";
 import { useErrorHandler } from "../../hooks/useErrorHandler";
 import { useAuth } from "../../context/AuthContext";
 import ErrorDialog from "../ErrorDialog";
+import { AuthService } from "../../services/authService";
+import { ApiError } from "../../config/api";
 
 const Header = ({ userVO = null }) => {
   const { t } = useTranslation();
@@ -86,20 +88,45 @@ const Header = ({ userVO = null }) => {
     setUsernameHidden(formData.j_username);
   };
 
-  const handlePasswordForgot = () => {
+  const handlePasswordForgot = async () => {
     valorizeUsernameHidden();
 
     // Validazione email
     if (!formData.j_username || !formData.j_username.includes("@")) {
-      setPasswordRecoveryRes(-1); // Malformed link
-      setShowPasswordRecoveryDialog(true);
+      showErrorMessage(
+        t("authentication.recovery_error", "Recupero password"),
+        t("authentication.recovery_missing_email", "Inserisci la tua email per ricevere il link di recupero.")
+      );
       return;
     }
 
-    // Simulazione chiamata API
-    setTimeout(() => {
+    try {
+      console.log("[Header] Calling forgotPassword API for:", formData.j_username);
+      await AuthService.forgotPassword(formData.j_username);
+      console.log("[Header] API call successful");
+
+      showSuccessMessage(
+        t("authentication.recovery_success_title", "Recupero password"),
+        t("authentication.recovery_success_message", "Se l'indirizzo esiste nei nostri sistemi riceverai una email con le istruzioni.")
+      );
+
+      // Mostra anche il dialog di successo per compatibilità con il vecchio design
       setShowSuccessDialog(true);
-    }, 500);
+    } catch (error) {
+      console.error("[Header] Password recovery error:", error);
+
+      if (error instanceof ApiError) {
+        showErrorMessage(
+          t("authentication.recovery_error", "Recupero password"),
+          error.message || t("authentication.recovery_generic_error", "Impossibile completare il recupero password. Riprova più tardi.")
+        );
+      } else {
+        showErrorMessage(
+          t("authentication.recovery_error", "Recupero password"),
+          t("authentication.recovery_generic_error", "Impossibile completare il recupero password. Riprova più tardi.")
+        );
+      }
+    }
   };
 
   const getRestrictedAreaLink = () => {
