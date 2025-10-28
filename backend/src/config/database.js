@@ -26,13 +26,26 @@ const databaseUrl = process.env.DATABASE_URL;
 let urlHost = '';
 let urlSslMode = '';
 
+// Log DATABASE_URL status (without exposing sensitive data)
+if (process.env.NODE_ENV !== 'production') {
+  console.log('[DB] DATABASE_URL status:', {
+    exists: !!databaseUrl,
+    length: databaseUrl?.length,
+    startsWithPostgresql: databaseUrl?.startsWith('postgresql://') || databaseUrl?.startsWith('postgres://'),
+  });
+}
+
 if (databaseUrl) {
+  // Trim whitespace that might cause parsing issues
+  const trimmedUrl = databaseUrl.trim();
+
   try {
-    const parsed = new URL(databaseUrl);
+    const parsed = new URL(trimmedUrl);
     urlHost = parsed.hostname || '';
     urlSslMode = (parsed.searchParams.get('sslmode') || '').toLowerCase();
   } catch (error) {
-    console.warn('Invalid DATABASE_URL provided, falling back to discrete credentials:', error.message);
+    console.error('[DB] Invalid DATABASE_URL provided, falling back to discrete credentials:', error.message);
+    console.error('[DB] URL starts with:', trimmedUrl?.substring(0, 20) + '...');
   }
 }
 
@@ -118,13 +131,26 @@ if (sslOptions) {
   pg.defaults.ssl = false;
 }
 
-if (!databaseUrl) {
+// Validate DATABASE_URL before using it
+let validDatabaseUrl = null;
+if (databaseUrl) {
+  const trimmedUrl = databaseUrl.trim();
+  // Basic validation: must start with postgres:// or postgresql://
+  if (trimmedUrl.startsWith('postgres://') || trimmedUrl.startsWith('postgresql://')) {
+    validDatabaseUrl = trimmedUrl;
+  } else {
+    console.error('[DB] DATABASE_URL does not start with postgres:// or postgresql://');
+    console.error('[DB] Falling back to discrete database credentials');
+  }
+}
+
+if (!validDatabaseUrl) {
   baseOptions.host = process.env.DB_HOST || 'localhost';
   baseOptions.port = process.env.DB_PORT || 5432;
 }
 
-const sequelize = databaseUrl
-  ? new Sequelize(databaseUrl, baseOptions)
+const sequelize = validDatabaseUrl
+  ? new Sequelize(validDatabaseUrl, baseOptions)
   : new Sequelize(
       process.env.DB_NAME || 'PINKCARE_DB',
       process.env.DB_USER || 'postgres',
