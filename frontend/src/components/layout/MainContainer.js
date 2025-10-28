@@ -18,6 +18,8 @@ const MainContainer = ({ userVO = null, children, errorHandler }) => {
     _spring_security_remember_me: false
   });
 
+  const [isRecoveringPassword, setIsRecoveringPassword] = useState(false);
+
   const handleMobileLoginChange = (e) => {
     const { name, value, type, checked } = e.target;
     setMobileLoginData(prev => ({
@@ -51,18 +53,31 @@ const MainContainer = ({ userVO = null, children, errorHandler }) => {
 
 
   const handlePasswordForgot = async () => {
+    // Previeni click multipli
+    if (isRecoveringPassword) return;
+
     if (!mobileLoginData.j_username) {
       showErrorMessage('Errore', 'Inserisci prima il tuo indirizzo email');
       return;
     }
 
+    setIsRecoveringPassword(true);
+
     try {
-      console.log('Password dimenticata per:', mobileLoginData.j_username);
+      console.log('[MainContainer] Password dimenticata per:', mobileLoginData.j_username);
       await AuthService.forgotPassword(mobileLoginData.j_username);
-      showSuccessMessage('Recovery', 'Email di recupero inviata');
+      showSuccessMessage(
+        t('authentication.recovery_success_title', 'Recupero password'),
+        t('authentication.recovery_success_message', "Se l'indirizzo esiste nei nostri sistemi riceverai una email con le istruzioni.")
+      );
     } catch (error) {
       console.error('❌ Forgot password error:', error);
-      showErrorMessage('Errore', 'Errore durante l\'invio della email di recupero');
+      showErrorMessage(
+        t('authentication.recovery_error', 'Recupero password'),
+        error.message || t('authentication.recovery_generic_error', 'Errore durante l\'invio della email di recupero')
+      );
+    } finally {
+      setIsRecoveringPassword(false);
     }
   };
 
@@ -138,12 +153,23 @@ const MainContainer = ({ userVO = null, children, errorHandler }) => {
                   </label>
                 </div>
                 <div className="col-xs-6 col-md-6">
-                  <a 
+                  <a
                     onClick={handlePasswordForgot}
-                    className="forgot" 
-                    style={{ cursor: 'pointer' }}
+                    className="forgot"
+                    style={{
+                      cursor: isRecoveringPassword ? 'not-allowed' : 'pointer',
+                      opacity: isRecoveringPassword ? 0.6 : 1,
+                      pointerEvents: isRecoveringPassword ? 'none' : 'auto'
+                    }}
                   >
-                    {t('authentication.forgot_my_password', 'Password dimenticata?')}
+                    {isRecoveringPassword ? (
+                      <>
+                        <i className="fa fa-spinner fa-spin" style={{ marginRight: '5px' }}></i>
+                        {t('authentication.sending', 'Invio in corso...')}
+                      </>
+                    ) : (
+                      t('authentication.forgot_my_password', 'Password dimenticata?')
+                    )}
                   </a>
                 </div>
               </>

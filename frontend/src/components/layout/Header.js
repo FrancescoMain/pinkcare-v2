@@ -31,6 +31,7 @@ const Header = ({ userVO = null }) => {
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [passwordRecoveryRes, setPasswordRecoveryRes] = useState(0);
   const [usernameHidden, setUsernameHidden] = useState("");
+  const [isRecoveringPassword, setIsRecoveringPassword] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -89,6 +90,9 @@ const Header = ({ userVO = null }) => {
   };
 
   const handlePasswordForgot = async () => {
+    // Previeni click multipli
+    if (isRecoveringPassword) return;
+
     valorizeUsernameHidden();
 
     // Validazione email
@@ -99,6 +103,8 @@ const Header = ({ userVO = null }) => {
       );
       return;
     }
+
+    setIsRecoveringPassword(true);
 
     try {
       console.log("[Header] Calling forgotPassword API for:", formData.j_username);
@@ -126,6 +132,8 @@ const Header = ({ userVO = null }) => {
           t("authentication.recovery_generic_error", "Impossibile completare il recupero password. Riprova più tardi.")
         );
       }
+    } finally {
+      setIsRecoveringPassword(false);
     }
   };
 
@@ -242,11 +250,20 @@ const Header = ({ userVO = null }) => {
                     <a
                       onClick={handlePasswordForgot}
                       className="forgot"
-                      style={{ color: "#fff", cursor: "pointer" }}
+                      style={{
+                        color: "#fff",
+                        cursor: isRecoveringPassword ? "not-allowed" : "pointer",
+                        opacity: isRecoveringPassword ? 0.6 : 1,
+                        pointerEvents: isRecoveringPassword ? "none" : "auto"
+                      }}
                     >
-                      {t(
-                        "authentication.forgot_my_password",
-                        "Password dimenticata?"
+                      {isRecoveringPassword ? (
+                        <>
+                          <i className="fa fa-spinner fa-spin" style={{ marginRight: "5px" }}></i>
+                          {t("authentication.sending", "Invio in corso...")}
+                        </>
+                      ) : (
+                        t("authentication.forgot_my_password", "Password dimenticata?")
                       )}
                     </a>
                   </div>
