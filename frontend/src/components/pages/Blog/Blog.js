@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../context/AuthContext';
 import { ApiClient } from '../../../config/api';
+import { useGrowl } from '../../../hooks/useGrowl';
+import Growl from '../../Growl';
 import BlogPostEditor from './BlogPostEditor';
 import BlogPostFilters from './BlogPostFilters';
 import BlogPostList from './BlogPostList';
@@ -10,6 +12,7 @@ import './Blog.css';
 const Blog = () => {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const { messages, showSuccessMessage, showErrorMessage, removeMessage } = useGrowl();
   const [posts, setPosts] = useState([]);
   const [filters, setFilters] = useState({
     text: '',
@@ -85,8 +88,16 @@ const Blog = () => {
     try {
       if (selectedPost) {
         await ApiClient.put(`/api/blog/${selectedPost.id}`, postData);
+        showSuccessMessage(
+          t('resourceBundle.Success', 'Successo'),
+          t('resourceBundle.Post_updated_successfully', 'Post aggiornato con successo')
+        );
       } else {
         await ApiClient.post('/api/blog', postData);
+        showSuccessMessage(
+          t('resourceBundle.Success', 'Successo'),
+          t('resourceBundle.Post_published_successfully', 'Post pubblicato con successo')
+        );
       }
       setSelectedPost(null);
       loadPosts();
@@ -94,7 +105,11 @@ const Blog = () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (error) {
       console.error('Error publishing post:', error);
-      alert('Errore durante la pubblicazione del post');
+      showErrorMessage(
+        t('resourceBundle.Error', 'Errore'),
+        t('resourceBundle.Error_publishing_post', 'Errore durante la pubblicazione del post')
+      );
+      throw error; // Re-throw per permettere al componente di gestire il loading
     }
   };
 
@@ -119,6 +134,9 @@ const Blog = () => {
 
   return (
     <div className="blog-page">
+      {/* Growl notifications */}
+      <Growl messages={messages} onRemove={removeMessage} />
+
       {/* Post Editor - only for PINKCARE and BUSINESS */}
       {canCreatePosts && (
         <BlogPostEditor

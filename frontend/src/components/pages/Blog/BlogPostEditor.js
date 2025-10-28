@@ -25,6 +25,7 @@ const BlogPostEditor = ({ post, filterOptions, onPublish, onCancel }) => {
 
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   useEffect(() => {
     if (post) {
@@ -115,8 +116,10 @@ const BlogPostEditor = ({ post, filterOptions, onPublish, onCancel }) => {
     setFormData({ ...formData, [field]: newValues });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (isPublishing) return;
 
     if (!formData.headline.trim()) {
       alert(t('resourceBundle.Headline', 'Titolo') + ' ' + t('resourceBundle.required_mascouline', 'richiesto'));
@@ -128,9 +131,14 @@ const BlogPostEditor = ({ post, filterOptions, onPublish, onCancel }) => {
       return;
     }
 
-    onPublish(formData);
-    if (!post) {
-      resetForm();
+    setIsPublishing(true);
+    try {
+      await onPublish(formData);
+      if (!post) {
+        resetForm();
+      }
+    } finally {
+      setIsPublishing(false);
     }
   };
 
@@ -329,8 +337,19 @@ const BlogPostEditor = ({ post, filterOptions, onPublish, onCancel }) => {
                     <span>{t('resourceBundle.Publish_in_reserved_area', 'Pubblica in area riservata')}</span>
                   </div>
                   <div className="col-12 col-sm-12 col-md-6">
-                    <button type="submit" className="btn btn-primary btn-md-2">
-                      {t('resourceBundle.Publish', 'Pubblica')}
+                    <button
+                      type="submit"
+                      className="btn btn-primary btn-md-2"
+                      disabled={isPublishing}
+                    >
+                      {isPublishing ? (
+                        <>
+                          <i className="fa fa-spinner fa-spin" style={{ marginRight: '5px' }}></i>
+                          {t('resourceBundle.Publishing', 'Pubblicazione...')}
+                        </>
+                      ) : (
+                        t('resourceBundle.Publish', 'Pubblica')
+                      )}
                     </button>
                     {post && (
                       <button
