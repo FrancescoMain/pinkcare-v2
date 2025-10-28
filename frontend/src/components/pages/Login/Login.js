@@ -137,6 +137,7 @@ const LoginPage = ({ errorHandler }) => {
   const [municipalitySuggestions, setMunicipalitySuggestions] = useState([]);
   const [skipMunicipalitySearch, setSkipMunicipalitySearch] = useState(false);
   const [isSubmittingBusiness, setIsSubmittingBusiness] = useState(false);
+  const [isLoadingMunicipalities, setIsLoadingMunicipalities] = useState(false);
 
 
   useEffect(() => {
@@ -212,6 +213,7 @@ const LoginPage = ({ errorHandler }) => {
     if (skipMunicipalitySearch) {
       console.log('[Municipality] Skipping search due to skipMunicipalitySearch flag');
       setSkipMunicipalitySearch(false);
+      setIsLoadingMunicipalities(false);
       return;
     }
 
@@ -221,6 +223,7 @@ const LoginPage = ({ errorHandler }) => {
     // Non fare la ricerca se il campo è vuoto o troppo corto
     if (!query || query.length < 3) {
       setMunicipalitySuggestions([]);
+      setIsLoadingMunicipalities(false);
       return;
     }
 
@@ -229,26 +232,42 @@ const LoginPage = ({ errorHandler }) => {
     if (activeAddress.province) {
       console.log('[Municipality] Skipping search - municipality already selected with province');
       setMunicipalitySuggestions([]);
+      setIsLoadingMunicipalities(false);
       return;
     }
 
-    console.log('[Municipality] Searching for:', query);
+    console.log('[Municipality] Starting debounce for:', query);
+    setIsLoadingMunicipalities(true);
 
-    let ignore = false;
-    (async () => {
-      try {
-        const results = await ReferenceService.searchMunicipalities(query);
-        if (!ignore) {
-          console.log('[Municipality] Found results:', results?.length || 0);
-          setMunicipalitySuggestions(results || []);
+    // Debouncing: attendi 500ms prima di fare la chiamata
+    const debounceTimer = setTimeout(() => {
+      console.log('[Municipality] Searching for:', query);
+
+      let ignore = false;
+      (async () => {
+        try {
+          const results = await ReferenceService.searchMunicipalities(query);
+          if (!ignore) {
+            console.log('[Municipality] Found results:', results?.length || 0);
+            setMunicipalitySuggestions(results || []);
+            setIsLoadingMunicipalities(false);
+          }
+        } catch (err) {
+          console.error('Municipality search failed:', err);
+          if (!ignore) {
+            setIsLoadingMunicipalities(false);
+          }
         }
-      } catch (err) {
-        console.error('Municipality search failed:', err);
-      }
-    })();
+      })();
+
+      return () => {
+        ignore = true;
+      };
+    }, 500); // 500ms di debounce
 
     return () => {
-      ignore = true;
+      clearTimeout(debounceTimer);
+      setIsLoadingMunicipalities(false);
     };
   }, [businessType, doctorData.address.municipality, clinicData.address.municipality, doctorData.address.province, clinicData.address.province, skipMunicipalitySearch]);
 
@@ -901,7 +920,20 @@ const LoginPage = ({ errorHandler }) => {
                 onChange={handleDoctorAddressChange}
                 required
                 autoComplete="off"
+                style={{ paddingRight: isLoadingMunicipalities ? '40px' : '12px' }}
               />
+              {isLoadingMunicipalities && (
+                <span className="municipality-loading-icon" style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  pointerEvents: 'none',
+                  color: '#e42080'
+                }}>
+                  <i className="fa fa-spinner fa-spin"></i>
+                </span>
+              )}
               {municipalitySuggestions.length > 0 && (
                 <ul className="autocomplete-list">
                   {municipalitySuggestions.map((item) => (
@@ -1119,7 +1151,20 @@ const LoginPage = ({ errorHandler }) => {
                 onChange={handleClinicAddressChange}
                 required
                 autoComplete="off"
+                style={{ paddingRight: isLoadingMunicipalities ? '40px' : '12px' }}
               />
+              {isLoadingMunicipalities && (
+                <span className="municipality-loading-icon" style={{
+                  position: 'absolute',
+                  right: '12px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  pointerEvents: 'none',
+                  color: '#e42080'
+                }}>
+                  <i className="fa fa-spinner fa-spin"></i>
+                </span>
+              )}
               {municipalitySuggestions.length > 0 && (
                 <ul className="autocomplete-list">
                   {municipalitySuggestions.map((item) => (
