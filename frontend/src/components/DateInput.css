@@ -35,6 +35,7 @@
   color: #999;
   font-size: 16px;
   z-index: 1;
+
 }
 
 /* When input has focus, highlight the icon */
@@ -58,45 +59,19 @@
 .date-input-calendar.form-control {
   display: block;
   width: 100%;
-  padding: 0.6rem 3rem 0.6rem 1.1rem; /* Increased right padding for Safari */
+  padding: 1rem 1.1rem 0.5rem;
+  height: 37px;
   line-height: 1.5;
   color: #515365;
   font-size: 14px;
   border: 1px solid #c4c7cc;
   border-radius: 4px;
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-  height: auto; /* Auto height */
+  display: flex;
 }
 
 .date-input-calendar.form-control:focus {
   border-color: #e42080;
   outline: 0;
   box-shadow: 0 0 0 0.2rem rgba(228, 32, 128, 0.25);
-}
-
-/* Safari-specific fixes */
-@supports (-webkit-appearance: none) {
-  .date-input-calendar {
-    -webkit-appearance: none;
-    appearance: none;
-  }
-
-  /* Make sure the native picker indicator doesn't overlap text */
-  .date-input-calendar::-webkit-date-and-time-value {
-    text-align: left;
-    padding-right: 10px;
-  }
-}
-
-/* Firefox date input styling */
-.date-input-calendar::-moz-focus-inner {
-  border: 0;
-  padding: 0;
-}
-
-/* Ensure text doesn't overflow */
-.date-input-calendar {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
