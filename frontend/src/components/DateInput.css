@@ -58,14 +58,14 @@
 .date-input-calendar.form-control {
   display: block;
   width: 100%;
-  padding: 1rem 3rem 0.5rem 1.1rem; /* Increased right padding for Safari */
+  padding: 0.6rem 3rem 0.6rem 1.1rem; /* Increased right padding for Safari */
   line-height: 1.5;
   color: #515365;
   font-size: 14px;
   border: 1px solid #c4c7cc;
   border-radius: 4px;
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-  min-height: 50px; /* Ensure enough height */
+  height: auto; /* Auto height */
 }
 
 .date-input-calendar.form-control:focus {
