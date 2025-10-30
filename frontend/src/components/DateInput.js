@@ -86,11 +86,10 @@ const DateInput = ({ name, value, onChange, placeholder, className, required }) 
         name={name}
         value={value || ''}
         onChange={handleDateChange}
-        className={`${className} date-input-calendar`}
+        className={`${className} date-input-calendar ${!value ? 'empty' : ''}`}
         required={required}
         min={getMinDate()}
         max={getMaxDate()}
-        placeholder={placeholder}
         title={placeholder}
       />
 
@@ -98,6 +97,11 @@ const DateInput = ({ name, value, onChange, placeholder, className, required }) 
       <span className="calendar-icon" aria-hidden="true">
         <i className="fa fa-calendar"></i>
       </span>
+
+      {/* Show placeholder text when no value is selected */}
+      {!value && (
+        <span className="date-placeholder">{placeholder}</span>
+      )}
     </div>
   );
 };

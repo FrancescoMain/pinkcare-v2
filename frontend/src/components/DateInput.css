@@ -25,6 +25,20 @@
   margin: 0;
 }
 
+/* Placeholder text overlay */
+.date-placeholder {
+  position: absolute;
+  left: 12px;
+  top: 40%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #999;
+  font-size: 14px;
+  z-index: 1;
+  background: white;
+  padding: 0 4px;
+}
+
 /* Calendar icon overlay */
 .calendar-icon {
   position: absolute;
@@ -36,6 +50,11 @@
   font-size: 16px;
   z-index: 1;
 
+}
+
+/* Hide placeholder when input is focused */
+.date-input-calendar:focus ~ .date-placeholder {
+  opacity: 0;
 }
 
 /* When input has focus, highlight the icon */
