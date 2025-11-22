@@ -8,6 +8,7 @@ export const useGrowl = () => {
 
   // Funzione per aggiungere un messaggio (equivalente a FacesContext.addMessage)
   const addMessage = useCallback((severity, summary, detail, options = {}) => {
+    console.log('[useGrowl] addMessage called', { severity, summary, detail, options });
     const message = {
       id: ++messageIdCounter,
       severity: severity || SEVERITY.INFO,
@@ -18,8 +19,14 @@ export const useGrowl = () => {
       life: options.life,
       ...options
     };
+    console.log('[useGrowl] Message created:', message);
 
-    setMessages(prev => [...prev, message]);
+    setMessages(prev => {
+      console.log('[useGrowl] setMessages - prev:', prev);
+      const newMessages = [...prev, message];
+      console.log('[useGrowl] setMessages - new:', newMessages);
+      return newMessages;
+    });
     return message.id;
   }, []);
 

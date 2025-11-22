@@ -184,10 +184,18 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
   min-width: 200px;
   z-index: 1000;
-  margin-top: 10px;
+  margin-top: 0px;
+  padding-top: 10px;
 }
 
-.author-page:hover .more-dropdown {
+.author-page:hover .more-dropdown,
+.nav-item.more:hover .more-dropdown,
+.more-dropdown:hover {
+  display: block;
+}
+
+/* Mantieni il dropdown visibile quando sei sopra di esso */
+.nav-item.more .more-dropdown:hover {
   display: block;
 }
 

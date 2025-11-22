@@ -1,20 +1,18 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useGlobalAjaxStatus } from './useGlobalAjaxStatus';
-import { useGrowl } from './useGrowl';
+import { toast } from 'react-toastify';
 
 export const useErrorHandler = () => {
   const [error, setError] = useState(null);
   const [isErrorDialogOpen, setIsErrorDialogOpen] = useState(false);
-  const { 
-    isLoading, 
-    fetchWithAjaxStatus, 
+  const {
+    isLoading,
+    fetchWithAjaxStatus,
     executeWithAjaxStatus,
     setLoadingState,
-    resetStatus 
+    resetStatus
   } = useGlobalAjaxStatus();
-  
-  // Integrazione con Growl per messaggi toast
-  const growl = useGrowl();
+
 
   const showError = useCallback((errorObj, options = {}) => {
     console.error('Application Error:', errorObj);
@@ -30,11 +28,7 @@ export const useErrorHandler = () => {
     
     // Mostra toast error se richiesto
     if (options.showToast !== false) {
-      growl.addErrorMessage(
-        'Errore di sistema',
-        normalizedError.message,
-        { sticky: true }
-      );
+      toast.error(`Errore di sistema: ${normalizedError.message}`);
     }
     
     // Mostra dialog solo per errori critici o se esplicitamente richiesto
@@ -42,7 +36,7 @@ export const useErrorHandler = () => {
       setError(normalizedError);
       setIsErrorDialogOpen(true);
     }
-  }, [growl]);
+  }, []);
 
   const hideError = useCallback(() => {
     setIsErrorDialogOpen(false);
@@ -109,22 +103,26 @@ export const useErrorHandler = () => {
     };
   }, [showError]);
 
-  // Funzioni di convenienza per messaggi (come JSF FacesContext.addMessage)
+  // Funzioni per messaggi toast con react-toastify (come JSF FacesContext.addMessage)
   const showSuccessMessage = useCallback((summary, detail, options) => {
-    growl.addSuccessMessage(summary, detail, options);
-  }, [growl]);
+    const message = detail ? `${summary}: ${detail}` : summary;
+    toast.success(message, options);
+  }, []);
 
   const showInfoMessage = useCallback((summary, detail, options) => {
-    growl.addInfoMessage(summary, detail, options);
-  }, [growl]);
+    const message = detail ? `${summary}: ${detail}` : summary;
+    toast.info(message, options);
+  }, []);
 
   const showWarnMessage = useCallback((summary, detail, options) => {
-    growl.addWarnMessage(summary, detail, options);
-  }, [growl]);
+    const message = detail ? `${summary}: ${detail}` : summary;
+    toast.warning(message, options);
+  }, []);
 
   const showErrorMessage = useCallback((summary, detail, options) => {
-    growl.addErrorMessage(summary, detail, options);
-  }, [growl]);
+    const message = detail ? `${summary}: ${detail}` : summary;
+    toast.error(message, options);
+  }, []);
 
   return {
     // Error handling
@@ -133,7 +131,7 @@ export const useErrorHandler = () => {
     showError,
     hideError,
     handleAsyncError,
-    
+
     // Ajax status handling
     isLoading,
     fetchWithErrorHandling,
@@ -141,16 +139,10 @@ export const useErrorHandler = () => {
     setLoadingState,
     resetStatus,
 
-    // Growl messages (equivalente a FacesContext.addMessage)
+    // Toast messages con react-toastify (equivalente a FacesContext.addMessage)
     showSuccessMessage,
-    showInfoMessage, 
+    showInfoMessage,
     showWarnMessage,
     showErrorMessage,
-    
-    // Growl state e controlli
-    growlMessages: growl.messages,
-    removeGrowlMessage: growl.removeMessage,
-    clearGrowlMessages: growl.clearMessages,
-    hasGrowlMessages: growl.hasMessages
   };
 };

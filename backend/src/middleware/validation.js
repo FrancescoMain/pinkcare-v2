@@ -362,12 +362,9 @@ class ValidationMiddleware {
   /**
    * Validation rules for password change
    * Based on legacy personal_form.xhtml password validation
+   * REPLICA ESATTA: NON richiede password attuale (come legacy)
    */
   static validatePasswordChange = [
-    body('currentPassword')
-      .notEmpty()
-      .withMessage('Password attuale è obbligatoria'),
-
     body('newPassword')
       .isLength({ min: 8 })
       .withMessage('La nuova password deve essere di almeno 8 caratteri')

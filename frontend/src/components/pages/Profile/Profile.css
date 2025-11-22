@@ -1,7 +1,8 @@
 .profile-page {
   background-color: #f8f9fa;
   min-height: 100vh;
-  padding-top: 2rem;
+  padding: 0;
+  margin: 0;
 }
 
 .profile-page .card {

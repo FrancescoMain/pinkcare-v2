@@ -22,10 +22,8 @@ const Profile = () => {
 
   return (
     <div className="profile-page">
-      <div className="container">
-        {/* ProfileEdit Component - replica esatta di personal_form.xhtml */}
-        <ProfileEdit errorHandler={errorHandler} />
-      </div>
+      {/* ProfileEdit Component - replica esatta di personal_form.xhtml */}
+      <ProfileEdit errorHandler={errorHandler} />
     </div>
   );
 };

@@ -358,14 +358,21 @@ class UserService {
    * @returns {Promise<User>} Updated user
    */
   async updateUserProfile(userId, updateData) {
-    const user = await User.findByPk(userId);
+    const user = await User.findByPk(userId, {
+      include: [{
+        model: Role,
+        as: 'roles',
+        through: { attributes: [] }
+      }]
+    });
     if (!user) {
       throw new Error('User not found');
     }
     
     // Remove sensitive fields that shouldn't be updated directly
+    // REPLICA ESATTA legacy: permette aggiornamento email
     const allowedFields = [
-      'name', 'surname', 'nickName', 'birthday', 'gender',
+      'name', 'surname', 'email', 'nickName', 'birthday', 'gender',
       'mobilePhone', 'weight', 'height', 'sedentaryLifestyle',
       'ageFirstMenstruation', 'regularityMenstruation',
       'durationMenstruation', 'durationPeriod', 'surgery', 'medicine',
@@ -583,21 +590,15 @@ class UserService {
   /**
    * Change user password
    * Replicates legacy UserService.save(user, password) behavior
+   * REPLICA ESATTA: NON verifica password attuale (come legacy)
    * @param {number} userId - User ID
-   * @param {string} currentPassword - Current password for verification
    * @param {string} newPassword - New password
    * @returns {Promise<boolean>} Success status
    */
-  async changePassword(userId, currentPassword, newPassword) {
+  async changePassword(userId, newPassword) {
     const user = await User.findByPk(userId);
     if (!user) {
-      throw new Error('Utente non trovato');
-    }
-
-    // Verify current password
-    const isCurrentPasswordValid = PasswordUtils.verifyMD5(currentPassword, user.password);
-    if (!isCurrentPasswordValid) {
-      throw new Error('Password attuale non corretta');
+      throw new Error('User not found');
     }
 
     // Validate new password strength
@@ -607,6 +608,7 @@ class UserService {
     }
 
     // Update password (using MD5 like legacy system)
+    // REPLICA ESATTA legacy: public User save(User user, String password)
     user.password = PasswordUtils.encodeMD5(newPassword);
     user.lastModifyDate = new Date();
     user.lastModifyUsername = user.username;

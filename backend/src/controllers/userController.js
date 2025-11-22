@@ -100,7 +100,7 @@ class UserController {
         gender: updatedUser.gender,
         mobilePhone: updatedUser.mobilePhone,
         filledPersonalForm: updatedUser.filledPersonalForm,
-        
+
         // Health information
         weight: updatedUser.weight,
         height: updatedUser.height,
@@ -111,13 +111,20 @@ class UserController {
         durationPeriod: updatedUser.durationPeriod,
         surgery: updatedUser.surgery,
         medicine: updatedUser.medicine,
-        
+
         // Privacy settings
         agreeMarketing: updatedUser.agreeMarketing,
         agreeNewsletter: updatedUser.agreeNewsletter,
-        
+
         // Metadata
-        lastModifyDate: updatedUser.lastModifyDate
+        lastModifyDate: updatedUser.lastModifyDate,
+
+        // Roles - IMPORTANTE per l'header
+        roles: updatedUser.roles?.map(role => ({
+          id: role.id,
+          name: role.name,
+          description: role.description
+        })) || []
       };
       
       res.json({
@@ -180,6 +187,7 @@ class UserController {
    * Change password
    * PUT /api/users/password
    * Replicates legacy UserService.save(user, password) behavior
+   * REPLICA ESATTA: NON richiede password attuale (come legacy)
    */
   async changePassword(req, res, next) {
     try {
@@ -193,10 +201,10 @@ class UserController {
       }
 
       const userId = req.user.id;
-      const { currentPassword, newPassword } = req.body;
+      const { newPassword } = req.body;
 
-      // Change password using service
-      await userService.changePassword(userId, currentPassword, newPassword);
+      // Change password using service (REPLICA ESATTA legacy: solo newPassword)
+      await userService.changePassword(userId, newPassword);
 
       res.json({
         message: 'Password aggiornata con successo'
@@ -208,12 +216,6 @@ class UserController {
       if (error.message === 'User not found') {
         return res.status(404).json({
           error: 'Utente non trovato'
-        });
-      }
-
-      if (error.message === 'Invalid current password') {
-        return res.status(400).json({
-          error: 'Password attuale non corretta'
         });
       }
 

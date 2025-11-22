@@ -43,7 +43,7 @@ const AuthenticatedHeader = () => {
         <div className="search-bar">
           {/* HOME - Solo per consumer */}
           {isConsumer && (
-            <div className={`nav-item ${isActive('/profile')}`}>
+            <div className={`nav-item ${location.pathname === '/profile' && !location.search ? 'active' : ''}`}>
               <Link to="/profile" className="nav-link">
                 <i className="fas fa-home"></i>
                 <span>{t('resourceBundle.HOME', 'HOME')}</span>
@@ -170,7 +170,7 @@ const AuthenticatedHeader = () => {
                 </div>
               </div>
               <a href="#" className="nav-link">
-                <i className="fas fa-clipboard-list"></i>
+                <i className="fas fa-clipboard-list" style={{ color: 'white' }}></i>
                 <span>{t('resourceBundle.EXAMS', 'ESAMI')}<i className="fas fa-caret-down" style={{ marginLeft: '5px' }}></i></span>
               </a>
             </div>
@@ -226,8 +226,8 @@ const AuthenticatedHeader = () => {
               </div>
             </div>
             <Link to="/profile?tab=0" className="nav-link">
-              <i className="fas fa-user"></i>
-              <span>{user?.team?.type?.id === 'CLINIC' ? 'GESTIONE ACCOUNT' : t('resourceBundle.PROFILE', 'PROFILO')}<i className="fas fa-caret-down" style={{ marginLeft: '5px' }}></i></span>
+              <i className="fas fa-user" style={{color: '#fff'}}></i>
+              <span style={{color: '#fff'}}>{user?.team?.type?.id === 'CLINIC' ? 'GESTIONE ACCOUNT' : t('resourceBundle.PROFILE', 'PROFILO')}<i className="fas fa-caret-down" style={{ marginLeft: '5px' }}></i></span>
             </Link>
           </div>
 

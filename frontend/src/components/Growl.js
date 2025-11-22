@@ -78,8 +78,14 @@ const GrowlMessage = ({ message, onClose }) => {
 };
 
 const Growl = ({ messages = [], onRemoveMessage, sticky = true, life = 600000 }) => {
-  if (!messages || messages.length === 0) return null;
+  console.log('[Growl] Render - messages:', messages, 'length:', messages?.length);
 
+  if (!messages || messages.length === 0) {
+    console.log('[Growl] No messages, returning null');
+    return null;
+  }
+
+  console.log('[Growl] Rendering', messages.length, 'messages');
   return (
     <div className="growl-container" id="msgs">
       {messages.map((message) => (

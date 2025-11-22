@@ -1,16 +1,16 @@
 import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import About from "./components/pages/About";
 import Home from "./components/pages/Home/Home";
 import Disclosure from "./components/pages/Disclosure";
 import Accreditation from "./components/pages/Accreditation";
 import Forum from "./components/pages/Forum/Forum";
-import Dashboard from "./components/pages/Dashboard/Dashboard";
 import Blog from "./components/pages/Blog/Blog";
 import ErrorDialog from "./components/ErrorDialog";
 import LoadingDialog from "./components/LoadingDialog";
-import Growl from "./components/Growl";
 import Header from "./components/layout/Header";
 import AuthenticatedLayout from "./components/layout/AuthenticatedLayout";
 import MainContainer from "./components/layout/MainContainer";
@@ -34,10 +34,7 @@ function App() {
     isErrorDialogOpen,
     isLoading,
     hideError,
-    growlMessages,
-    removeGrowlMessage,
   } = errorHandler;
-
 
   // Stato utente per gestire login/logout
   const [simulatedUser, setSimulatedUser] = useState(null);
@@ -57,7 +54,7 @@ function App() {
           <Route path="/profile" element={
             <ProtectedRoute>
               <AuthenticatedLayout>
-                <Dashboard />
+                <Profile errorHandler={errorHandler} />
               </AuthenticatedLayout>
             </ProtectedRoute>
           } />
@@ -111,11 +108,17 @@ function App() {
         </Routes>
 
         {/* Componenti globali sempre presenti */}
-        <Growl
-          messages={growlMessages}
-          onRemoveMessage={removeGrowlMessage}
-          sticky={true}
-          life={600000}
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
         />
 
         <LoadingDialog isOpen={isLoading} />

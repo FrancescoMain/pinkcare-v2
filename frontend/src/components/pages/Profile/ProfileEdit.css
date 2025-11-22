@@ -1,7 +1,22 @@
-/* ProfileEdit.css - Replica esatta dello stile legacy */
+/* ProfileEdit.css - Replica ESATTA dello stile legacy */
 
-.profile-edit-page {
-  padding: 20px 0;
+/* Layout principale a 3 colonne - identico al legacy */
+.profile-page-legacy {
+  padding: 0;
+  margin: 0;
+  background-color: #f5f6fa;
+}
+
+.profile-page-legacy .profile-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.profile-page-legacy .col {
+  padding: 10px;
 }
 
 /* Replica classi legacy ui-block */
@@ -17,9 +32,21 @@
   border-bottom: 1px solid #e6ecf5;
 }
 
+.ui-block-title-small {
+  padding: 15px 20px;
+  border-bottom: 1px solid #e6ecf5;
+}
+
 .ui-block-title .title {
   margin: 0;
   font-size: 18px;
+  font-weight: 600;
+  color: #515365;
+}
+
+.ui-block-title-small .title {
+  margin: 0;
+  font-size: 16px;
   font-weight: 600;
   color: #515365;
 }
@@ -28,19 +55,126 @@
   padding: 25px;
 }
 
-/* Form styles - replica legacy */
-.profile-edit-page form .row {
-  margin-right: -15px;
-  margin-left: -15px;
+/* Sidebar sinistra - User Card - SEMPLICE come legacy */
+.your-profile {
+  padding: 30px 20px;
+  text-align: center;
 }
 
-.profile-edit-page form .col {
-  padding-right: 15px;
-  padding-left: 15px;
+.author-thumb {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #f0f0f0;
+}
+
+.author-thumb .profile-pic {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.author-content {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.author-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: #515365;
+  margin-bottom: 8px;
+}
+
+.country {
+  font-size: 13px;
+  color: #888;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Eventi del mese */
+.events-section {
+  margin: 25px 0;
+  padding-top: 20px;
+  border-top: 1px solid #e6ecf5;
+}
+
+.events-section .section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #515365;
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.nothing-found {
+  padding: 20px;
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+}
+
+/* Pulsanti sidebar */
+.profile-menu {
+  margin-bottom: 15px;
+}
+
+.btn-block {
+  display: block;
+  width: 100%;
+}
+
+.btn {
+  display: inline-block;
+  padding: 14px 24px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.42857143;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  user-select: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #e42080;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #c91b6f;
+}
+
+.btn-secondary {
+  color: #fff !important;
+  background-color: #f7941e !important;
+  border-color: #f7941e !important;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #d67b10 !important;
+  border-color: #d67b10 !important;
+}
+
+.btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+
+/* Form centrale - stili form */
+.form-group {
   margin-bottom: 20px;
 }
 
-.profile-edit-page form label {
+.form-group label {
   display: block;
   margin-bottom: 8px;
   font-weight: 500;
@@ -48,12 +182,12 @@
   font-size: 14px;
 }
 
-.profile-edit-page form .control-label {
+.control-label {
   font-weight: 500;
   color: #515365;
 }
 
-.profile-edit-page form .form-control {
+.form-control {
   display: block;
   width: 100%;
   padding: 10px 15px;
@@ -67,7 +201,7 @@
   transition: border-color ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
 }
 
-.profile-edit-page form .form-control:focus {
+.form-control:focus {
   border-color: #e42080;
   outline: 0;
   box-shadow: 0 0 0 0.2rem rgba(228, 32, 128, 0.15);
@@ -81,6 +215,7 @@
   transform: translateY(-50%);
   color: #888;
   z-index: 2;
+  cursor: pointer;
 }
 
 .toggle-password {
@@ -126,56 +261,48 @@
   background-color: #dff0d8;
 }
 
-/* Button styles - replica legacy */
-.profile-edit-page form .btn {
-  display: inline-block;
-  padding: 10px 30px;
-  margin-top: 10px;
-  font-size: 14px;
-  font-weight: 600;
-  line-height: 1.42857143;
-  text-align: center;
-  white-space: nowrap;
-  vertical-align: middle;
-  cursor: pointer;
-  border: 1px solid transparent;
+/* Sidebar destra - Banner */
+.widget {
+  padding: 20px;
+}
+
+.w-banner img {
+  width: 100%;
+  height: auto;
   border-radius: 5px;
-  user-select: none;
-  transition: all 0.2s ease-in-out;
 }
 
-.profile-edit-page form .btn-primary {
-  color: #fff;
-  background-color: #e42080;
-  border-color: #e42080;
+/* Grid system - replica bootstrap legacy */
+/* Desktop: 3 colonne affiancate - SEMPRE */
+.profile-page-legacy .col-xl-3 {
+  flex: 0 0 25%;
+  max-width: 25%;
 }
 
-.profile-edit-page form .btn-primary:hover:not(:disabled) {
-  background-color: #c91b6f;
-  border-color: #c91b6f;
+.profile-page-legacy .col-xl-6 {
+  flex: 0 0 50%;
+  max-width: 50%;
 }
 
-.profile-edit-page form .btn-primary:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
-}
-
-/* Small text helper */
-.form-text {
-  display: block;
-  margin-top: 5px;
-  font-size: 12px;
-}
-
-.text-muted {
-  color: #888;
-}
-
-/* Responsive adjustments - replica legacy grid */
-@media (max-width: 991px) {
-  .profile-edit-page form .col-lg-6 {
+/* Responsive adjustments - solo per mobile vero (sotto 768px) */
+@media (max-width: 767px) {
+  .profile-page-legacy .col-xl-3,
+  .profile-page-legacy .col-xl-6 {
     flex: 0 0 100%;
     max-width: 100%;
+  }
+
+  /* Riordina colonne su mobile */
+  .order-md-1 {
+    order: 1;
+  }
+
+  .order-md-2 {
+    order: 2;
+  }
+
+  .order-md-3 {
+    order: 3;
   }
 }
 
@@ -184,7 +311,19 @@
     padding: 15px;
   }
 
-  .profile-edit-page form .col {
+  .form-group {
     margin-bottom: 15px;
   }
 }
+
+/* Link styles */
+a {
+  color: #e42080;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #c91b6f;
+  text-decoration: underline;
+}
+
