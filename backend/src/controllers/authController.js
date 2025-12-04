@@ -16,27 +16,35 @@ class AuthController {
    * POST /api/auth/register-consumer
    */
   async registerConsumer(req, res, next) {
+    const transaction = await sequelize.transaction();
     try {
       // Check validation errors
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
+        await transaction.rollback();
         return res.status(400).json({
           error: 'Validation Error',
           details: errors.array()
         });
       }
-      
+
       const userData = req.body;
-      
+
       // Validate required privacy agreement
       if (!userData.agreeConditionAndPrivacy) {
+        await transaction.rollback();
         return res.status(400).json({
           error: 'Devi accettare i termini e condizioni per il trattamento dei dati sensibili'
         });
       }
-      
+
       // Create user
-      const user = await userService.createUser(userData);
+      const user = await userService.createUser(userData, { transaction });
+
+      // Create consumer team for the user
+      const team = await teamService.createConsumerTeam({ user }, { transaction });
+
+      await transaction.commit();
 
       // Send welcome email (legacy behavior - sends password in plain text)
       try {
@@ -51,10 +59,10 @@ class AuthController {
         console.error('Failed to send welcome email:', emailError);
         // Don't fail registration if email fails
       }
-      
+
       // Generate JWT token
       const token = this.generateToken(user);
-      
+
       // Return user data without password
       const userResponse = {
         id: user.id,
@@ -66,14 +74,19 @@ class AuthController {
         filledPersonalForm: user.filledPersonalForm,
         insertionDate: user.insertionDate
       };
-      
+
       res.status(201).json({
         message: 'Processo completato. Controlla la tua email per completare la registrazione.',
         user: userResponse,
+        team: {
+          id: team.id,
+          name: team.name
+        },
         token
       });
-      
+
     } catch (error) {
+      await transaction.rollback();
       console.error('Registration error:', error);
 
       // Handle unique constraint errors

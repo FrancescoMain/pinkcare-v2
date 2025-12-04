@@ -79,6 +79,76 @@ class TeamService {
   }
 
   /**
+   * Create consumer team for regular users
+   * @param {object} params
+   * @param {object} params.user - User object
+   * @param {object} options - { transaction }
+   * @returns {Promise<Team>}
+   */
+  async createConsumerTeam({ user }, options = {}) {
+    const { transaction } = options;
+
+    if (!user || !user.id) {
+      throw new Error('Utente non valido');
+    }
+
+    const basicTitle = await typologyService.getBasicTitle();
+    if (!basicTitle) {
+      throw new Error('Tipologia BASIC non trovata');
+    }
+
+    const teamName = `${user.name || ''} ${user.surname || ''}`.trim() || user.email;
+
+    // Create team with CONSUMER type
+    const [teamResult] = await sequelize.query(`
+      INSERT INTO app_team (
+        id, active, deleted, insertion_date, last_modify_date, name,
+        email, searchable, representative_id, title_id, type_id
+      ) VALUES (
+        nextval('app_team_id_seq'), :active, :deleted, :insertionDate, :lastModifyDate,
+        :name, :email, :searchable, :representativeId, :titleId, :typeId
+      ) RETURNING *
+    `, {
+      replacements: {
+        active: 'Y',
+        deleted: 'N',
+        insertionDate: new Date(),
+        lastModifyDate: new Date(),
+        name: teamName,
+        email: user.email,
+        searchable: false,
+        representativeId: user.id,
+        titleId: basicTitle.id,
+        typeId: Typology.IDS.CONSUMER
+      },
+      type: sequelize.QueryTypes.INSERT,
+      transaction
+    });
+
+    const team = teamResult[0];
+
+    // Associate user with team
+    await UserTeam.create({
+      userId: user.id,
+      teamId: team.id,
+      removed: 'N',
+      insertion: new Date(),
+      modification: new Date(),
+      cancellation: 'N'
+    }, { transaction });
+
+    // Reload with associations
+    return Team.findByPk(team.id, {
+      include: [
+        { association: 'representative' },
+        { association: 'type' },
+        { association: 'title' }
+      ],
+      transaction
+    });
+  }
+
+  /**
    * Create team, associate representative and map to user
    * @param {object} params
    * @param {object} params.user - Representative user
@@ -189,7 +259,11 @@ class TeamService {
 
     await UserTeam.create({
       userId: user.id,
-      teamId: team.id
+      teamId: team.id,
+      removed: 'N',
+      insertion: new Date(),
+      modification: new Date(),
+      cancellation: 'N'
     }, { transaction });
 
     // Reload with associations similar to legacy eager loading
