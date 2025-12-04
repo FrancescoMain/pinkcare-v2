@@ -85,16 +85,36 @@ exports.initializeScreening = async (req, res) => {
       deleted: false
     };
 
-    // If screeningType == -1, filter by user's protocol (age-based)
+    // If screeningType == -1, filter by user's protocol (age-based) AND "Generali" area
     // If screeningType > 0, filter by thematic area
     if (screeningType === -1) {
-      // Get user's protocol
-      const protocol = await Protocol.findOne({
-        where: {
-          deleted: false
-          // Add age-based logic here if needed
+      // Calculate user age if birthday exists
+      let userAge = null;
+      if (user.birthday) {
+        const birthDate = new Date(user.birthday);
+        const today = new Date();
+        userAge = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+          userAge--;
         }
-      });
+        console.log(`[QuestionnaireController] User age: ${userAge}`);
+      } else {
+        console.log('[QuestionnaireController] User has no birthday set');
+      }
+
+      // Get user's protocol based on age
+      let protocol = null;
+      if (userAge !== null) {
+        protocol = await Protocol.findOne({
+          where: {
+            deleted: false,
+            inferior_limit: { [Op.lte]: userAge },
+            superior_limit: { [Op.gte]: userAge }
+          }
+        });
+        console.log(`[QuestionnaireController] Found protocol for age ${userAge}:`, protocol?.id);
+      }
 
       if (protocol) {
         // Include both protocol-specific questions AND "Generali" area (id = -1)
@@ -104,6 +124,14 @@ exports.initializeScreening = async (req, res) => {
             { protocol_id: protocol.id },
             { thematic_area_id: -1 }
           ]
+        };
+      } else {
+        // No protocol found (user has no age or no matching protocol)
+        // Load ONLY "Generali" area questions (thematic_area_id = -1)
+        console.log('[QuestionnaireController] No protocol found, loading only Generali area');
+        searchCriteria = {
+          deleted: false,
+          thematic_area_id: -1
         };
       }
     } else if (screeningType > 0) {
