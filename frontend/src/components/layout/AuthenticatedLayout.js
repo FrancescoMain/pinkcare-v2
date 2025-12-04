@@ -3,17 +3,15 @@ import AuthenticatedHeader from './AuthenticatedHeader';
 import './AuthenticatedLayout.css';
 
 /**
- * AuthenticatedLayout
- * Layout per pagine autenticate con header (senza footer)
+ * AuthenticatedLayout - REPLICA ESATTA del layout standard.xhtml
+ * Layout per pagine autenticate con header e contenuto principale
  */
 const AuthenticatedLayout = ({ children }) => {
   return (
     <div className="authenticated-layout">
       <AuthenticatedHeader />
       <main className="main-content">
-        <div className="container-fluid">
-          {children}
-        </div>
+        {children}
       </main>
     </div>
   );

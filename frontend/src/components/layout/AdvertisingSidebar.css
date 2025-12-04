@@ -1,0 +1,12 @@
+/* AdvertisingSidebar.css - REPLICA ESATTA degli stili della sidebar destra del legacy */
+
+/* Sidebar destra - Banner */
+.widget {
+  padding: 20px;
+}
+
+.w-banner img {
+  width: 100%;
+  height: auto;
+  border-radius: 5px;
+}

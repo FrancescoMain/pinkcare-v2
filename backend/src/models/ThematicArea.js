@@ -9,6 +9,10 @@ const ThematicArea = sequelize.define('ThematicArea', {
   },
   label: {
     type: DataTypes.STRING
+  },
+  deleted: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false
   }
 }, {
   tableName: 'app_thematic_area',

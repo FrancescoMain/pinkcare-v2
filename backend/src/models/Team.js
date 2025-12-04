@@ -12,9 +12,19 @@ const Team = sequelize.define('Team', {
     type: DataTypes.CHAR,
     defaultValue: 'Y'
   },
-  deleted: {
+  removed: {
     type: DataTypes.CHAR,
-    defaultValue: 'N'
+    field: 'deleted',  // Maps to 'deleted' column in database
+    defaultValue: 'N',
+    // Convert CHAR 'Y'/'N' to boolean for JavaScript
+    get() {
+      const rawValue = this.getDataValue('removed');
+      return rawValue === 'Y';
+    },
+    set(value) {
+      // Convert boolean to 'Y'/'N' for database
+      this.setDataValue('removed', value ? 'Y' : 'N');
+    }
   },
   insertionDate: {
     type: DataTypes.DATE,
@@ -157,7 +167,17 @@ const Team = sequelize.define('Team', {
   }
 }, {
   tableName: 'app_team',
-  timestamps: false
+  timestamps: false,
+  defaultScope: {
+    where: {
+      removed: 'N'
+    }
+  },
+  scopes: {
+    withRemoved: {
+      where: {}
+    }
+  }
 });
 
 module.exports = Team;

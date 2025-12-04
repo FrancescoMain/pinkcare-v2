@@ -129,10 +129,11 @@
 
 .btn {
   display: inline-block;
-  padding: 14px 24px;
+  height: 70px;
+  padding: 0 24px;
   font-size: 15px;
   font-weight: 600;
-  line-height: 1.42857143;
+  line-height: 70px;
   text-align: center;
   white-space: nowrap;
   vertical-align: middle;
@@ -166,6 +167,44 @@
 .btn:disabled {
   opacity: 0.65;
   cursor: not-allowed;
+}
+
+/* Profile Save Button - custom styling without legacy classes */
+.profile-save-btn {
+  background-color: #e42080 !important;
+  border-color: #e42080 !important;
+  color: white !important;
+  padding: 12px 30px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  font-size: 13px !important;
+  letter-spacing: 0.08em !important;
+  border-radius: 4px !important;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(228, 32, 128, 0.3) !important;
+  height: auto !important;
+  line-height: 1.5 !important;
+  width: auto !important;
+  display: inline-block !important;
+}
+
+.profile-save-btn:hover:not(:disabled) {
+  background-color: #d01c70 !important;
+  border-color: #d01c70 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(228, 32, 128, 0.4) !important;
+}
+
+.profile-save-btn:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 8px rgba(228, 32, 128, 0.3) !important;
+}
+
+.profile-save-btn:disabled {
+  opacity: 0.65 !important;
+  cursor: not-allowed !important;
 }
 
 

@@ -13,6 +13,16 @@ body.login-page-active .App {
   padding: 60px 0 120px;
 }
 
+/* Sovrascrive il .btn legacy per la pagina di login */
+.login-page .btn,
+.login-page button.btn,
+.login-card .btn {
+  height: auto !important;
+  min-height: auto !important;
+  max-height: none !important;
+  line-height: 1.5 !important;
+}
+
 .login-container {
   max-width: 1140px;
 }
@@ -209,14 +219,36 @@ body.login-page-active .App {
 
 .btn-login,
 .btn-register {
-  background-color: #e42080;
-  border-color: #e42080;
-  padding: 12px 30px;
-  font-weight: 600;
-  text-transform: uppercase;
-  font-size: 13px;
-  letter-spacing: 0.08em;
-  border-radius: 4px;
+  background-color: #e42080 !important;
+  border-color: #e42080 !important;
+  padding: 12px 30px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  font-size: 13px !important;
+  letter-spacing: 0.08em !important;
+  border-radius: 4px !important;
+  line-height: 1.5 !important;
+  width: auto !important;
+  height: auto !important;
+  display: inline-block !important;
+}
+
+/* Selettore più specifico per sovrascrivere il legacy CSS */
+.login-card .btn-login,
+.login-card button.btn-login,
+button#signin.btn-login {
+  height: auto !important;
+  min-height: auto !important;
+  max-height: none !important;
+}
+
+/* Rimuovi eventuali pseudo-elementi dal Bootstrap legacy */
+.btn-login::before,
+.btn-login::after,
+.btn-register::before,
+.btn-register::after {
+  display: none !important;
+  content: none !important;
 }
 
 .btn-login[disabled] {

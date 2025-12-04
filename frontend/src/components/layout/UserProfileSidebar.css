@@ -1,0 +1,115 @@
+/* UserProfileSidebar.css - REPLICA ESATTA degli stili della sidebar sinistra del legacy */
+
+/* Sidebar sinistra - User Card - SEMPLICE come legacy */
+.your-profile {
+  padding: 30px 20px;
+  text-align: center;
+}
+
+.author-thumb {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 20px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #f0f0f0;
+}
+
+.author-thumb .profile-pic {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.author-content {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.author-name {
+  font-size: 20px;
+  font-weight: 600;
+  color: #515365;
+  margin-bottom: 8px;
+}
+
+.country {
+  font-size: 13px;
+  color: #888;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* Eventi del mese */
+.events-section {
+  margin: 25px 0;
+  padding-top: 20px;
+  border-top: 1px solid #e6ecf5;
+}
+
+.events-section .section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #515365;
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.nothing-found {
+  padding: 20px;
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+}
+
+/* Pulsanti sidebar */
+.profile-menu {
+  margin-bottom: 15px;
+}
+
+.btn-block {
+  display: block;
+  width: 100%;
+}
+
+.btn {
+  display: inline-block;
+  height: 70px;
+  padding: 0 24px;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 70px;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  user-select: none;
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-primary {
+  color: #fff;
+  background-color: #e42080;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #c91b6f;
+}
+
+.btn-secondary {
+  color: #fff !important;
+  background-color: #f7941e !important;
+  border-color: #f7941e !important;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #d67b10 !important;
+  border-color: #d67b10 !important;
+}
+
+.btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}

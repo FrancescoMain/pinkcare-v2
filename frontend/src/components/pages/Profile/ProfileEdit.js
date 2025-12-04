@@ -423,9 +423,8 @@ const ProfileEdit = ({ errorHandler }) => {
                     <div className="col col-lg-12 col-md-12 col-sm-12 col-12">
                       <button
                         type="submit"
-                        className="btn btn-primary"
+                        className="profile-save-btn"
                         disabled={isSubmitting}
-                        style={{ backgroundColor: '#515365', borderColor: '#515365' }}
                       >
                         {isSubmitting ? t('resourceBundle.Saving', 'Salvataggio...') : t('resourceBundle.Save', 'Salva')}
                       </button>

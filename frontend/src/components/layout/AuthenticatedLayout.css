@@ -13,6 +13,16 @@
   background: #edf2f6;
 }
 
+.content-wrapper {
+  max-width: 1400px;
+  margin: 0 auto;
+  gap: 2rem;
+}
+
+.main-content-area {
+  padding: 0;
+}
+
 .container-fluid {
   max-width: 100%;
   width: 100%;

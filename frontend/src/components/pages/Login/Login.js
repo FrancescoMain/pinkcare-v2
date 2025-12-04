@@ -754,7 +754,7 @@ const LoginPage = ({ errorHandler }) => {
               id="signin"
               name="submit"
               type="submit"
-              className="btn btn-primary btn-login"
+              className="btn-login"
               disabled={isSubmittingLogin}
             >
               {isSubmittingLogin

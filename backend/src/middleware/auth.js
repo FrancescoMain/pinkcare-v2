@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
-const { User, Role, Team } = require('../models');
+const { User, Role, Team, sequelize } = require('../models');
+const { QueryTypes } = require('sequelize');
 
 /**
  * Authentication middleware
@@ -22,19 +23,14 @@ class AuthMiddleware {
       
       // Verify JWT token
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      
-      // Get user with roles and teams
+
+      // Get user with roles (without teams to avoid Sequelize's deleted field handling)
       const user = await User.findByPk(decoded.userId, {
         include: [
           {
             model: Role,
             as: 'roles',
             attributes: ['id', 'name', 'description']
-          },
-          {
-            model: Team,
-            as: 'teams',
-            attributes: ['id', 'name', 'logo']
           }
         ]
       });
@@ -45,14 +41,27 @@ class AuthMiddleware {
         });
       }
 
+      // Fetch teams using raw SQL to avoid Sequelize's hardcoded "deleted = false" boolean conversion
+      const teamsQuery = `
+        SELECT t.id, t.name, t.logo FROM app_team t
+        INNER JOIN app_user_app_team ut ON t.id = ut.teams_id
+        WHERE ut.app_user_id = :userId AND t.deleted = 'N'
+      `;
+
+      const teams = await sequelize.query(teamsQuery, {
+        replacements: { userId: user.id },
+        type: QueryTypes.SELECT
+      });
+
       // Add user info to request
       req.user = {
         id: user.id,
         email: user.email,
         name: user.name,
         surname: user.surname,
+        birthday: user.birthday,
         roles: user.roles?.map(role => role.name) || [],
-        teams: user.teams || []
+        teams: teams || []
       };
       
       req.token = decoded;
@@ -153,23 +162,31 @@ class AuthMiddleware {
             model: Role,
             as: 'roles',
             attributes: ['id', 'name', 'description']
-          },
-          {
-            model: Team,
-            as: 'teams',
-            attributes: ['id', 'name', 'logo']
           }
         ]
       });
 
       if (user) {
+        // Fetch teams using raw SQL (same reason as verifyToken)
+        const teamsQuery = `
+          SELECT t.id, t.name, t.logo FROM app_team t
+          INNER JOIN app_user_app_team ut ON t.id = ut.teams_id
+          WHERE ut.app_user_id = :userId AND t.deleted = 'N'
+        `;
+
+        const teams = await sequelize.query(teamsQuery, {
+          replacements: { userId: user.id },
+          type: QueryTypes.SELECT
+        });
+
         req.user = {
           id: user.id,
           email: user.email,
           name: user.name,
           surname: user.surname,
+          birthday: user.birthday,
           roles: user.roles?.map(role => role.name) || [],
-          teams: user.teams || []
+          teams: teams || []
         };
         req.token = decoded;
       }

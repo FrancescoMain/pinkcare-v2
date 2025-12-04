@@ -1,0 +1,104 @@
+/* ProfileSidebar - REPLICA ESATTA degli stili della sidebar del legacy */
+
+.profile-sidebar {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.profile-sidebar .ui-block {
+  background-color: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  margin-bottom: 1.5rem;
+  padding: 1.5rem;
+}
+
+.profile-sidebar .top-header-author {
+  text-align: center;
+}
+
+.profile-sidebar .widget-thumb {
+  margin-bottom: 1rem;
+}
+
+.profile-sidebar .user_img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #e42080;
+}
+
+.profile-sidebar .user_info {
+  margin-top: 1rem;
+}
+
+.profile-sidebar .user_info .name {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.profile-sidebar .user_info p {
+  font-size: 0.875rem;
+  color: #666;
+  margin: 0;
+}
+
+.profile-sidebar .edit_anagraphic {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+  text-align: center;
+}
+
+.profile-sidebar .edit_anagraphic a {
+  color: #e42080;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.profile-sidebar .edit_anagraphic a:hover {
+  color: #c71868;
+  text-decoration: underline;
+}
+
+/* Widget "Calcola data parto" */
+.profile-sidebar .widget-link {
+  display: block;
+  text-decoration: none;
+}
+
+.profile-sidebar .widget {
+  border-radius: 0.5rem;
+  transition: transform 0.2s;
+}
+
+.profile-sidebar .widget:hover {
+  transform: translateY(-2px);
+}
+
+.profile-sidebar .w-build-fav {
+  cursor: pointer;
+}
+
+.profile-sidebar .btn-wid {
+  text-align: center;
+}
+
+.profile-sidebar .ibm h4 {
+  margin: 0;
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 1199px) {
+  .profile-sidebar {
+    display: none;
+  }
+}

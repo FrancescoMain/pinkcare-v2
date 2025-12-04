@@ -1,0 +1,110 @@
+/* ThreeColumnLayout.css - Layout riutilizzabile REPLICA ESATTA del legacy */
+
+/* Layout principale a 3 colonne - identico al legacy ProfileEdit */
+.three-column-layout {
+  padding: 0;
+  margin: 0;
+  background-color: #f5f6fa;
+  width: 100%;
+}
+
+.three-column-layout .three-column-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.three-column-layout .col {
+  padding: 10px;
+}
+
+/* Replica classi legacy ui-block */
+.three-column-layout .ui-block {
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+.three-column-layout .ui-block-title {
+  padding: 20px 25px;
+  border-bottom: 1px solid #e6ecf5;
+}
+
+.three-column-layout .ui-block-title .title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #515365;
+}
+
+.three-column-layout .ui-block-content {
+  padding: 25px;
+}
+
+/* Grid system - replica bootstrap legacy */
+/* Desktop: 3 colonne affiancate - SEMPRE full-width */
+.three-column-layout .col-xl-2 {
+  flex: 0 0 16.666667%;
+  max-width: 16.666667%;
+}
+
+.three-column-layout .col-xl-3 {
+  flex: 0 0 25%;
+  max-width: 25%;
+}
+
+.three-column-layout .col-xl-6 {
+  flex: 0 0 50%;
+  max-width: 50%;
+}
+
+.three-column-layout .col-xl-8 {
+  flex: 0 0 66.666667%;
+  max-width: 66.666667%;
+}
+
+/* Responsive adjustments - solo per mobile vero (sotto 768px) */
+@media (max-width: 767px) {
+  .three-column-layout .col-xl-2,
+  .three-column-layout .col-xl-3,
+  .three-column-layout .col-xl-6,
+  .three-column-layout .col-xl-8 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+
+  /* Riordina colonne su mobile */
+  .three-column-layout .order-md-1 {
+    order: 1;
+  }
+
+  .three-column-layout .order-md-2 {
+    order: 2;
+  }
+
+  .three-column-layout .order-md-3 {
+    order: 3;
+  }
+
+  .three-column-layout .ui-block-content {
+    padding: 15px;
+  }
+}
+
+/* Hide columns on smaller screens */
+.three-column-layout .d-none {
+  display: none;
+}
+
+.three-column-layout .d-xl-block {
+  display: block;
+}
+
+@media (max-width: 1199px) {
+  .three-column-layout .d-xl-block {
+    display: none !important;
+  }
+}

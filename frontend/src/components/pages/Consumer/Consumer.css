@@ -1,0 +1,21 @@
+/* Consumer.css - Stili specifici per i contenuti dei tab */
+
+.tab-placeholder {
+  padding: 40px 20px;
+  text-align: center;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.tab-placeholder h3 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #515365;
+  margin-bottom: 15px;
+}
+
+.tab-placeholder p {
+  font-size: 16px;
+  color: #666;
+}

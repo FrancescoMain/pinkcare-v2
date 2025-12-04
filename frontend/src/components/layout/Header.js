@@ -212,7 +212,7 @@ const Header = ({ userVO = null }) => {
                         id="signin"
                         name="submit"
                         type="submit"
-                        className="btn btn-main btn_log_home"
+                        className="header-login-btn"
                       >
                         {t("authentication.login_caps", "LOGIN")}
                       </button>

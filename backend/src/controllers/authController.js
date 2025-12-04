@@ -62,6 +62,7 @@ class AuthController {
         surname: user.surname,
         email: user.email,
         nickName: user.nickName,
+        birthday: user.birthday,
         filledPersonalForm: user.filledPersonalForm,
         insertionDate: user.insertionDate
       };
@@ -273,6 +274,7 @@ class AuthController {
         surname: user.surname,
         email: user.email,
         nickName: user.nickName,
+        birthday: user.birthday,
         filledPersonalForm: user.filledPersonalForm,
         firstLoginDate: user.firstLoginDate,
         roles: user.roles?.map(role => ({
@@ -490,6 +492,7 @@ class AuthController {
         surname: user.surname,
         email: user.email,
         nickName: user.nickName,
+        birthday: user.birthday,
         filledPersonalForm: user.filledPersonalForm,
         roles: user.roles?.map(role => ({
           id: role.id,

@@ -128,6 +128,34 @@ label {
   font-size: 12px;
 }
 
+/* Pulsante Login Header - senza interferenze legacy */
+.header-login-btn {
+  background-color: white;
+  color: #e42080;
+  white-space: nowrap;
+  padding: 3px 6px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  transition: all 0.2s;
+  font-weight: 600;
+  text-transform: uppercase;
+  min-width: auto;
+  width: auto;
+}
+
+.header-login-btn:hover {
+  background-color: #f8f8f8;
+  color: #d01c70;
+}
+
 .btn-transparent {
   background-color: transparent;
   color: white;

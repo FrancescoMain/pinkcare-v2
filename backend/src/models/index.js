@@ -15,6 +15,11 @@ const BlogPostPathology = require('./BlogPostPathology');
 const Protocol = require('./Protocol');
 const ThematicArea = require('./ThematicArea');
 const ExaminationPathology = require('./ExaminationPathology');
+const Question = require('./Question');
+const ProtocolRule = require('./ProtocolRule');
+const Screening = require('./Screening');
+const ScreeningResult = require('./ScreeningResult');
+const TeamReply = require('./TeamReply');
 
 // Define associations
 User.belongsToMany(Role, {
@@ -35,7 +40,10 @@ User.belongsToMany(Team, {
   through: UserTeam,
   foreignKey: 'app_user_id',
   otherKey: 'teams_id',
-  as: 'teams'
+  as: 'teams',
+  scope: {
+    removed: 'N'
+  }
 });
 
 Team.belongsToMany(User, {
@@ -162,6 +170,78 @@ BlogPostPathology.belongsTo(ExaminationPathology, {
   as: 'pathology'
 });
 
+// Questionnaire associations
+// Question self-reference for sub-questions
+Question.hasMany(Question, {
+  foreignKey: 'root_id',
+  as: 'sub_questions'
+});
+
+Question.belongsTo(Question, {
+  foreignKey: 'root_id',
+  as: 'root'
+});
+
+Question.hasMany(ProtocolRule, {
+  foreignKey: 'question_id',
+  as: 'protocol_rules'
+});
+
+ProtocolRule.belongsTo(Question, {
+  foreignKey: 'question_id',
+  as: 'question'
+});
+
+ProtocolRule.belongsTo(Protocol, {
+  foreignKey: 'protocol_id',
+  as: 'protocol'
+});
+
+ProtocolRule.belongsTo(ThematicArea, {
+  foreignKey: 'thematic_area_id',
+  as: 'thematic_area'
+});
+
+ProtocolRule.belongsTo(ExaminationPathology, {
+  foreignKey: 'examination_id',
+  as: 'examination'
+});
+
+Screening.belongsTo(Team, {
+  foreignKey: 'team_id',
+  as: 'team'
+});
+
+Screening.belongsTo(ThematicArea, {
+  foreignKey: 'thematic_area_id',
+  as: 'thematic_area'
+});
+
+Screening.hasMany(ScreeningResult, {
+  foreignKey: 'screening_id',
+  as: 'results'
+});
+
+ScreeningResult.belongsTo(Screening, {
+  foreignKey: 'screening_id',
+  as: 'screening'
+});
+
+TeamReply.belongsTo(Team, {
+  foreignKey: 'team_id',
+  as: 'team'
+});
+
+TeamReply.belongsTo(Question, {
+  foreignKey: 'question_id',
+  as: 'question'
+});
+
+TeamReply.belongsTo(Screening, {
+  foreignKey: 'screening_id',
+  as: 'screening'
+});
+
 module.exports = {
   sequelize,
   User,
@@ -179,5 +259,10 @@ module.exports = {
   BlogPostPathology,
   Protocol,
   ThematicArea,
-  ExaminationPathology
+  ExaminationPathology,
+  Question,
+  ProtocolRule,
+  Screening,
+  ScreeningResult,
+  TeamReply
 };

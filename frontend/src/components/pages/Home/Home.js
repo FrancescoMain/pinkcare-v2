@@ -436,9 +436,8 @@ const Home = ({ userVO = null, errorHandler }) => {
               <div className="col-xs-12 col-sm-12">
                 <button
                   type="submit"
-                  className="btn btn-secondary"
+                  className="register-btn"
                   style={{
-                    padding: 0,
                     opacity: isSubmittingRegistration ? 0.7 : 1,
                     cursor: isSubmittingRegistration ? 'not-allowed' : 'pointer',
                     pointerEvents: isSubmittingRegistration ? 'none' : 'auto'

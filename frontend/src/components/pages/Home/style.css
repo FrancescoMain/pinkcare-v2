@@ -156,3 +156,43 @@ select.form-control:invalid {
   transform: translateY(0);
   box-shadow: 0 2px 8px rgba(228, 32, 128, 0.3);
 }
+
+/* Register button - custom styling without legacy classes */
+.register-btn {
+  background-color: #e42080 !important;
+  border-color: #e42080 !important;
+  padding: 12px 30px !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+  font-size: 13px !important;
+  letter-spacing: 0.08em !important;
+  border-radius: 4px !important;
+  color: white !important;
+  width: 100% !important;
+  margin-top: 20px !important;
+  display: block !important;
+  text-align: center !important;
+  transition: all 0.3s ease !important;
+  box-shadow: 0 4px 12px rgba(228, 32, 128, 0.3) !important;
+  border: none;
+  cursor: pointer;
+  height: auto !important;
+  line-height: 1.5 !important;
+}
+
+.register-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(228, 32, 128, 0.4) !important;
+  background-color: #d01c70 !important;
+  border-color: #d01c70 !important;
+}
+
+.register-btn:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 8px rgba(228, 32, 128, 0.3) !important;
+}
+
+.register-btn:disabled {
+  opacity: 0.7 !important;
+  cursor: not-allowed !important;
+}
