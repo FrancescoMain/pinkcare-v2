@@ -69,7 +69,10 @@ exports.initializeScreening = async (req, res) => {
       type: QueryTypes.SELECT
     });
 
+    console.log(`[QuestionnaireController] Found ${activeTeams?.length || 0} active teams for user ${user.id} (${user.username})`);
+
     if (!activeTeams || activeTeams.length === 0) {
+      console.log('[QuestionnaireController] ERROR: User has no associated teams');
       return res.status(400).json({
         error: 'Utente non associato a nessun team'
       });
