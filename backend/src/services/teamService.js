@@ -130,11 +130,7 @@ class TeamService {
     // Associate user with team
     await UserTeam.create({
       userId: user.id,
-      teamId: team.id,
-      removed: 'N',
-      insertion: new Date(),
-      modification: new Date(),
-      cancellation: 'N'
+      teamId: team.id
     }, { transaction });
 
     // Reload with associations
@@ -259,11 +255,7 @@ class TeamService {
 
     await UserTeam.create({
       userId: user.id,
-      teamId: team.id,
-      removed: 'N',
-      insertion: new Date(),
-      modification: new Date(),
-      cancellation: 'N'
+      teamId: team.id
     }, { transaction });
 
     // Reload with associations similar to legacy eager loading
