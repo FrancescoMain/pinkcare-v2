@@ -1,0 +1,60 @@
+/* RadioGroup - Legacy PrimeFaces style */
+
+.radio-group {
+  display: flex;
+  gap: 15px;
+  margin-bottom: 1rem;
+}
+
+.radio-group.inline {
+  flex-direction: row;
+  align-items: center;
+}
+
+.radio-group.vertical {
+  flex-direction: column;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  font-size: 14px;
+  color: #515365;
+}
+
+.radio-option.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.radio-option input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  margin-bottom: 0 !important;
+  cursor: pointer;
+  accent-color: #F92552;
+}
+
+.radio-option.disabled input[type="radio"] {
+  cursor: not-allowed;
+}
+
+.radio-label {
+  margin-bottom: 0;
+}
+
+.radio-option.checked .radio-label {
+  font-weight: 600;
+  color: #333;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .radio-group.inline {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

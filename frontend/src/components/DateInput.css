@@ -2,8 +2,9 @@
 
 .date-input-wrapper {
   position: relative;
-  display: inline-block;
+  display: block;
   width: 100%;
+  height: 37px;
 }
 
 .date-input-calendar {
@@ -29,7 +30,7 @@
 .date-placeholder {
   position: absolute;
   left: 12px;
-  top: 40%;
+  top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
   color: #999;
@@ -43,13 +44,12 @@
 .calendar-icon {
   position: absolute;
   right: 12px;
-  top: 40%;
+  top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
   color: #999;
   font-size: 16px;
   z-index: 1;
-
 }
 
 /* Hide placeholder when input is focused */
@@ -78,7 +78,7 @@
 .date-input-calendar.form-control {
   display: block;
   width: 100%;
-  padding: 1rem 1.1rem 0.5rem;
+  padding: 6px 12px;
   height: 37px;
   line-height: 1.5;
   color: #515365;
@@ -86,7 +86,7 @@
   border: 1px solid #c4c7cc;
   border-radius: 4px;
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-  display: flex;
+  box-sizing: border-box;
 }
 
 .date-input-calendar.form-control:focus {

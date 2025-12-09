@@ -2,7 +2,7 @@
 
 .medical-history-form {
   width: 100%;
-  padding: 20px 0;
+  padding: 0;
 }
 
 .loading {
@@ -11,99 +11,200 @@
   color: #666;
 }
 
-/* Accordion container */
-.thematic-areas-accordion {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  margin-bottom: 30px;
+/* UI Block - Legacy container style */
+.ui-block {
+  background-color: #fff;
+  border-radius: 4px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* Single accordion section */
-.accordion-section {
-  border: 1px solid #ddd;
-  border-bottom: none;
-}
-
-.accordion-section:first-child {
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-}
-
-.accordion-section:last-child {
-  border-bottom: 1px solid #ddd;
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
-}
-
-/* Accordion header - stile legacy con sfondo rosa/malva */
-.accordion-header {
-  background-color: #e8d4d8;
-  /* Legacy pink/mauve color */
+.ui-block-title {
+  background-color: #fff;
   padding: 15px 20px;
-  cursor: pointer;
+  border-bottom: 1px solid #e5e5e5;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  transition: background-color 0.2s ease;
-  user-select: none;
 }
 
-.accordion-header:hover {
-  background-color: #dfc4c9;
-}
-
-.accordion-header.expanded {
-  background-color: #d4b8be;
-}
-
-.accordion-header span {
-  font-size: 15px;
-  font-weight: 500;
+.ui-block-title .title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
   color: #333;
 }
 
-.accordion-header i {
-  color: #666;
-  font-size: 14px;
-  transition: transform 0.2s ease;
+.ui-block-content {
+  padding: 30px;
 }
 
-/* Accordion content */
-.accordion-content {
+/* PDF Download Button */
+.btn-download-pdf {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 5px;
+  transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.btn-download-pdf:hover {
+  opacity: 0.8;
+}
+
+.btn-download-pdf:active {
+  transform: scale(0.95);
+}
+
+/* Icona fiocco - Legacy style */
+.immages_bow {
+  height: 40px;
+  width: 40px;
+  display: inline-block;
+  object-fit: contain;
+}
+
+.btn-download-pdf:hover .immages_bow {
+  opacity: 0.8;
+}
+
+/* Form Styles - Bootstrap 4 compatible */
+.medical-history-form form {
+  width: 100%;
+}
+
+/* Bootstrap form-row */
+.medical-history-form .form-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-right: -5px;
+  margin-left: -5px;
+}
+
+.medical-history-form .form-row > .col,
+.medical-history-form .form-row > [class*='col-'] {
+  padding-right: 5px;
+  padding-left: 5px;
+}
+
+/* Bootstrap form-group */
+.medical-history-form .form-group {
+  margin-bottom: 1rem;
+}
+
+/* Legacy row support */
+.medical-history-form .row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -10px;
+  margin-bottom: 20px;
+}
+
+.medical-history-form .row > [class*='col-'] {
+  padding: 10px;
+}
+
+/* Column classes for form-row */
+.medical-history-form .col-md-3 { flex: 0 0 25%; max-width: 25%; }
+.medical-history-form .col-md-4 { flex: 0 0 33.333333%; max-width: 33.333333%; }
+.medical-history-form .col-md-6 { flex: 0 0 50%; max-width: 50%; }
+.medical-history-form .col-md-9 { flex: 0 0 75%; max-width: 75%; }
+.medical-history-form .col-md-12 { flex: 0 0 100%; max-width: 100%; }
+
+@media (max-width: 767.98px) {
+  .medical-history-form .col-md-3,
+  .medical-history-form .col-md-4,
+  .medical-history-form .col-md-6,
+  .medical-history-form .col-md-9 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+.medical-history-form label {
+  display: block;
+  font-size: 14px;
+  color: #515365;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.medical-history-form .form-control {
+  height: 37px;
+  padding: 6px 12px;
+  line-height: 1.5;
+  color: #515365;
+  font-size: 14px;
+  display: block;
+  width: 100%;
+  border: 1px solid #c4c7cc;
+  border-radius: 4px;
   background-color: #fff;
-  padding: 20px;
-  border-top: 1px solid #ddd;
-  animation: slideDown 0.2s ease;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  box-sizing: border-box;
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    max-height: 0;
-  }
-  to {
-    opacity: 1;
-    max-height: 500px;
-  }
+.medical-history-form .form-control:focus {
+  outline: none;
+  border-color: #F92552;
+  box-shadow: 0 0 0 0.2rem rgba(249, 37, 82, 0.25);
 }
 
-.placeholder-text {
-  color: #666;
-  font-size: 14px;
+.medical-history-form textarea.form-control {
+  padding: 0.75rem;
+  line-height: 1.5;
+  resize: vertical;
+  min-height: 100px;
+}
+
+.medical-history-form input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.medical-history-form input[type="number"]::-webkit-inner-spin-button,
+.medical-history-form input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
   margin: 0;
 }
 
-/* Form actions - pulsante "Salva Tutto e Mostra risultati" */
-.form-actions {
-  display: flex;
-  justify-content: center;
-  padding: 20px 0;
+/* Section Titles */
+.medical-history-form h5 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 20px 0 10px 0;
 }
 
-.btn-save-all {
+.medical-history-form h5.title {
+  margin-bottom: 15px;
+}
+
+/* Bootstrap utility classes */
+.medical-history-form .mt-4 { margin-top: 1.5rem !important; }
+.medical-history-form .mb-2 { margin-bottom: 0.5rem !important; }
+
+.medical-history-form hr {
+  border: none;
+  border-top: 1px solid #e5e5e5;
+  margin: 10px 0 20px 0;
+}
+
+/* Gravidance Type Items */
+.gravidance-type-item {
+  margin-bottom: 15px;
+}
+
+.gravidance-type-item label {
+  margin-bottom: 8px;
+}
+
+/* Save Button - Gray like legacy */
+.medical-history-form .btn-primary {
   background-color: #8b8b9f;
-  /* Legacy button color */
+  border-color: #8b8b9f;
   color: white;
   border: none;
   padding: 12px 30px;
@@ -111,39 +212,132 @@
   font-weight: 500;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.1s ease;
   text-transform: none;
 }
 
-.btn-save-all:hover {
+.medical-history-form .btn-primary:hover {
+  background-color: #757585;
+  border-color: #757585;
+}
+
+.medical-history-form .btn-primary:active,
+.medical-history-form .btn-primary:focus {
+  background-color: #6a6a7a;
+  border-color: #6a6a7a;
+  box-shadow: 0 0 0 0.2rem rgba(139, 139, 159, 0.5);
+}
+
+.medical-history-form .btn-primary:disabled {
+  background-color: #ccc;
+  border-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Legacy btn-save support */
+.btn-save {
+  background-color: #8b8b9f;
+  color: white;
+  border: none;
+  padding: 12px 30px;
+  font-size: 15px;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  text-transform: none;
+  margin-top: 10px;
+}
+
+.btn-save:hover {
   background-color: #757585;
 }
 
-.btn-save-all:active {
+.btn-save:active {
   background-color: #6a6a7a;
   transform: translateY(1px);
 }
 
+.btn-save:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Column Widths - Bootstrap-like grid */
+.col-12 { width: 100%; }
+.col-sm-12 { width: 100%; }
+
+@media (min-width: 576px) {
+  .col-sm-12 { width: 100%; }
+}
+
+@media (min-width: 768px) {
+  .col-md-3 { width: 25%; }
+  .col-md-6 { width: 50%; }
+  .col-md-9 { width: 75%; }
+  .col-md-12 { width: 100%; }
+}
+
+@media (min-width: 992px) {
+  .col-lg-4 { width: 33.333%; }
+  .col-lg-6 { width: 50%; }
+  .col-lg-12 { width: 100%; }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
-  .medical-history-form {
-    padding: 15px 0;
+  .ui-block-content {
+    padding: 20px;
   }
 
-  .accordion-header {
-    padding: 12px 15px;
+  .medical-history-form .row {
+    margin: -7px;
   }
 
-  .accordion-header span {
-    font-size: 14px;
+  .medical-history-form .row > [class*='col-'] {
+    padding: 7px;
   }
 
-  .accordion-content {
+  .ui-block-title {
+    padding: 10px 15px;
+  }
+
+  .ui-block-title .title {
+    font-size: 16px;
+  }
+
+  .immages_bow {
+    width: 35px;
+    height: 35px;
+  }
+
+  .btn-save {
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .ui-block-content {
     padding: 15px;
   }
 
-  .btn-save-all {
-    width: 100%;
-    max-width: 300px;
+  .ui-block-title .title {
+    font-size: 14px;
+  }
+
+  .immages_bow {
+    width: 30px;
+    height: 30px;
+  }
+
+  .medical-history-form label {
+    font-size: 13px;
+  }
+
+  .medical-history-form .form-control {
+    font-size: 13px;
+    padding: 0.875rem 1rem 0.5rem;
   }
 }

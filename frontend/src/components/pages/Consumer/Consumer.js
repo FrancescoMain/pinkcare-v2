@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import QuestionnaireChoice from '../Questionnaire/QuestionnaireChoice';
 import QuestionnaireForm from '../Questionnaire/QuestionnaireForm';
 import MedicalHistoryForm from './MedicalHistoryForm';
+import MensesCalendar from './Calendar/MensesCalendar';
 import UserProfileSidebar from '../../layout/UserProfileSidebar';
 import AdvertisingSidebar from '../../layout/AdvertisingSidebar';
 import ThreeColumnLayout from '../../layout/ThreeColumnLayout';
@@ -89,13 +90,8 @@ const Consumer = () => {
         );
 
       case 5:
-        // TODO: Menses Calendar - not yet implemented
-        return (
-          <div className="tab-placeholder">
-            <h3>Menses Calendar</h3>
-            <p>Da implementare</p>
-          </div>
-        );
+        // Menses Calendar (Calendario Mestruale)
+        return <MensesCalendar />;
 
       case 10:
         // TODO: My Documents - not yet implemented

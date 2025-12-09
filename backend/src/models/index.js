@@ -20,6 +20,12 @@ const ProtocolRule = require('./ProtocolRule');
 const Screening = require('./Screening');
 const ScreeningResult = require('./ScreeningResult');
 const TeamReply = require('./TeamReply');
+const CalendarEvent = require('./CalendarEvent');
+const EventDetail = require('./EventDetail');
+const EventDetailType = require('./EventDetailType');
+const TeamSurgery = require('./TeamSurgery');
+const Surgery = require('./Surgery');
+const GravidanceType = require('./GravidanceType');
 
 // Define associations
 User.belongsToMany(Role, {
@@ -242,6 +248,85 @@ TeamReply.belongsTo(Screening, {
   as: 'screening'
 });
 
+// Calendar Event associations
+CalendarEvent.belongsTo(Typology, {
+  foreignKey: 'typeId',
+  as: 'type'
+});
+
+CalendarEvent.belongsTo(Team, {
+  foreignKey: 'teamId',
+  as: 'team'
+});
+
+CalendarEvent.hasMany(EventDetail, {
+  foreignKey: 'eventId',
+  as: 'details'
+});
+
+EventDetail.belongsTo(CalendarEvent, {
+  foreignKey: 'eventId',
+  as: 'event'
+});
+
+EventDetail.belongsTo(EventDetailType, {
+  foreignKey: 'detailTypeId',
+  as: 'detailType'
+});
+
+EventDetailType.hasMany(EventDetail, {
+  foreignKey: 'detailTypeId',
+  as: 'details'
+});
+
+EventDetailType.belongsTo(Typology, {
+  foreignKey: 'eventTypeId',
+  as: 'eventType'
+});
+
+// Clinical History associations
+User.belongsTo(Municipality, {
+  foreignKey: 'birthPlaceId',
+  as: 'birthPlace'
+});
+
+Municipality.hasMany(User, {
+  foreignKey: 'birthPlaceId',
+  as: 'users'
+});
+
+User.hasMany(GravidanceType, {
+  foreignKey: 'userId',
+  as: 'gravidanceTypes'
+});
+
+GravidanceType.belongsTo(User, {
+  foreignKey: 'userId',
+  as: 'user'
+});
+
+Team.hasMany(TeamSurgery, {
+  foreignKey: 'teamId',
+  as: 'surgeries'
+});
+
+TeamSurgery.belongsTo(Team, {
+  foreignKey: 'teamId',
+  as: 'team'
+});
+
+TeamSurgery.belongsTo(Surgery, {
+  foreignKey: 'surgeryId',
+  as: 'surgery'
+});
+
+Surgery.hasMany(TeamSurgery, {
+  foreignKey: 'surgeryId',
+  as: 'teamSurgeries'
+});
+
+// No hierarchical structure for surgeries - table doesn't have parent_id column
+
 module.exports = {
   sequelize,
   User,
@@ -264,5 +349,11 @@ module.exports = {
   ProtocolRule,
   Screening,
   ScreeningResult,
-  TeamReply
+  TeamReply,
+  CalendarEvent,
+  EventDetail,
+  EventDetailType,
+  TeamSurgery,
+  Surgery,
+  GravidanceType
 };

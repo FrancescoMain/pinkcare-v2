@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
+import { downloadClinicalHistoryPDF } from '../../services/clinicalHistoryApi';
 import './AuthenticatedHeader.css';
 
 /**
@@ -15,6 +16,25 @@ const AuthenticatedHeader = () => {
 
   const isActive = (path) => {
     return location.pathname === path ? 'active' : '';
+  };
+
+  // Handle PDF download for Storia Clinica
+  const handleDownloadPDF = async (e) => {
+    e.preventDefault();
+    try {
+      const pdfBlob = await downloadClinicalHistoryPDF();
+      const url = window.URL.createObjectURL(pdfBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'storia_clinica.pdf');
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      alert('Errore durante il download del PDF');
+    }
   };
 
   const hasRole = (role) => {
@@ -279,9 +299,13 @@ const AuthenticatedHeader = () => {
 
           {/* STORIA CLINICA - Solo per consumer */}
           {isConsumer && (
-            <div className={`nav-item ${isActive('/clinical-history')}`}>
-              <a href="/api/consumer/download-details" className="nav-link" target="_blank" rel="noopener noreferrer">
-                <span className="immages_bow"></span>
+            <div className="nav-item">
+              <a href="#" className="nav-link" onClick={handleDownloadPDF}>
+                <img
+                  src="/styles/olympus/assets/images/pinkcare_icon.png"
+                  alt=""
+                  className="immages_bow"
+                />
                 <span>{t('resourceBundle.CLINICAL_HISTORY', 'STORIA CLINICA')}</span>
               </a>
             </div>

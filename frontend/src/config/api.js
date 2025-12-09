@@ -175,19 +175,33 @@ export class ApiClient {
     // Remove params from config as it's not a valid fetch option
     delete config.params;
 
+    // Remove responseType from config as it's not a valid fetch option
+    const responseType = config.responseType;
+    delete config.responseType;
+
     try {
       console.log(`API Call: ${options.method || 'GET'} ${url}`, config.body ? JSON.parse(config.body) : null);
 
       const response = await fetch(url, config);
+
+      // Handle blob responses (e.g., PDF downloads)
+      if (responseType === 'blob') {
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new ApiError(errorText || 'Errore download', response.status);
+        }
+        return await response.blob();
+      }
+
       const data = await response.json();
-      
+
       if (!response.ok) {
         console.log('API Error Response:', data);
         // Per errori di validazione, passa i details direttamente
         const details = data.details || data;
         throw new ApiError(data.error || 'Errore API', response.status, details);
       }
-      
+
       return data;
       
     } catch (error) {

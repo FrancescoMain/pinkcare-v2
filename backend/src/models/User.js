@@ -161,6 +161,12 @@ const User = sequelize.define('User', {
   },
   medicine: {
     type: DataTypes.TEXT
+  },
+
+  // Birth place (foreign key to Municipality)
+  birthPlaceId: {
+    type: DataTypes.BIGINT,
+    field: 'birth_place_id'
   }
 }, {
   tableName: 'app_user',

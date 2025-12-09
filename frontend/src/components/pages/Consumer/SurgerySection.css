@@ -1,0 +1,198 @@
+/* SurgerySection - REPLICA ESATTA dello stile legacy */
+
+.surgery-section {
+  width: 100%;
+}
+
+.no-surgeries {
+  padding: 20px;
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}
+
+/* Parent Panel - Accordion Item */
+.parent-panel {
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.parent-panel .ui-block-title {
+  background-color: #f5f5f5;
+  padding: 15px 20px;
+  border-bottom: 1px solid #ddd;
+}
+
+.parent-panel.open .ui-block-title {
+  background-color: #e8d4d8; /* Legacy pink/mauve color when open */
+}
+
+.parent-panel .ui-block-title .h6 {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.parent-panel .ui-block-title .h6 .radio-group {
+  display: flex;
+  gap: 15px;
+}
+
+.surgery-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  color: #333;
+}
+
+.info-icon {
+  color: #F92552;
+  font-size: 14px;
+  cursor: help;
+  margin-left: 5px;
+}
+
+/* Content Animation - Collapsible Section */
+.content-animation {
+  -webkit-transition: max-height 0.5s ease-in-out, box-shadow 0.1s linear;
+  -moz-transition: max-height 0.5s ease-in-out, box-shadow 0.1s linear;
+  -o-transition: max-height 0.5s ease-in-out, box-shadow 0.1s linear;
+  -ms-transition: max-height 0.5s ease-in-out, box-shadow 0.1s linear;
+  transition: max-height 0.5s ease-in-out, box-shadow 0.1s linear;
+  overflow-y: auto;
+  max-height: 300px;
+  padding: 15px;
+  background-color: #fff;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 400px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+}
+
+.form-group.label-floating {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.form-group.label-floating textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #c4c7cc;
+  border-radius: 4px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  transition: border-color 0.2s ease;
+}
+
+.form-group.label-floating textarea:focus {
+  outline: none;
+  border-color: #F92552;
+  box-shadow: 0 0 0 0.2rem rgba(249, 37, 82, 0.25);
+}
+
+/* Sub-surgeries */
+.ui-block.available-widget {
+  background-color: #f9f9f9;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 10px;
+  margin-bottom: 10px;
+  transition: background-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.ui-block.available-widget:hover {
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  margin: 0;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  margin-bottom: 0 !important;
+  cursor: pointer;
+  accent-color: #F92552;
+  flex-shrink: 0;
+}
+
+.sub-surgery-label {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: #333;
+  line-height: 1.3;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  text-transform: uppercase;
+}
+
+/* Row Layout */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: -7.5px;
+}
+
+.row > [class*='col-'] {
+  padding: 7.5px;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .col-lg-4 {
+    width: 50%;
+  }
+}
+
+@media (max-width: 768px) {
+  .col-md-6 {
+    width: 100%;
+  }
+
+  .content-animation {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 576px) {
+  .col-sm-12 {
+    width: 100%;
+  }
+
+  .surgery-label {
+    font-size: 14px;
+  }
+
+  .ui-block.available-widget {
+    padding: 12px;
+  }
+}

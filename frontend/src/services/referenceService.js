@@ -10,4 +10,16 @@ class ReferenceService {
   }
 }
 
+/**
+ * Autocomplete function for municipalities
+ * Used by AutocompleteInput component
+ * @param {string} query - Search query
+ * @returns {Promise<Array>} Array of municipalities
+ */
+export const autocompleteMunicipalities = async (query) => {
+  const response = await ReferenceService.searchMunicipalities(query);
+  // ApiClient returns data directly, not wrapped in {data: ...}
+  return Array.isArray(response) ? response : [];
+};
+
 export default ReferenceService;

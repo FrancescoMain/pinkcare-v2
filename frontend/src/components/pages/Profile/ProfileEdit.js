@@ -2,15 +2,18 @@ import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../context/AuthContext';
 import { ApiClient } from '../../../config/api';
+import ThreeColumnLayout from '../../layout/ThreeColumnLayout';
+import UserProfileSidebar from '../../layout/UserProfileSidebar';
+import AdvertisingSidebar from '../../layout/AdvertisingSidebar';
 import './ProfileEdit.css';
 
 /**
  * ProfileEdit Component
  * Replica ESATTA di pinkcare/WEB-INF/flows/profile/personal_form.xhtml
- * Layout identico al legacy con:
- * - Sidebar sinistra (user card + menu)
+ * Layout identico al legacy usando ThreeColumnLayout con proporzioni 2-8-2:
+ * - Sidebar sinistra (UserProfileSidebar)
  * - Form centrale (solo campi legacy: nome, cognome, email, password)
- * - Sidebar destra (banner pubblicitari)
+ * - Sidebar destra (AdvertisingSidebar)
  */
 const ProfileEdit = ({ errorHandler }) => {
   const { t } = useTranslation();
@@ -46,27 +49,6 @@ const ProfileEdit = ({ errorHandler }) => {
       });
     }
   }, [user]);
-
-  // Calcola età
-  const calculateAge = (birthday) => {
-    if (!birthday) return null;
-    const today = new Date();
-    const birthDate = new Date(birthday);
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    return age;
-  };
-
-  const userAge = user?.birthday ? calculateAge(user.birthday) : null;
-
-  // Funzione per capitalizzare prima lettera
-  const capitalize = (str) => {
-    if (!str) return '';
-    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -217,74 +199,15 @@ const ProfileEdit = ({ errorHandler }) => {
     }
   };
 
-  const handleModificaStoriaClinica = () => {
-    // TODO: Implementare navigazione a storia clinica (Fase 6)
-    console.log('Navigazione a storia clinica');
-  };
-
-  const handleCalcolaDataParto = () => {
-    // TODO: Implementare calcolo data parto
-    console.log('Calcola data parto');
-  };
-
   return (
-    <div className="profile-page-legacy">
-      <div className="profile-row">
-          {/* SIDEBAR SINISTRA - User Card */}
-          <div className="col col-xl-3 order-xl-1 col-lg-3 order-lg-1 col-md-12 order-md-2 col-sm-12 col-12">
-            <div className="ui-block">
-              {/* User Card - Layout semplice come legacy */}
-              <div className="your-profile">
-                {/* Avatar centrato */}
-                <div className="author-thumb">
-                  <img src="/styles/olympus/assets/images/avatar.jpg" alt="author"
-                       className="profile-pic" />
-                </div>
-
-                {/* Nome centrato */}
-                <div className="author-content">
-                  <div className="author-name">
-                    {capitalize(user?.name) || ''} {capitalize(user?.surname) || ''}
-                  </div>
-                  {userAge && (
-                    <div className="country">ETA: {userAge} ANNI</div>
-                  )}
-                </div>
-
-                {/* Pulsante Modifica Storia Clinica */}
-                <div className="profile-menu">
-                  <button
-                    className="btn btn-primary btn-block"
-                    onClick={handleModificaStoriaClinica}
-                  >
-                    {t('resourceBundle.Modify_Medical_History', 'Modifica storia clinica')}
-                  </button>
-                </div>
-
-                {/* Eventi del mese */}
-                <div className="events-section">
-                  <h6 className="section-title">{t('resourceBundle.Events_Month', 'Eventi del mese')}</h6>
-                  <div className="nothing-found">
-                    <span>{t('resourceBundle.No_Records_Found', 'No records found.')}</span>
-                  </div>
-                </div>
-
-                {/* Pulsante Calcola Data Parto */}
-                <div className="profile-menu">
-                  <button
-                    className="btn btn-secondary btn-block"
-                    onClick={handleCalcolaDataParto}
-                  >
-                    {t('resourceBundle.Calculate_Due_Date', 'Calcola data parto')}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* CONTENUTO CENTRALE - Form Profilo */}
-          <div className="col col-xl-6 order-xl-2 col-lg-6 order-lg-2 col-md-12 order-md-1 col-sm-12 col-12">
-            <div className="ui-block">
+    <ThreeColumnLayout
+      leftSidebar={<UserProfileSidebar />}
+      rightSidebar={<AdvertisingSidebar />}
+      leftColSize={2}
+      centerColSize={8}
+      rightColSize={2}
+    >
+      <div className="ui-block">
               <div className="ui-block-title">
                 <h6 className="title">{t('resourceBundle.Personal_Information', 'Informazioni Personali')}</h6>
               </div>
@@ -433,23 +356,7 @@ const ProfileEdit = ({ errorHandler }) => {
                 </form>
               </div>
             </div>
-          </div>
-
-          {/* SIDEBAR DESTRA - Banner Pubblicitari */}
-          <div className="col col-xl-3 order-xl-3 col-lg-3 order-lg-3 col-md-12 order-md-3 col-sm-12 col-12">
-            <div className="ui-block">
-              {/* Banner Pubblicitario */}
-              <div className="widget w-banner">
-                <img
-                  src="/styles/olympus/assets/images/muscle-pharm-fish-oil-banner.jpg"
-                  alt="Banner"
-                  style={{ width: '100%', borderRadius: '5px' }}
-                />
-              </div>
-            </div>
-          </div>
-      </div>
-    </div>
+    </ThreeColumnLayout>
   );
 };
 

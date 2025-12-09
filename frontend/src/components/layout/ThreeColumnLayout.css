@@ -20,6 +20,12 @@
   padding: 10px;
 }
 
+/* Sidebar sinistra e destra: padding zero come legacy */
+.three-column-layout .col.sidebar-left,
+.three-column-layout .col.sidebar-right {
+  padding: 0;
+}
+
 /* Replica classi legacy ui-block */
 .three-column-layout .ui-block {
   background-color: #fff;

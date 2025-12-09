@@ -129,11 +129,10 @@
 
 .btn {
   display: inline-block;
-  height: 70px;
-  padding: 0 24px;
+  padding: 8px 24px;
   font-size: 15px;
   font-weight: 600;
-  line-height: 70px;
+  line-height: 1.5;
   text-align: center;
   white-space: nowrap;
   vertical-align: middle;

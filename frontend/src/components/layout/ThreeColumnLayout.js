@@ -29,7 +29,7 @@ const ThreeColumnLayout = ({
       <div className="three-column-row">
         {/* Sidebar Sinistra */}
         {leftSidebar && (
-          <div className={`col col-xl-${leftColSize} order-xl-1 col-lg-${leftColSize} order-lg-1 col-md-12 order-md-2 col-sm-12 col-12`}>
+          <div className={`col sidebar-left col-xl-${leftColSize} order-xl-1 col-lg-${leftColSize} order-lg-1 col-md-12 order-md-2 col-sm-12 col-12`}>
             {leftSidebar}
           </div>
         )}
@@ -41,7 +41,7 @@ const ThreeColumnLayout = ({
 
         {/* Sidebar Destra */}
         {rightSidebar && (
-          <div className={`col col-xl-${rightColSize} order-xl-3 col-lg-${rightColSize} order-lg-3 col-md-12 order-md-3 col-sm-12 col-12`}>
+          <div className={`col sidebar-right col-xl-${rightColSize} order-xl-3 col-lg-${rightColSize} order-lg-3 col-md-12 order-md-3 col-sm-12 col-12`}>
             {rightSidebar}
           </div>
         )}

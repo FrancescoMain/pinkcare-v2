@@ -1,115 +1,205 @@
 /* UserProfileSidebar.css - REPLICA ESATTA degli stili della sidebar sinistra del legacy */
 
-/* Sidebar sinistra - User Card - SEMPLICE come legacy */
-.your-profile {
+/* top-header-author - struttura principale */
+.top-header-author {
   padding: 30px 20px;
   text-align: center;
 }
 
-.author-thumb {
+/* Avatar - REPLICA ESATTA del legacy */
+.widget-thumb.author-thumb {
+  margin-bottom: 20px;
+}
+
+.widget-thumb.author-thumb .user_img {
   width: 120px;
   height: 120px;
-  margin: 0 auto 20px;
   border-radius: 50%;
-  overflow: hidden;
+  object-fit: cover;
   background: #f0f0f0;
 }
 
-.author-thumb .profile-pic {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.author-content {
+/* User info - nome e età */
+.user_info {
   text-align: center;
-  margin-bottom: 25px;
 }
 
-.author-name {
+.user_info .h4.name {
   font-size: 20px;
   font-weight: 600;
   color: #515365;
+  display: block;
   margin-bottom: 8px;
+  text-transform: capitalize;
 }
 
-.country {
+.user_info p {
   font-size: 13px;
   color: #888;
   text-transform: uppercase;
   font-weight: 500;
+  margin: 0;
 }
 
-/* Eventi del mese */
-.events-section {
-  margin: 25px 0;
-  padding-top: 20px;
-  border-top: 1px solid #e6ecf5;
+/* edit_anagraphic - REPLICA ESATTA del legacy (Modifica storia clinica) */
+.edit_anagraphic {
+  padding: 20px;
+  text-align: center;
+  background-color: #e42180;
+  border: 1px solid #e42180;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
 }
 
-.events-section .section-title {
+.edit_anagraphic:hover {
+  background-color: #c91b6f;
+  border-color: #c91b6f;
+}
+
+.edit_anagraphic span {
+  color: #fff;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+/* Widget build fav - container per bottoni/sezioni */
+.widget.w-build-fav {
+  padding: 15px;
+  margin: 10px 0;
+}
+
+.widget.w-build-fav.btn-wid {
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.widget.w-build-fav.btn-wid:hover {
+  opacity: 0.9;
+}
+
+/* Schedule list (Eventi del mese) */
+.sched_list {
+  padding: 10px;
+}
+
+.sched_list h6 {
   font-size: 16px;
   font-weight: 600;
   color: #515365;
   margin-bottom: 15px;
-  text-align: left;
+  padding-bottom: 10px;
 }
 
+/* Nothing found */
 .nothing-found {
-  padding: 20px;
+  padding: 15px;
   text-align: center;
   color: #888;
   font-size: 14px;
 }
 
-/* Pulsanti sidebar */
-.profile-menu {
-  margin-bottom: 15px;
-}
-
-.btn-block {
-  display: block;
-  width: 100%;
-}
-
-.btn {
-  display: inline-block;
-  height: 70px;
-  padding: 0 24px;
-  font-size: 15px;
-  font-weight: 600;
-  line-height: 70px;
-  text-align: center;
-  white-space: nowrap;
-  vertical-align: middle;
-  cursor: pointer;
-  border: none;
+/* Calcola data parto - REPLICA ESATTA del legacy (arancione) */
+.widget.w-build-fav.calcola-parto {
+  background-color: #f29811;
+  padding: 10px;
   border-radius: 5px;
-  user-select: none;
+}
+
+.widget.w-build-fav.calcola-parto:hover {
+  background-color: #d67b10;
+}
+
+.widget.w-build-fav.calcola-parto .ibm h4 {
+  color: #fff;
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+}
+
+/* BMI Widget - REPLICA ESATTA del legacy (rosa #f294c2) */
+.widget.w-build-fav.bmi-widget {
+  background-color: #f294c2;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.widget.w-build-fav.bmi-widget .ibm {
+  text-align: center;
+  color: #fff;
+}
+
+.widget.w-build-fav.bmi-widget .ibm h4 {
+  color: #fff;
+  font-weight: 600;
+  margin: 0 0 5px 0;
+  font-size: 14px;
+}
+
+/* Container per valore BMI e icona info inline */
+.widget.w-build-fav.bmi-widget .ibm .bmi-value-container {
+  display: inline-block;
+  position: relative;
+}
+
+.widget.w-build-fav.bmi-widget .ibm h3.bmi-value {
+  color: #fff;
+  font-weight: bold;
+  font-size: 28px;
+  margin: 5px 0;
+  display: inline;
+}
+
+.widget.w-build-fav.bmi-widget .ibm h3.bmi-description {
+  color: #fff;
+  font-size: 16px;
+  margin: 5px 0 10px 0;
+}
+
+.widget.w-build-fav.bmi-widget .ibm .btn.btn-xs.bg-outline-w {
+  background-color: transparent;
+  border: 1px solid #fff;
+  color: #fff;
+  padding: 0px 10px !important;
+  font-size: 11px;
+  cursor: pointer;
+  border-radius: 3px;
   transition: all 0.2s ease-in-out;
 }
 
-.btn-primary {
+.widget.w-build-fav.bmi-widget .ibm .btn.btn-xs.bg-outline-w:hover {
+  background-color: #fff;
+  color: #f294c2;
+}
+
+/* Info icon per BMI - accanto al valore */
+.widget.w-build-fav.bmi-widget .ibm .bmi-info-icon {
   color: #fff;
-  background-color: #e42080;
+  margin-left: 3px;
+  cursor: help;
+  font-size: 12px;
+  vertical-align: super;
 }
 
-.btn-primary:hover:not(:disabled) {
-  background-color: #c91b6f;
+.widget.w-build-fav.bmi-widget .ibm .bmi-tooltip {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: 100%;
+  left: 100%;
+  transform: translateX(0);
+  background-color: #333;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 11px;
+  white-space: nowrap;
+  z-index: 100;
+  transition: opacity 0.2s ease-in-out;
+  margin-bottom: 5px;
+  margin-left: 5px;
 }
 
-.btn-secondary {
-  color: #fff !important;
-  background-color: #f7941e !important;
-  border-color: #f7941e !important;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background-color: #d67b10 !important;
-  border-color: #d67b10 !important;
-}
-
-.btn:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
+.widget.w-build-fav.bmi-widget .ibm .bmi-value-container:hover .bmi-tooltip {
+  visibility: visible;
+  opacity: 1;
 }

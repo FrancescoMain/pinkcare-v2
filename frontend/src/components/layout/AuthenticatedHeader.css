@@ -268,22 +268,13 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Storia Clinica Icon - Usa icona FontAwesome invece dell'immagine */
-.immages_bow {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+/* Storia Clinica Icon - Usa immagine PinkCare */
+.search-bar .immages_bow {
   width: 20px;
   height: 20px;
-  margin-right: 5px;
-}
-
-.immages_bow::before {
-  content: "\f135"; /* FontAwesome rocket icon */
-  font-family: "Font Awesome 5 Free";
-  font-weight: 900;
-  font-size: 16px;
-  color: white;
+  margin-bottom: 3px;
+  object-fit: contain;
+  filter: brightness(0) invert(1); /* Rende l'icona bianca */
 }
 
 

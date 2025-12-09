@@ -290,6 +290,8 @@ class AuthController {
         birthday: user.birthday,
         filledPersonalForm: user.filledPersonalForm,
         firstLoginDate: user.firstLoginDate,
+        height: user.height,
+        weight: user.weight,
         roles: user.roles?.map(role => ({
           id: role.id,
           nome: role.name,
@@ -507,13 +509,15 @@ class AuthController {
         nickName: user.nickName,
         birthday: user.birthday,
         filledPersonalForm: user.filledPersonalForm,
+        height: user.height,
+        weight: user.weight,
         roles: user.roles?.map(role => ({
           id: role.id,
           nome: role.name,
           descrizione: role.description
         })) || []
       };
-      
+
       res.json({
         valid: true,
         user: userResponse

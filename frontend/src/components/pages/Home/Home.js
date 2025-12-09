@@ -256,7 +256,7 @@ const Home = ({ userVO = null, errorHandler }) => {
 
   // Contenuto originale della home (form di registrazione + carousel)
   const renderHomeContent = () => (
-    <>
+    <div className="row">
       {/* Start Appointment Image Area - carousel section */}
       <div className="col-md-6 col-xs-12">
         <MainCarousel />
@@ -460,7 +460,7 @@ const Home = ({ userVO = null, errorHandler }) => {
         {/* End Registration Form */}
       </div>
       {/* End Content Area */}
-    </>
+    </div>
   );
 
   return (

@@ -4,17 +4,43 @@
   /* No padding - managed by main-container */
 }
 
-.home-page .row {
+.home-page > .row {
   display: flex;
   flex-wrap: wrap;
   margin: 0 -15px;
 }
 
-.home-page .col-md-6,
-.home-page .col-md-5,
-.home-page .col-md-1 {
+.home-page > .row > .col-md-6 {
+  flex: 0 0 50%;
+  max-width: 50%;
   padding: 0 15px;
   box-sizing: border-box;
+}
+
+.home-page > .row > .col-md-5 {
+  flex: 0 0 41.666667%;
+  max-width: 41.666667%;
+  padding: 0 15px;
+  box-sizing: border-box;
+}
+
+.home-page > .row > .col-md-1 {
+  flex: 0 0 8.333333%;
+  max-width: 8.333333%;
+  padding: 0 15px;
+  box-sizing: border-box;
+}
+
+/* Responsive: stack on smaller screens */
+@media (max-width: 991px) {
+  .home-page > .row > .col-md-6,
+  .home-page > .row > .col-md-5 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+  .home-page > .row > .col-md-1 {
+    display: none;
+  }
 }
 
 /* Tab buttons - compact height styling */
