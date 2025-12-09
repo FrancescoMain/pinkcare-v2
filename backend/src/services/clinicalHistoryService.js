@@ -13,6 +13,7 @@ const {
   Municipality
 } = require('../models');
 const { Op } = require('sequelize');
+const { sequelize } = require('../config/database');
 
 /**
  * Clinical History Service
@@ -66,11 +67,12 @@ class ClinicalHistoryService {
 
   /**
    * Get all surgeries for a team
-   * If no surgeries exist, initialize them with default root surgeries
+   * If no surgeries exist and initializeIfEmpty is true, initialize them with default root surgeries
    * @param {number} teamId - Team ID
+   * @param {boolean} initializeIfEmpty - Whether to create default surgeries if none exist (default: true)
    * @returns {Promise<Array>} List of team surgeries with children
    */
-  async getTeamSurgeries(teamId) {
+  async getTeamSurgeries(teamId, initializeIfEmpty = true) {
     try {
       let surgeries = await TeamSurgery.findAll({
         where: { teamId },
@@ -83,8 +85,8 @@ class ClinicalHistoryService {
         order: [['id', 'ASC']]
       });
 
-      // If no surgeries exist, initialize with defaults
-      if (surgeries.length === 0) {
+      // If no surgeries exist and initialization is requested, initialize with defaults
+      if (surgeries.length === 0 && initializeIfEmpty) {
         surgeries = await this.initializeTeamSurgeries(teamId);
       }
 
@@ -99,6 +101,7 @@ class ClinicalHistoryService {
   /**
    * Initialize default surgeries for a team
    * Creates team_surgery records for all surgeries (root and children)
+   * Uses PostgreSQL sequence for ID generation (legacy compatibility)
    * @param {number} teamId - Team ID
    * @returns {Promise<Array>} Created team surgeries
    */
@@ -114,7 +117,13 @@ class ClinicalHistoryService {
       const createdSurgeries = [];
 
       for (const surgery of allSurgeries) {
+        // Get next ID from PostgreSQL sequence (legacy compatibility)
+        const [[{ nextval }]] = await sequelize.query(
+          "SELECT nextval('app_team_surgery_id_seq')"
+        );
+
         const teamSurgery = await TeamSurgery.create({
+          id: nextval,
           teamId,
           surgeryId: surgery.id,
           executed: false,

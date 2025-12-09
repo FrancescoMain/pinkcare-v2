@@ -237,9 +237,9 @@ exports.downloadClinicalHistoryPDF = async (req, res) => {
 
       const teamId = teams[0].id; // Use first team
 
-      // Get all necessary data
+      // Get all necessary data (don't initialize surgeries if empty - read-only for PDF)
       const consumerData = await clinicalHistoryService.getConsumerDetails(teamId);
-      const surgeries = await clinicalHistoryService.getTeamSurgeries(teamId);
+      const surgeries = await clinicalHistoryService.getTeamSurgeries(teamId, false);
       const screeningData = await clinicalHistoryService.getScreeningDataForThematicAreas(teamId);
 
       // Debug: log screening data
