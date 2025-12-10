@@ -100,4 +100,32 @@ router.get('/event-detail-types',
   calendarController.getEventDetailTypes
 );
 
+// Get last menses date
+router.get('/last-menses',
+  AuthMiddleware.verifyToken,
+  calendarController.getLastMenses
+);
+
+// Start a new menstrual period
+router.post('/start-period',
+  AuthMiddleware.verifyToken,
+  [
+    body('date')
+      .notEmpty().withMessage('date obbligatoria')
+      .isISO8601().withMessage('date deve essere una data valida (ISO 8601)')
+  ],
+  calendarController.startPeriod
+);
+
+// End current menstrual period
+router.post('/end-period',
+  AuthMiddleware.verifyToken,
+  [
+    body('date')
+      .notEmpty().withMessage('date obbligatoria')
+      .isISO8601().withMessage('date deve essere una data valida (ISO 8601)')
+  ],
+  calendarController.endPeriod
+);
+
 module.exports = router;

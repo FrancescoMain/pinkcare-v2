@@ -13,10 +13,9 @@ class CalendarApi {
    * @returns {Promise} - Promise with events and user profile
    */
   static async getEvents(start, end) {
-    const response = await ApiService.get(`/api/calendar/events`, {
+    return ApiService.get(`/api/calendar/events`, {
       params: { start, end }
     });
-    return response.data;
   }
 
   /**
@@ -30,8 +29,7 @@ class CalendarApi {
    * @returns {Promise} - Promise with created event
    */
   static async createEvent(eventData) {
-    const response = await ApiService.post('/api/calendar/events', eventData);
-    return response.data;
+    return ApiService.post('/api/calendar/events', eventData);
   }
 
   /**
@@ -41,8 +39,7 @@ class CalendarApi {
    * @returns {Promise} - Promise with updated event
    */
   static async updateEvent(id, eventData) {
-    const response = await ApiService.put(`/api/calendar/events/${id}`, eventData);
-    return response.data;
+    return ApiService.put(`/api/calendar/events/${id}`, eventData);
   }
 
   /**
@@ -51,8 +48,7 @@ class CalendarApi {
    * @returns {Promise} - Promise with deletion confirmation
    */
   static async deleteEvent(id) {
-    const response = await ApiService.delete(`/api/calendar/events/${id}`);
-    return response.data;
+    return ApiService.delete(`/api/calendar/events/${id}`);
   }
 
   /**
@@ -61,10 +57,35 @@ class CalendarApi {
    * @returns {Promise} - Promise with detail types
    */
   static async getEventDetailTypes(eventType) {
-    const response = await ApiService.get('/api/calendar/event-detail-types', {
+    return ApiService.get('/api/calendar/event-detail-types', {
       params: { eventType }
     });
-    return response.data;
+  }
+
+  /**
+   * Get last menses date and open period info
+   * @returns {Promise} - Promise with lastMensesDate, hasOpenPeriod, openPeriodId
+   */
+  static async getLastMenses() {
+    return ApiService.get('/api/calendar/last-menses');
+  }
+
+  /**
+   * Start a new menstrual period
+   * @param {string} date - Start date (YYYY-MM-DD)
+   * @returns {Promise} - Promise with created event
+   */
+  static async startPeriod(date) {
+    return ApiService.post('/api/calendar/start-period', { date });
+  }
+
+  /**
+   * End current menstrual period
+   * @param {string} date - End date (YYYY-MM-DD)
+   * @returns {Promise} - Promise with updated event
+   */
+  static async endPeriod(date) {
+    return ApiService.post('/api/calendar/end-period', { date });
   }
 }
 

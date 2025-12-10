@@ -5,7 +5,7 @@ import DayCell from './DayCell';
  * MonthView - Monthly calendar grid
  * Displays a month grid with day cells
  */
-const MonthView = ({ currentMonth, events, onRefresh }) => {
+const MonthView = ({ currentMonth, events, onRefresh, onDayClick }) => {
   // Get days to display in the month grid
   const getDaysInMonth = () => {
     const year = currentMonth.getFullYear();
@@ -89,7 +89,7 @@ const MonthView = ({ currentMonth, events, onRefresh }) => {
             date={date}
             events={getEventsForDate(date)}
             isToday={isToday(date)}
-            onRefresh={onRefresh}
+            onDayClick={onDayClick}
           />
         ))}
       </div>

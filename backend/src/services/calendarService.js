@@ -108,11 +108,12 @@ class CalendarService {
     });
 
     // Calculate dynamic events (ovulation, fertility, future cycles)
-    const calculatedEvents = this.calculateDynamicEvents(
+    const calculatedEvents = await this.calculateDynamicEvents(
       startDate,
       endDate,
       persistedEvents,
-      user
+      user,
+      teamId
     );
 
     // Combine and return
@@ -125,15 +126,26 @@ class CalendarService {
    * @param {Date} endDate - Range end
    * @param {Array} persistedEvents - Existing events
    * @param {User} user - User object
-   * @returns {Array} Calculated events
+   * @param {number} teamId - Team ID for fetching additional data
+   * @returns {Promise<Array>} Calculated events
    */
-  calculateDynamicEvents(startDate, endDate, persistedEvents, user) {
+  async calculateDynamicEvents(startDate, endDate, persistedEvents, user, teamId) {
     const calculated = [];
 
-    // Get all menses events
-    const mensesEvents = persistedEvents.filter(
-      e => e.typeId === CalendarService.EVENT_TYPES.MENSES && !e.deleted
+    // Get all menses events from persisted events in range
+    // Note: typeId from DB may be string, so use parseInt for comparison
+    let mensesEvents = persistedEvents.filter(
+      e => parseInt(e.typeId) === CalendarService.EVENT_TYPES.MENSES && !e.deleted
     );
+
+    // If no menses events in range, fetch the most recent one from DB
+    // This ensures predictions work for future months
+    if (mensesEvents.length === 0 && teamId) {
+      const lastMenses = await this.getLastMensesEvent(teamId);
+      if (lastMenses) {
+        mensesEvents = [lastMenses];
+      }
+    }
 
     if (mensesEvents.length === 0) {
       return calculated; // No data to calculate from
@@ -486,6 +498,67 @@ class CalendarService {
     }
 
     return savedDetails;
+  }
+
+  /**
+   * Get last menses event (full event object)
+   * @param {number} teamId - Team ID
+   * @returns {Promise<CalendarEvent|null>}
+   */
+  async getLastMensesEvent(teamId) {
+    return await CalendarEvent.findOne({
+      where: {
+        teamId,
+        typeId: CalendarService.EVENT_TYPES.MENSES,
+        deleted: false
+      },
+      order: [['beginning', 'DESC']]
+    });
+  }
+
+  /**
+   * Get active pregnancy event for a team
+   * @param {number} teamId - Team ID
+   * @returns {Promise<CalendarEvent|null>}
+   */
+  async getActivePregnancy(teamId) {
+    return await CalendarEvent.findOne({
+      where: {
+        teamId,
+        typeId: CalendarService.EVENT_TYPES.PREGNANCY,
+        deleted: false
+      },
+      order: [['beginning', 'DESC']]
+    });
+  }
+
+  /**
+   * Terminate pregnancy when new period starts
+   * @param {number} teamId - Team ID
+   * @param {Date} endDate - Date to set as pregnancy end
+   * @param {Object} options - Transaction options
+   * @returns {Promise<boolean>}
+   */
+  async terminatePregnancy(teamId, endDate, options = {}) {
+    const { transaction } = options;
+
+    const pregnancyEvent = await this.getActivePregnancy(teamId);
+    if (!pregnancyEvent) {
+      return false;
+    }
+
+    // Set the pregnancy event as deleted and update ending date
+    await pregnancyEvent.update({
+      ending: new Date(endDate),
+      deleted: true,
+      lastModifyDate: new Date()
+    }, { transaction });
+
+    // Also clear the user's pregnancy-related fields if needed
+    // This would require accessing User model and team's representative
+    // For now, we just mark the event as deleted
+
+    return true;
   }
 }
 

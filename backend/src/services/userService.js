@@ -1,4 +1,4 @@
-const { User, Role, UserRole } = require('../models');
+const { User, Role, UserRole, Team } = require('../models');
 const PasswordUtils = require('../utils/passwordUtils');
 const { Op } = require('sequelize');
 const { sequelize } = require('../config/database');
@@ -182,13 +182,16 @@ class UserService {
       helpPassword: null
     };
 
-    const [userResult] = await sequelize.query(sql, {
+    const result = await sequelize.query(sql, {
       replacements,
-      transaction: options.transaction,
-      type: sequelize.QueryTypes.INSERT
+      transaction: options.transaction
     });
 
-    return userResult[0];
+    // For PostgreSQL with RETURNING *, result is [[rows], metadata]
+    const rows = result[0];
+    const user = Array.isArray(rows) ? rows[0] : rows;
+
+    return user;
   }
 
   async assignRoles(userId, roles = [], options = {}) {
@@ -204,14 +207,32 @@ class UserService {
    * @returns {Promise<User>}
    */
   async createUser(userData, options = {}) {
-    const user = await this.insertUserRecord({
+    const insertedUser = await this.insertUserRecord({
       ...userData,
       agreeToBeShown: userData.agreeToBeShown === true
     }, options);
 
-    await this.assignRoles(user.id, ['ROLE_USER', 'ROLE_CONSUMER'], options);
+    await this.assignRoles(insertedUser.id, ['ROLE_USER', 'ROLE_CONSUMER'], options);
 
-    return this.getUserProfile(user.id, options);
+    // Return the inserted user directly with roles info
+    // Note: getUserProfile doesn't work here because findByPk doesn't see uncommitted transaction data
+    return {
+      id: insertedUser.id,
+      name: insertedUser.name,
+      surname: insertedUser.surname,
+      email: insertedUser.email,
+      username: insertedUser.username,
+      nickName: insertedUser.nick_name || insertedUser.nickName,
+      birthday: insertedUser.birthday,
+      gender: insertedUser.gender,
+      filledPersonalForm: insertedUser.filled_personal_form || insertedUser.filledPersonalForm || false,
+      insertionDate: insertedUser.insertion_date || insertedUser.insertionDate,
+      agreeConditionAndPrivacy: insertedUser.agree_condition_and_privacy || insertedUser.agreeConditionAndPrivacy,
+      agreeMarketing: insertedUser.agree_marketing || insertedUser.agreeMarketing,
+      agreeNewsletter: insertedUser.agree_newsletter || insertedUser.agreeNewsletter,
+      agreeToBeShown: insertedUser.agree_to_be_shown || insertedUser.agreeToBeShown,
+      roles: [{ name: 'ROLE_USER' }, { name: 'ROLE_CONSUMER' }]
+    };
   }
 
   /**
@@ -336,17 +357,23 @@ class UserService {
   }
   
   /**
-   * Get user profile with roles
+   * Get user profile with roles and teams
    * @param {number} userId - User ID
-   * @returns {Promise<User|null>} User with roles
+   * @returns {Promise<User|null>} User with roles and teams
    */
   async getUserProfile(userId, options = {}) {
     return await User.findByPk(userId, {
-      include: [{
-        model: Role,
-        as: 'roles',
-        attributes: ['id', 'name', 'description']
-      }],
+      include: [
+        {
+          model: Role,
+          as: 'roles',
+          attributes: ['id', 'name', 'description']
+        },
+        {
+          model: Team,
+          as: 'teams'
+        }
+      ],
       transaction: options.transaction
     });
   }

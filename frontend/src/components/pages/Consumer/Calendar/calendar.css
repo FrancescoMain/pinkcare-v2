@@ -180,6 +180,101 @@
   font-size: 1.1rem;
 }
 
+/* Prerequisite Message - shown when user needs to complete profile */
+.calendar-prerequisite-message {
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.prerequisite-content {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 30px;
+  background: linear-gradient(135deg, #fff5f8 0%, #ffe8ef 100%);
+  border-radius: 12px;
+  border: 2px solid #f39ac6;
+  box-shadow: 0 4px 12px rgba(243, 154, 198, 0.2);
+}
+
+.prerequisite-icon {
+  font-size: 3rem;
+  color: #f39ac6;
+  margin-bottom: 15px;
+}
+
+.prerequisite-content h5 {
+  color: #c76b96;
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.prerequisite-content p {
+  color: #666;
+  margin-bottom: 15px;
+  line-height: 1.6;
+}
+
+.prerequisite-content ul {
+  text-align: left;
+  padding-left: 30px;
+  margin-bottom: 15px;
+}
+
+.prerequisite-content ul li {
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.prerequisite-info {
+  font-size: 0.9rem;
+  color: #888;
+  font-style: italic;
+  margin-bottom: 20px !important;
+}
+
+.calendar-prerequisite-message .btn-go-profile,
+.calendar-prerequisite-message .btn.btn-go-profile,
+.calendar-prerequisite-message button.btn-go-profile {
+  background: linear-gradient(135deg, #e881b0 0%, #c76b96 100%) !important;
+  border: none !important;
+  padding: 14px 32px !important;
+  font-size: 1.05rem !important;
+  font-weight: 600 !important;
+  border-radius: 30px !important;
+  color: #fff !important;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 15px rgba(200, 107, 150, 0.35) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-transform: none;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none !important;
+  cursor: pointer;
+}
+
+.calendar-prerequisite-message .btn-go-profile:hover,
+.calendar-prerequisite-message .btn.btn-go-profile:hover,
+.calendar-prerequisite-message button.btn-go-profile:hover {
+  background: linear-gradient(135deg, #d669a0 0%, #b45a85 100%) !important;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(200, 107, 150, 0.45) !important;
+  color: #fff !important;
+}
+
+.calendar-prerequisite-message .btn-go-profile:active,
+.calendar-prerequisite-message button.btn-go-profile:active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(200, 107, 150, 0.4) !important;
+}
+
+.calendar-prerequisite-message .btn-go-profile i {
+  font-size: 1.1rem;
+  margin-right: 8px;
+}
+
 /* Modal Backdrop */
 .modal-backdrop {
   position: fixed;
@@ -256,5 +351,600 @@
   .event-dot {
     width: 6px;
     height: 6px;
+  }
+}
+
+/* =====================================================
+   LEGACY PINKCARE CALENDAR STYLES
+   ===================================================== */
+
+/* Menses Period Days - Pink background */
+.day-cell.menses-day {
+  background: #f39ac6 !important;
+}
+
+.day-cell.menses-day .day-number {
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+/* Expected Menses - Striped pattern */
+.day-cell.expectation-day {
+  background-image: linear-gradient(45deg, #f3d4e3 25%, #ffffff 25%, #ffffff 50%, #f3d4e3 50%, #f3d4e3 75%, #ffffff 75%, #ffffff 100%);
+  background-size: 14px 14px;
+}
+
+/* Ovulation Day - Orange/Yellow */
+.day-cell.ovulation-day {
+  background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+  border-color: #ffa000;
+  position: relative;
+}
+
+.day-cell.ovulation-day::after {
+  content: '🌸';
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  font-size: 16px;
+}
+
+/* Fertility Window - Light green */
+.day-cell.fertility-day {
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border-color: #81c784;
+}
+
+.day-cell.fertility-day::after {
+  content: '🌱';
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  font-size: 14px;
+}
+
+/* Pregnancy Trimesters */
+.day-cell.pregnancy-1-trimester {
+  background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);
+  border-color: #e91e63;
+}
+
+.day-cell.pregnancy-2-trimester {
+  background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+  border-color: #9c27b0;
+}
+
+.day-cell.pregnancy-3-trimester {
+  background: linear-gradient(135deg, #ede7f6 0%, #d1c4e9 100%);
+  border-color: #673ab7;
+}
+
+/* Day with other events (symptoms, drugs, moods, etc) - green dot indicator */
+.day-cell.has-other-events::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  background: #4caf50;
+  border-radius: 50%;
+}
+
+/* =====================================================
+   EVENT DIALOG STYLES (Legacy-inspired)
+   ===================================================== */
+
+.event-dialog {
+  z-index: 1060;
+}
+
+.event-dialog .modal-content {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+.event-dialog .modal-header {
+  background: linear-gradient(135deg, #e42080 0%, #ff6b9d 100%);
+  color: white;
+  border-radius: 12px 12px 0 0;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.event-dialog .modal-title {
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.event-dialog .modal-header .modal-close-btn {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: 6px;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.event-dialog .modal-header .modal-close-btn i {
+  color: white;
+  font-size: 18px;
+}
+
+.event-dialog .modal-header .modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.event-dialog .modal-header .modal-close-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.event-dialog .modal-body {
+  padding: 24px;
+}
+
+/* Event Buttons Grid */
+.event-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.event-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+  border: 2px solid #e0e0e0;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 100px;
+  position: relative;
+}
+
+.event-btn:hover:not(:disabled) {
+  border-color: #e42080;
+  background: #fef0f5;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(228, 32, 128, 0.15);
+}
+
+.event-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.event-btn.active {
+  border-color: #e42080;
+  background: #e42080;
+  color: white;
+}
+
+.event-btn.active i {
+  color: white;
+}
+
+.event-btn.has-value {
+  background: linear-gradient(135deg, #fff0f5 0%, #ffe4ef 100%);
+  border-color: #e42080;
+}
+
+.event-btn.has-value i {
+  color: #e42080;
+}
+
+.event-btn.has-value::after {
+  content: '✓';
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #e42080;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+}
+
+.event-btn i {
+  font-size: 28px;
+  margin-bottom: 8px;
+  color: #666;
+  transition: color 0.2s ease;
+}
+
+.event-btn span {
+  font-size: 13px;
+  font-weight: 500;
+  text-align: center;
+}
+
+/* Period Start/End buttons - larger and more prominent */
+.event-btn.period-btn {
+  background: linear-gradient(135deg, #fef0f5 0%, #fff 100%);
+}
+
+.event-btn.period-btn i {
+  font-size: 32px;
+  color: #e42080;
+}
+
+.event-btn.period-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e42080 0%, #ff6b9d 100%);
+  color: white;
+}
+
+.event-btn.period-btn:hover:not(:disabled) i {
+  color: white;
+}
+
+/* Value Input Section */
+.value-input-section {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+}
+
+.value-input-section label {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.value-input-section .input-group {
+  max-width: 200px;
+}
+
+.value-input-section input {
+  font-size: 18px;
+  text-align: center;
+}
+
+.value-input-section .input-group-text {
+  background: #e42080;
+  color: white;
+  border-color: #e42080;
+}
+
+/* Action Buttons Row */
+.event-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.event-actions .btn {
+  flex: 1;
+  padding: 12px;
+  font-weight: 500;
+}
+
+.event-actions .btn-primary {
+  background: #e42080;
+  border-color: #e42080;
+}
+
+.event-actions .btn-primary:hover {
+  background: #c41a6f;
+  border-color: #c41a6f;
+}
+
+.event-actions .btn-danger {
+  background: transparent;
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+.event-actions .btn-danger:hover {
+  background: #dc3545;
+  color: white;
+}
+
+/* =====================================================
+   DETAILS DIALOG STYLES (Symptoms, Drugs, Moods)
+   ===================================================== */
+
+.details-dialog .modal-content {
+  max-height: 80vh;
+}
+
+.details-dialog .modal-body {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.details-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e0e0e0;
+  transition: background 0.2s ease;
+}
+
+.detail-item:hover {
+  background: #f8f9fa;
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+}
+
+.detail-label {
+  font-size: 15px;
+  color: #333;
+}
+
+/* Intensity Selector (1-3 circles) */
+.intensity-selector {
+  display: flex;
+  gap: 8px;
+}
+
+.intensity-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.intensity-btn:hover {
+  border-color: #e42080;
+}
+
+.intensity-btn.active {
+  background: #e42080;
+  border-color: #e42080;
+}
+
+.intensity-btn i {
+  font-size: 10px;
+  color: #ccc;
+}
+
+.intensity-btn.active i {
+  color: white;
+}
+
+/* Star Selector (for drugs) */
+.star-selector {
+  display: flex;
+  gap: 4px;
+}
+
+.star-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  font-size: 20px;
+  color: #ccc;
+  transition: color 0.2s ease;
+}
+
+.star-btn:hover {
+  color: #ffc107;
+}
+
+.star-btn.active {
+  color: #ffc107;
+}
+
+/* =====================================================
+   CALENDAR LEGEND (Legacy-inspired)
+   ===================================================== */
+
+.calendar-legend {
+  background: linear-gradient(135deg, #fff 0%, #fafafa 100%);
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-top: 24px;
+}
+
+.calendar-legend h5 {
+  color: #e42080;
+  font-weight: 600;
+  margin-bottom: 12px;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.legend-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.legend-color.menses {
+  background: #f39ac6;
+}
+
+.legend-color.expectation {
+  background-image: linear-gradient(45deg, #f3d4e3 25%, #ffffff 25%, #ffffff 50%, #f3d4e3 50%, #f3d4e3 75%, #ffffff 75%, #ffffff 100%);
+  background-size: 6px 6px;
+}
+
+.legend-color.ovulation {
+  background: #ffb74d;
+}
+
+.legend-color.fertility {
+  background: #81c784;
+}
+
+.legend-color.event {
+  background: #4caf50;
+  border-radius: 50%;
+}
+
+.legend-color.pregnancy-1 {
+  background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);
+}
+
+.legend-color.pregnancy-2 {
+  background: linear-gradient(135deg, #f3e5f5 0%, #e1bee7 100%);
+}
+
+.legend-color.pregnancy-3 {
+  background: linear-gradient(135deg, #ede7f6 0%, #d1c4e9 100%);
+}
+
+.legend-label {
+  font-size: 13px;
+  color: #555;
+}
+
+/* Inline Legend (for header) */
+.legend-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+}
+
+.legend-inline .legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-inline .legend-color {
+  width: 17px;
+  height: 17px;
+  border-radius: 3px;
+}
+
+.legend-inline .legend-label {
+  font-size: 12px;
+}
+
+/* =====================================================
+   CALENDAR TITLE BLOCK (Legacy-inspired)
+   ===================================================== */
+
+.calendar-title-block {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px 10px 0 0;
+  border-bottom: 2px solid #e42080;
+}
+
+.calendar-title-block h5 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* =====================================================
+   RESPONSIVE ADJUSTMENTS
+   ===================================================== */
+
+@media (max-width: 768px) {
+  .event-buttons {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .event-btn {
+    padding: 14px 10px;
+    min-height: 80px;
+  }
+
+  .event-btn i {
+    font-size: 22px;
+  }
+
+  .event-btn span {
+    font-size: 11px;
+  }
+
+  .legend-items {
+    gap: 12px;
+  }
+
+  .day-cell.ovulation-day::after,
+  .day-cell.fertility-day::after {
+    font-size: 12px;
+    bottom: 2px;
+    right: 2px;
+  }
+}
+
+@media (max-width: 480px) {
+  .event-buttons {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .event-btn {
+    padding: 12px 8px;
+    min-height: 70px;
+  }
+
+  .event-btn i {
+    font-size: 20px;
+    margin-bottom: 4px;
+  }
+
+  .event-btn span {
+    font-size: 10px;
+  }
+
+  .legend-items {
+    flex-direction: column;
+    gap: 8px;
   }
 }

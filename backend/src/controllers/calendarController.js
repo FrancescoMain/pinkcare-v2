@@ -51,7 +51,7 @@ class CalendarController {
       }
 
       // Get active teams for user
-      const teams = user.teams?.filter(t => t.deleted === 'N' || t.deleted === false);
+      const teams = user.teams?.filter(t => !t.removed);
       if (!teams || teams.length === 0) {
         return res.status(400).json({
           error: 'Utente non associato a nessun team'
@@ -129,7 +129,7 @@ class CalendarController {
 
       // Get user and team
       const user = await userService.getUserProfile(userId);
-      const teams = user.teams?.filter(t => t.deleted === 'N' || t.deleted === false);
+      const teams = user.teams?.filter(t => !t.removed);
       if (!teams || teams.length === 0) {
         await transaction.rollback();
         return res.status(400).json({
@@ -320,6 +320,198 @@ class CalendarController {
 
     } catch (error) {
       console.error('Get detail types error:', error);
+      next(error);
+    }
+  }
+
+  /**
+   * Get last menses date
+   * GET /api/calendar/last-menses
+   */
+  async getLastMenses(req, res, next) {
+    try {
+      const userId = req.user.userId;
+
+      const user = await userService.getUserProfile(userId);
+      if (!user) {
+        return res.status(404).json({ error: 'Utente non trovato' });
+      }
+
+      const teams = user.teams?.filter(t => !t.removed);
+      if (!teams || teams.length === 0) {
+        return res.status(400).json({ error: 'Utente non associato a nessun team' });
+      }
+      const teamId = teams[0].id;
+
+      const lastMensesDate = await calendarService.getLastMensesDate(teamId);
+      const openPeriod = await calendarService.getOpenMensesPeriod(teamId);
+
+      res.json({
+        lastMensesDate,
+        hasOpenPeriod: !!openPeriod,
+        openPeriodId: openPeriod?.id || null
+      });
+
+    } catch (error) {
+      console.error('Get last menses error:', error);
+      next(error);
+    }
+  }
+
+  /**
+   * Start a new menstrual period
+   * POST /api/calendar/start-period
+   */
+  async startPeriod(req, res, next) {
+    const transaction = await sequelize.transaction();
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        await transaction.rollback();
+        return res.status(400).json({
+          error: 'Validation Error',
+          details: errors.array()
+        });
+      }
+
+      const userId = req.user.userId;
+      const { date } = req.body;
+
+      const user = await userService.getUserProfile(userId);
+      const teams = user.teams?.filter(t => !t.removed);
+      if (!teams || teams.length === 0) {
+        await transaction.rollback();
+        return res.status(400).json({ error: 'Utente non associato a nessun team' });
+      }
+      const teamId = teams[0].id;
+
+      // Check for open period
+      const openPeriod = await calendarService.getOpenMensesPeriod(teamId);
+      if (openPeriod) {
+        await transaction.rollback();
+        return res.status(400).json({
+          error: 'Hai già un ciclo aperto. Chiudilo prima di iniziarne uno nuovo',
+          openPeriodId: openPeriod.id
+        });
+      }
+
+      // Calculate ending date based on user's duration_menstruation
+      const beginningDate = new Date(date);
+      let endingDate = null;
+      if (user.durationMenstruation && user.durationMenstruation > 0) {
+        endingDate = new Date(beginningDate);
+        endingDate.setDate(endingDate.getDate() + user.durationMenstruation - 1);
+      }
+
+      // Create the menses event
+      const event = await calendarService.createEvent({
+        beginning: beginningDate,
+        ending: endingDate,
+        typeId: calendarService.constructor.EVENT_TYPES.MENSES,
+        teamId,
+        username: user.email
+      }, { transaction });
+
+      // Check and terminate any pregnancy event
+      const pregnancyEvent = await calendarService.getActivePregnancy(teamId);
+      if (pregnancyEvent) {
+        await calendarService.terminatePregnancy(teamId, beginningDate, { transaction });
+      }
+
+      await transaction.commit();
+
+      res.status(201).json({
+        message: 'Ciclo iniziato con successo',
+        event: {
+          id: event.id,
+          beginning: event.beginning,
+          ending: event.ending
+        }
+      });
+
+    } catch (error) {
+      await transaction.rollback();
+      console.error('Start period error:', error);
+      next(error);
+    }
+  }
+
+  /**
+   * End current menstrual period
+   * POST /api/calendar/end-period
+   */
+  async endPeriod(req, res, next) {
+    const transaction = await sequelize.transaction();
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        await transaction.rollback();
+        return res.status(400).json({
+          error: 'Validation Error',
+          details: errors.array()
+        });
+      }
+
+      const userId = req.user.userId;
+      const { date } = req.body;
+
+      const user = await userService.getUserProfile(userId);
+      const teams = user.teams?.filter(t => !t.removed);
+      if (!teams || teams.length === 0) {
+        await transaction.rollback();
+        return res.status(400).json({ error: 'Utente non associato a nessun team' });
+      }
+      const teamId = teams[0].id;
+
+      // Get the open period
+      const openPeriod = await calendarService.getOpenMensesPeriod(teamId);
+      if (!openPeriod) {
+        // No open period - try to find the most recent one to update
+        const lastMenses = await calendarService.getLastMensesEvent(teamId);
+        if (!lastMenses) {
+          await transaction.rollback();
+          return res.status(400).json({
+            error: 'Nessun ciclo trovato da chiudere'
+          });
+        }
+
+        // Update the last menses event's ending
+        await calendarService.updateEvent(lastMenses.id, {
+          ending: new Date(date),
+          username: user.email
+        }, { transaction });
+
+        await transaction.commit();
+
+        return res.json({
+          message: 'Ciclo aggiornato con successo',
+          event: {
+            id: lastMenses.id,
+            ending: new Date(date)
+          }
+        });
+      }
+
+      // Update the open period's ending date
+      await calendarService.updateEvent(openPeriod.id, {
+        ending: new Date(date),
+        username: user.email
+      }, { transaction });
+
+      await transaction.commit();
+
+      res.json({
+        message: 'Ciclo chiuso con successo',
+        event: {
+          id: openPeriod.id,
+          beginning: openPeriod.beginning,
+          ending: new Date(date)
+        }
+      });
+
+    } catch (error) {
+      await transaction.rollback();
+      console.error('End period error:', error);
       next(error);
     }
   }

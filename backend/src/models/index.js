@@ -46,10 +46,8 @@ User.belongsToMany(Team, {
   through: UserTeam,
   foreignKey: 'app_user_id',
   otherKey: 'teams_id',
-  as: 'teams',
-  scope: {
-    removed: 'N'
-  }
+  as: 'teams'
+  // Team model already has defaultScope filtering deleted='N'
 });
 
 Team.belongsToMany(User, {

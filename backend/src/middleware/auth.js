@@ -56,6 +56,7 @@ class AuthMiddleware {
       // Add user info to request
       req.user = {
         id: user.id,
+        userId: user.id,  // Alias for compatibility with controllers using userId
         email: user.email,
         name: user.name,
         surname: user.surname,
@@ -181,6 +182,7 @@ class AuthMiddleware {
 
         req.user = {
           id: user.id,
+          userId: user.id,  // Alias for compatibility with controllers using userId
           email: user.email,
           name: user.name,
           surname: user.surname,
@@ -190,9 +192,9 @@ class AuthMiddleware {
         };
         req.token = decoded;
       }
-      
+
       next();
-      
+
     } catch (error) {
       // Ignore token errors in optional auth
       next();

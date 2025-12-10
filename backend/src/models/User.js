@@ -154,7 +154,19 @@ const User = sequelize.define('User', {
     type: DataTypes.INTEGER,
     field: 'duration_period'
   },
-  
+
+  // Pregnancy tracking
+  ovulationDate: {
+    type: DataTypes.DATE,
+    field: 'ovulation_date',
+    comment: 'Calculated or tracked ovulation date'
+  },
+  childbirthdate: {
+    type: DataTypes.DATE,
+    field: 'childbirthdate',
+    comment: 'Expected delivery date for pregnancy'
+  },
+
   // Medical history
   surgery: {
     type: DataTypes.TEXT
