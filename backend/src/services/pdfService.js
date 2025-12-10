@@ -49,14 +49,17 @@ class PDFService {
     };
 
     // Fill page 2 with screening data
-    const needsThirdPage = await this._fillScreeningPage(pdfDoc2, thematicAreas, state, sdf);
+    let needsMorePages = await this._fillScreeningPage(pdfDoc2, thematicAreas, state, sdf);
 
-    // If we need a third page, create it
-    let pdfDoc3 = null;
-    if (needsThirdPage && state.ta_idx < thematicAreas.length) {
-      const template3Bytes = fs.readFileSync(template2Path);
-      pdfDoc3 = await PDFDocument.load(template3Bytes);
-      await this._fillScreeningPage(pdfDoc3, thematicAreas, state, sdf, true);
+    // Collect all screening pages (page 2 and any additional pages needed)
+    const screeningPages = [pdfDoc2];
+
+    // Create additional pages as needed (loop until all content is rendered)
+    while (needsMorePages && state.ta_idx < thematicAreas.length) {
+      const additionalPageBytes = fs.readFileSync(template2Path);
+      const additionalPdfDoc = await PDFDocument.load(additionalPageBytes);
+      needsMorePages = await this._fillScreeningPage(additionalPdfDoc, thematicAreas, state, sdf, true);
+      screeningPages.push(additionalPdfDoc);
     }
 
     // Merge all pages into final document
@@ -66,14 +69,10 @@ class PDFService {
     const [page1] = await finalPdf.copyPages(pdfDoc1, [0]);
     finalPdf.addPage(page1);
 
-    // Copy page 2
-    const [page2] = await finalPdf.copyPages(pdfDoc2, [0]);
-    finalPdf.addPage(page2);
-
-    // Copy page 3 if needed
-    if (pdfDoc3) {
-      const [page3] = await finalPdf.copyPages(pdfDoc3, [0]);
-      finalPdf.addPage(page3);
+    // Copy all screening pages
+    for (const screeningPdfDoc of screeningPages) {
+      const [screeningPage] = await finalPdf.copyPages(screeningPdfDoc, [0]);
+      finalPdf.addPage(screeningPage);
     }
 
     // Flatten and return
@@ -209,22 +208,32 @@ class PDFService {
     const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica);
     const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
-    const MAX_ROWS = 36;
-    let row = 0;
-
     // Row layout configuration (based on template)
     // These values need to match the template's row positions
     const ROW_HEIGHT = 20;
     const FIRST_ROW_Y = height - 100; // Starting Y position from top
     const LEFT_MARGIN = 25;
     const ROW_WIDTH = width - 50;
+    const FOOTER_MARGIN = 100; // Space reserved for footer at bottom of page
+
+    // Calculate max rows dynamically based on available space (avoid footer overlap)
+    const availableHeight = FIRST_ROW_Y - FOOTER_MARGIN;
+    const MAX_ROWS = Math.floor(availableHeight / ROW_HEIGHT);
+    let row = 0;
 
     // Helper to calculate Y position for a row (PDF coordinates start from bottom)
     const getRowY = (rowNum) => FIRST_ROW_Y - (rowNum * ROW_HEIGHT);
 
+    // Helper to check if we can draw at this row (above footer)
+    const canDrawAtRow = (rowNum) => {
+      const y = getRowY(rowNum);
+      return y > FOOTER_MARGIN;
+    };
+
     // Helper to draw header row with red background and white bold text
     const drawHeaderRow = (rowNum, text) => {
       const y = getRowY(rowNum);
+      if (y <= FOOTER_MARGIN) return; // Safety check - don't draw in footer area
 
       // Draw red background rectangle - RGB(249, 37, 82) = PinkCare red
       page.drawRectangle({
@@ -248,6 +257,7 @@ class PDFService {
     // Helper to draw regular question row with black text
     const drawQuestionRow = (rowNum, text) => {
       const y = getRowY(rowNum);
+      if (y <= FOOTER_MARGIN) return; // Safety check - don't draw in footer area
 
       page.drawText(text, {
         x: LEFT_MARGIN + 5,
