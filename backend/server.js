@@ -27,6 +27,7 @@ const blogRoutes = require('./src/routes/blog');
 const questionnaireRoutes = require('./src/routes/questionnaire');
 const calendarRoutes = require('./src/routes/calendar');
 const clinicalHistoryRoutes = require('./src/routes/clinicalHistory');
+const scheduleRoutes = require('./src/routes/schedule');
 const { testConnection } = require('./src/config/database');
 
 const app = express();
@@ -60,6 +61,7 @@ app.use('/api/blog', blogRoutes);
 app.use('/api/questionnaire', questionnaireRoutes);
 app.use('/api/calendar', calendarRoutes);
 app.use('/api/clinical-history', clinicalHistoryRoutes);
+app.use('/api/schedule', scheduleRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

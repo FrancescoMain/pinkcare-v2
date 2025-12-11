@@ -26,6 +26,8 @@ const EventDetailType = require('./EventDetailType');
 const TeamSurgery = require('./TeamSurgery');
 const Surgery = require('./Surgery');
 const GravidanceType = require('./GravidanceType');
+const Schedule = require('./Schedule');
+const RecommendedExamination = require('./RecommendedExamination');
 
 // Define associations
 User.belongsToMany(Role, {
@@ -325,6 +327,48 @@ Surgery.hasMany(TeamSurgery, {
 
 // No hierarchical structure for surgeries - table doesn't have parent_id column
 
+// Schedule (Agenda) associations
+Schedule.belongsTo(User, {
+  foreignKey: 'userId',
+  as: 'user'
+});
+
+User.hasMany(Schedule, {
+  foreignKey: 'userId',
+  as: 'schedules'
+});
+
+// RecommendedExamination associations
+RecommendedExamination.belongsTo(Team, {
+  foreignKey: 'teamId',
+  as: 'team'
+});
+
+RecommendedExamination.belongsTo(ExaminationPathology, {
+  foreignKey: 'examinationId',
+  as: 'examination'
+});
+
+RecommendedExamination.belongsTo(Screening, {
+  foreignKey: 'screeningId',
+  as: 'screening'
+});
+
+RecommendedExamination.belongsTo(ProtocolRule, {
+  foreignKey: 'protocolRuleId',
+  as: 'protocolRule'
+});
+
+Team.hasMany(RecommendedExamination, {
+  foreignKey: 'teamId',
+  as: 'recommendedExaminations'
+});
+
+ExaminationPathology.hasMany(RecommendedExamination, {
+  foreignKey: 'examinationId',
+  as: 'recommendedExaminations'
+});
+
 module.exports = {
   sequelize,
   User,
@@ -353,5 +397,7 @@ module.exports = {
   EventDetailType,
   TeamSurgery,
   Surgery,
-  GravidanceType
+  GravidanceType,
+  Schedule,
+  RecommendedExamination
 };

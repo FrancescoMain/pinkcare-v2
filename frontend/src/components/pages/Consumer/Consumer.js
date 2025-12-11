@@ -4,6 +4,7 @@ import QuestionnaireChoice from '../Questionnaire/QuestionnaireChoice';
 import QuestionnaireForm from '../Questionnaire/QuestionnaireForm';
 import MedicalHistoryForm from './MedicalHistoryForm';
 import MensesCalendar from './Calendar/MensesCalendar';
+import Schedule from './Schedule/Schedule';
 import UserProfileSidebar from '../../layout/UserProfileSidebar';
 import AdvertisingSidebar from '../../layout/AdvertisingSidebar';
 import ThreeColumnLayout from '../../layout/ThreeColumnLayout';
@@ -81,13 +82,8 @@ const Consumer = () => {
         return <QuestionnaireChoice />;
 
       case 4:
-        // TODO: Schedule - not yet implemented
-        return (
-          <div className="tab-placeholder">
-            <h3>Schedule</h3>
-            <p>Da implementare</p>
-          </div>
-        );
+        // Schedule (Agenda Personale)
+        return <Schedule />;
 
       case 5:
         // Menses Calendar (Calendario Mestruale)

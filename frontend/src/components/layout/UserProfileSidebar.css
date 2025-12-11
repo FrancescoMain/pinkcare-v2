@@ -203,3 +203,61 @@
   visibility: visible;
   opacity: 1;
 }
+
+/* Monthly Events List - Eventi del mese */
+.events-loading {
+  padding: 15px;
+  text-align: center;
+  color: #888;
+  font-size: 14px;
+}
+
+.monthly-events-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.monthly-event-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 5px;
+  border-bottom: 1px solid #f0f0f0;
+  gap: 10px;
+}
+
+.monthly-event-item:last-child {
+  border-bottom: none;
+}
+
+.monthly-event-item .event-date {
+  font-size: 12px;
+  font-weight: 600;
+  color: #515365;
+  min-width: 45px;
+  text-transform: capitalize;
+}
+
+.monthly-event-item .event-title {
+  flex: 1;
+  font-size: 13px;
+  color: #666;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.monthly-event-item .event-color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.monthly-event-more {
+  padding: 8px 5px;
+  font-size: 12px;
+  color: #888;
+  font-style: italic;
+  text-align: center;
+}

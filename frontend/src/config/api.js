@@ -141,7 +141,22 @@ export class ApiClient {
       ...options
     });
   }
-  
+
+  /**
+   * Effettua una chiamata PATCH
+   * @param {string} endpoint - L'endpoint da chiamare
+   * @param {Object} data - Dati da inviare
+   * @param {Object} options - Opzioni aggiuntive
+   * @returns {Promise} - Promise con la risposta
+   */
+  static async patch(endpoint, data = null, options = {}) {
+    return this.request(endpoint, {
+      method: 'PATCH',
+      body: data ? JSON.stringify(data) : null,
+      ...options
+    });
+  }
+
   /**
    * Metodo base per le chiamate API
    * @param {string} endpoint - L'endpoint da chiamare

@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
+import ScheduleApi from '../../services/scheduleApi';
 import './UserProfileSidebar.css';
 
 /**
@@ -12,6 +13,40 @@ const UserProfileSidebar = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [monthlyEvents, setMonthlyEvents] = useState([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
+
+  // Fetch eventi del mese corrente
+  useEffect(() => {
+    const fetchMonthlyEvents = async () => {
+      try {
+        setEventsLoading(true);
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+
+        const formatDate = (date) => {
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        };
+
+        const response = await ScheduleApi.getEvents(
+          formatDate(startOfMonth),
+          formatDate(endOfMonth)
+        );
+        setMonthlyEvents(response.events || []);
+      } catch (error) {
+        console.error('Error fetching monthly events:', error);
+        setMonthlyEvents([]);
+      } finally {
+        setEventsLoading(false);
+      }
+    };
+
+    fetchMonthlyEvents();
+  }, []);
 
   // Calcola età
   const calculateAge = (birthday) => {
@@ -98,9 +133,50 @@ const UserProfileSidebar = () => {
       <div className="widget w-build-fav btn-wid">
         <div className="widget-thumb sched_list">
           <h6 style={{ borderBottom: '1px solid #ddd' }}>Eventi del mese</h6>
-          <div className="nothing-found">
-            <span>No records found.</span>
-          </div>
+          {eventsLoading ? (
+            <div className="events-loading">
+              <span>Caricamento...</span>
+            </div>
+          ) : monthlyEvents.length === 0 ? (
+            <div className="nothing-found">
+              <span>No records found.</span>
+            </div>
+          ) : (
+            <ul className="monthly-events-list">
+              {monthlyEvents.slice(0, 5).map((event, index) => (
+                <li key={event.id || index} className="monthly-event-item">
+                  <span className="event-date">
+                    {new Date(event.start).toLocaleDateString('it-IT', {
+                      day: '2-digit',
+                      month: 'short'
+                    })}
+                  </span>
+                  <span className="event-title" title={event.title}>
+                    {event.title}
+                  </span>
+                  <span
+                    className="event-color-dot"
+                    style={{
+                      backgroundColor: event.color?.includes('red') ? '#E12417' :
+                        event.color?.includes('orange') ? '#E18A17' :
+                        event.color?.includes('yellow') ? '#E1D817' :
+                        event.color?.includes('green') ? '#21CD24' :
+                        event.color?.includes('aquamarine') ? '#17E19E' :
+                        event.color?.includes('turquoise') ? '#17D7E1' :
+                        event.color?.includes('purple') ? (event.color?.includes('red-purple') ? '#8e24aa' : '#E117D4') :
+                        event.color?.includes('lavander') ? '#7986cb' :
+                        '#176FE1'
+                    }}
+                  ></span>
+                </li>
+              ))}
+              {monthlyEvents.length > 5 && (
+                <li className="monthly-event-more">
+                  +{monthlyEvents.length - 5} altri eventi
+                </li>
+              )}
+            </ul>
+          )}
         </div>
       </div>
 
