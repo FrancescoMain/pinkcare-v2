@@ -155,23 +155,62 @@ class ScheduleService {
    * @returns {Promise<Schedule>} Created schedule
    */
   async createEvent(eventData, userId) {
-    const schedule = await Schedule.create({
-      heading: eventData.heading,
-      message: eventData.message,
-      eventBeginning: eventData.eventBeginning,
-      eventEnding: eventData.eventEnding,
-      reminder: eventData.reminder,
-      reminder2: eventData.reminder2,
-      reminder3: eventData.reminder3,
-      reminder4: eventData.reminder4,
-      reminder5: eventData.reminder5,
-      color: eventData.color || ScheduleService.COLORS.BLUE,
-      userId,
-      insertionDate: new Date(),
-      lastModifyDate: new Date()
+    const now = new Date();
+    const color = eventData.color || ScheduleService.COLORS.BLUE;
+
+    // Use raw SQL with nextval to handle PostgreSQL sequence for id
+    const [result] = await sequelize.query(`
+      INSERT INTO app_schedule (
+        id, heading, message, event_beginning, event_ending,
+        reminder, reminder_2, reminder_3, reminder_4, reminder_5,
+        color, user_id, deleted, insertion_date, last_modify_date
+      ) VALUES (
+        nextval('app_schedule_id_seq'),
+        :heading, :message, :eventBeginning, :eventEnding,
+        :reminder, :reminder2, :reminder3, :reminder4, :reminder5,
+        :color, :userId, 'N', :insertionDate, :lastModifyDate
+      ) RETURNING *
+    `, {
+      replacements: {
+        heading: eventData.heading || null,
+        message: eventData.message || null,
+        eventBeginning: eventData.eventBeginning || null,
+        eventEnding: eventData.eventEnding || null,
+        reminder: eventData.reminder || null,
+        reminder2: eventData.reminder2 || null,
+        reminder3: eventData.reminder3 || null,
+        reminder4: eventData.reminder4 || null,
+        reminder5: eventData.reminder5 || null,
+        color,
+        userId,
+        insertionDate: now,
+        lastModifyDate: now
+      },
+      type: sequelize.QueryTypes.INSERT
     });
 
-    return this._transformSchedule(schedule);
+    const schedule = result[0];
+
+    return {
+      id: schedule.id,
+      type: 'schedule',
+      title: schedule.heading,
+      heading: schedule.heading,
+      description: schedule.message,
+      message: schedule.message,
+      start: schedule.event_beginning,
+      end: schedule.event_ending,
+      eventBeginning: schedule.event_beginning,
+      eventEnding: schedule.event_ending,
+      color: schedule.color || ScheduleService.COLORS.BLUE,
+      reminder: schedule.reminder,
+      reminder2: schedule.reminder_2,
+      reminder3: schedule.reminder_3,
+      reminder4: schedule.reminder_4,
+      reminder5: schedule.reminder_5,
+      allDay: this._isAllDayEvent(schedule.event_beginning, schedule.event_ending),
+      editable: true
+    };
   }
 
   /**
