@@ -249,14 +249,33 @@ class UserService {
       throw new Error('Devi acconsentire ad essere visibile sul portale');
     }
 
-    const user = await this.insertUserRecord({
+    const insertedUser = await this.insertUserRecord({
       ...userData,
       agreeToBeShown: true
     }, options);
 
-    await this.assignRoles(user.id, ['ROLE_USER', 'ROLE_BUSINESS'], options);
+    await this.assignRoles(insertedUser.id, ['ROLE_USER', 'ROLE_BUSINESS'], options);
 
-    return this.getUserProfile(user.id, options);
+    // Return the inserted user directly with roles info
+    // Note: getUserProfile doesn't work here because findByPk doesn't see uncommitted transaction data
+    return {
+      id: insertedUser.id,
+      name: insertedUser.name,
+      surname: insertedUser.surname,
+      email: insertedUser.email,
+      username: insertedUser.username,
+      nickName: insertedUser.nick_name || insertedUser.nickName,
+      birthday: insertedUser.birthday,
+      gender: insertedUser.gender,
+      mobilePhone: insertedUser.mobile_phone || insertedUser.mobilePhone,
+      filledPersonalForm: insertedUser.filled_personal_form || insertedUser.filledPersonalForm || false,
+      insertionDate: insertedUser.insertion_date || insertedUser.insertionDate,
+      agreeConditionAndPrivacy: insertedUser.agree_condition_and_privacy || insertedUser.agreeConditionAndPrivacy,
+      agreeMarketing: insertedUser.agree_marketing || insertedUser.agreeMarketing,
+      agreeNewsletter: insertedUser.agree_newsletter || insertedUser.agreeNewsletter,
+      agreeToBeShown: insertedUser.agree_to_be_shown || insertedUser.agreeToBeShown,
+      roles: [{ name: 'ROLE_USER' }, { name: 'ROLE_BUSINESS' }]
+    };
   }
   
   /**
