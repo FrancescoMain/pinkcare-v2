@@ -1,6 +1,7 @@
 {
   "version": 2,
   "name": "pinkcare-api",
+  "regions": ["arn1"],
   "builds": [
     {
       "src": "server.js",
