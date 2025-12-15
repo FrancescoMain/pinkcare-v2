@@ -359,44 +359,58 @@ exports.elaborateScreening = async (req, res) => {
       await screening.save();
     }
 
-    // Save team replies
+    // OPTIMIZED: Batch upsert TeamReply - pre-fetch existing replies and batch operations
     console.log('[QuestionnaireController] Saving team replies for', questions.length, 'questions to screening', screening.id);
-    console.log('[QuestionnaireController] Questions received:', JSON.stringify(questions, null, 2));
+
+    // Step 1: Collect all question IDs (including sub-questions)
+    const allQuestionIds = [];
+    for (const q of questions) {
+      allQuestionIds.push(q.id);
+      if (q.sub_questions && q.sub_questions.length > 0) {
+        for (const sq of q.sub_questions) {
+          allQuestionIds.push(sq.id);
+        }
+      }
+    }
+
+    // Step 2: Pre-fetch ALL existing replies in ONE query
+    const existingReplies = await TeamReply.findAll({
+      where: {
+        team_id: userTeam.id,
+        screening_id: screening.id,
+        question_id: allQuestionIds
+      }
+    });
+
+    // Build a Map for O(1) lookup: question_id -> reply
+    const repliesMap = new Map();
+    for (const reply of existingReplies) {
+      repliesMap.set(reply.question_id, reply);
+    }
+    console.log(`[QuestionnaireController] Pre-fetched ${existingReplies.length} existing replies`);
+
+    // Step 3: Separate into updates and creates
+    const toCreate = [];
+    const toUpdate = [];
+    const now = new Date();
 
     for (const q of questions) {
-      console.log(`[QuestionnaireController] Processing question ${q.id}: given_answer=${q.given_answer}, given_answer_string=${q.given_answer_string}`);
-
-      // Skip questions with no answer (null or undefined)
-      // But keep questions with answer 0 or -1 as they are valid answers
+      // Skip questions with no answer
       if (q.given_answer === null && !q.given_answer_string) {
-        console.log(`[QuestionnaireController] Skipping question ${q.id} - no answer provided`);
         continue;
       }
 
-      // Check if reply already exists
-      let teamReply = await TeamReply.findOne({
-        where: {
-          team_id: userTeam.id,
-          question_id: q.id,
-          screening_id: screening.id
-        }
-      });
-
-      if (teamReply) {
-        // Update existing reply - set fields and mark as changed for Sequelize
-        console.log(`[QuestionnaireController] BEFORE UPDATE - reply id=${teamReply.id}, old answer=${teamReply.reply}, new answer=${q.given_answer}`);
-        teamReply.reply = q.given_answer;
-        teamReply.reply_string = q.given_answer_string;
-        teamReply.last_modify_username = user.username;
-        teamReply.last_modify_date = new Date();
-        // Force Sequelize to detect changes on mapped fields
-        teamReply.changed('reply', true);
-        teamReply.changed('reply_string', true);
-        const savedReply = await teamReply.save();
-        console.log(`[QuestionnaireController] AFTER UPDATE - saved reply: id=${savedReply.id}, answer=${savedReply.reply}, dataValues:`, savedReply.dataValues);
+      const existingReply = repliesMap.get(q.id);
+      if (existingReply) {
+        toUpdate.push({
+          id: existingReply.id,
+          reply: q.given_answer,
+          reply_string: q.given_answer_string,
+          last_modify_username: user.username,
+          last_modify_date: now
+        });
       } else {
-        // Create new reply
-        await TeamReply.create({
+        toCreate.push({
           team_id: userTeam.id,
           question_id: q.id,
           screening_id: screening.id,
@@ -407,37 +421,24 @@ exports.elaborateScreening = async (req, res) => {
         });
       }
 
-      // Save sub-question replies if any
+      // Process sub-questions
       if (q.sub_questions && q.sub_questions.length > 0) {
         for (const sq of q.sub_questions) {
-          console.log(`[QuestionnaireController] Processing sub-question ${sq.id}: given_answer=${sq.given_answer}, given_answer_string=${sq.given_answer_string}`);
-
-          // Skip sub-questions with no answer
           if (sq.given_answer === null && !sq.given_answer_string) {
-            console.log(`[QuestionnaireController] Skipping sub-question ${sq.id} - no answer provided`);
             continue;
           }
 
-          let subReply = await TeamReply.findOne({
-            where: {
-              team_id: userTeam.id,
-              question_id: sq.id,
-              screening_id: screening.id
-            }
-          });
-
-          if (subReply) {
-            // Update existing sub-reply - set fields and mark as changed for Sequelize
-            subReply.reply = sq.given_answer;
-            subReply.reply_string = sq.given_answer_string;
-            subReply.last_modify_username = user.username;
-            subReply.last_modify_date = new Date();
-            // Force Sequelize to detect changes on mapped fields
-            subReply.changed('reply', true);
-            subReply.changed('reply_string', true);
-            await subReply.save();
-          } else{
-            await TeamReply.create({
+          const existingSubReply = repliesMap.get(sq.id);
+          if (existingSubReply) {
+            toUpdate.push({
+              id: existingSubReply.id,
+              reply: sq.given_answer,
+              reply_string: sq.given_answer_string,
+              last_modify_username: user.username,
+              last_modify_date: now
+            });
+          } else {
+            toCreate.push({
               team_id: userTeam.id,
               question_id: sq.id,
               screening_id: screening.id,
@@ -451,30 +452,64 @@ exports.elaborateScreening = async (req, res) => {
       }
     }
 
-    // Elaborate screening results (find matching protocol rules)
+    // Step 4: Batch create new replies
+    if (toCreate.length > 0) {
+      await TeamReply.bulkCreate(toCreate);
+      console.log(`[QuestionnaireController] Batch created ${toCreate.length} new replies`);
+    }
+
+    // Step 5: Batch update existing replies using raw query for efficiency
+    if (toUpdate.length > 0) {
+      // Use Promise.all for parallel updates (still individual but concurrent)
+      await Promise.all(toUpdate.map(update =>
+        TeamReply.update(
+          {
+            reply: update.reply,
+            reply_string: update.reply_string,
+            last_modify_username: update.last_modify_username,
+            last_modify_date: update.last_modify_date
+          },
+          { where: { id: update.id } }
+        )
+      ));
+      console.log(`[QuestionnaireController] Batch updated ${toUpdate.length} existing replies`);
+    }
+
+    // OPTIMIZED: Pre-fetch all ProtocolRules for this thematic area in ONE query
     console.log('[QuestionnaireController] Elaborating screening results');
+
+    // Pre-fetch ALL protocol rules for this thematic area with examinations
+    const allProtocolRules = await ProtocolRule.findAll({
+      where: {
+        thematic_area_id: thematicAreaId,
+        question_id: allQuestionIds,
+        deleted: false
+      },
+      include: [{
+        model: ExaminationPathology,
+        as: 'examination',
+        where: { deleted: false },
+        required: true
+      }]
+    });
+
+    // Build a Map for quick lookup: question_id -> array of rules
+    const rulesMap = new Map();
+    for (const rule of allProtocolRules) {
+      if (!rulesMap.has(rule.question_id)) {
+        rulesMap.set(rule.question_id, []);
+      }
+      rulesMap.get(rule.question_id).push(rule);
+    }
+    console.log(`[QuestionnaireController] Pre-fetched ${allProtocolRules.length} protocol rules`);
 
     const suggestedExaminations = [];
 
     for (const q of questions) {
-      // Find protocol rules that match the answer
-      const matchingRules = await ProtocolRule.findAll({
-        where: {
-          question_id: q.id,
-          thematic_area_id: thematicAreaId,
-          answer: q.given_answer,
-          deleted: false
-        },
-        include: [{
-          model: ExaminationPathology,
-          as: 'examination',
-          where: { deleted: false },
-          required: true
-        }]
-      });
-
-      for (const rule of matchingRules) {
-        if (rule.examination) {
+      // Find matching rules from pre-fetched data
+      const questionRules = rulesMap.get(q.id) || [];
+      for (const rule of questionRules) {
+        if (rule.answer === q.given_answer && rule.examination) {
           suggestedExaminations.push({
             examination: rule.examination,
             rule: rule,
@@ -486,21 +521,8 @@ exports.elaborateScreening = async (req, res) => {
       // Check sub-questions
       if (q.sub_questions && q.sub_questions.length > 0) {
         for (const sq of q.sub_questions) {
-          const subMatchingRules = await ProtocolRule.findAll({
-            where: {
-              question_id: sq.id,
-              thematic_area_id: thematicAreaId,
-              deleted: false
-            },
-            include: [{
-              model: ExaminationPathology,
-              as: 'examination',
-              where: { deleted: false },
-              required: true
-            }]
-          });
-
-          for (const rule of subMatchingRules) {
+          const subQuestionRules = rulesMap.get(sq.id) || [];
+          for (const rule of subQuestionRules) {
             // Check if answer matches or if it's a select type question
             if (rule.answer === sq.given_answer || (sq.type_question === 'select' && sq.given_answer_string)) {
               if (rule.examination) {
@@ -615,29 +637,51 @@ async function elaborateSingleThematicArea(req, thematicArea) {
     await screening.save();
   }
 
-  // Save team replies
+  // OPTIMIZED: Batch operations for team replies
+  // Step 1: Collect all question IDs
+  const allQuestionIds = [];
   for (const q of screening_questions) {
-    console.log(`[QuestionnaireController] Processing question ${q.id}: given_answer=${q.given_answer}, given_answer_string=${q.given_answer_string}`);
-
-    let teamReply = await TeamReply.findOne({
-      where: {
-        team_id: userTeam.id,
-        question_id: q.id,
-        screening_id: screening.id
+    allQuestionIds.push(q.id);
+    if (q.sub_questions && q.sub_questions.length > 0) {
+      for (const sq of q.sub_questions) {
+        allQuestionIds.push(sq.id);
       }
-    });
+    }
+  }
 
-    if (teamReply) {
-      teamReply.reply = q.given_answer;
-      teamReply.reply_string = q.given_answer_string;
-      teamReply.last_modify_username = user.username;
-      teamReply.last_modify_date = new Date();
-      // Force Sequelize to detect changes on mapped fields
-      teamReply.changed('reply', true);
-      teamReply.changed('reply_string', true);
-      await teamReply.save();
+  // Step 2: Pre-fetch existing replies
+  const existingReplies = await TeamReply.findAll({
+    where: {
+      team_id: userTeam.id,
+      screening_id: screening.id,
+      question_id: allQuestionIds
+    }
+  });
+
+  const repliesMap = new Map();
+  for (const reply of existingReplies) {
+    repliesMap.set(reply.question_id, reply);
+  }
+
+  // Step 3: Batch operations
+  const toCreate = [];
+  const toUpdate = [];
+  const now = new Date();
+
+  for (const q of screening_questions) {
+    if (q.given_answer === null && !q.given_answer_string) continue;
+
+    const existingReply = repliesMap.get(q.id);
+    if (existingReply) {
+      toUpdate.push({
+        id: existingReply.id,
+        reply: q.given_answer,
+        reply_string: q.given_answer_string,
+        last_modify_username: user.username,
+        last_modify_date: now
+      });
     } else {
-      await TeamReply.create({
+      toCreate.push({
         team_id: userTeam.id,
         question_id: q.id,
         screening_id: screening.id,
@@ -648,37 +692,21 @@ async function elaborateSingleThematicArea(req, thematicArea) {
       });
     }
 
-    // Save sub-question replies if any
     if (q.sub_questions && q.sub_questions.length > 0) {
       for (const sq of q.sub_questions) {
-        console.log(`[QuestionnaireController] Processing sub-question ${sq.id}: given_answer=${sq.given_answer}, given_answer_string=${sq.given_answer_string}`);
+        if (sq.given_answer === null && !sq.given_answer_string) continue;
 
-        // Skip sub-questions with no answer
-        if (sq.given_answer === null && !sq.given_answer_string) {
-          console.log(`[QuestionnaireController] Skipping sub-question ${sq.id} - no answer provided`);
-          continue;
-        }
-
-        let subReply = await TeamReply.findOne({
-          where: {
-            team_id: userTeam.id,
-            question_id: sq.id,
-            screening_id: screening.id
-          }
-        });
-
-        if (subReply) {
-          // Update existing sub-reply - set fields and mark as changed for Sequelize
-          subReply.reply = sq.given_answer;
-          subReply.reply_string = sq.given_answer_string;
-          subReply.last_modify_username = user.username;
-          subReply.last_modify_date = new Date();
-          // Force Sequelize to detect changes on mapped fields
-          subReply.changed('reply', true);
-          subReply.changed('reply_string', true);
-          await subReply.save();
+        const existingSubReply = repliesMap.get(sq.id);
+        if (existingSubReply) {
+          toUpdate.push({
+            id: existingSubReply.id,
+            reply: sq.given_answer,
+            reply_string: sq.given_answer_string,
+            last_modify_username: user.username,
+            last_modify_date: now
+          });
         } else {
-          await TeamReply.create({
+          toCreate.push({
             team_id: userTeam.id,
             question_id: sq.id,
             screening_id: screening.id,
@@ -692,27 +720,53 @@ async function elaborateSingleThematicArea(req, thematicArea) {
     }
   }
 
-  // Elaborate screening results
+  if (toCreate.length > 0) {
+    await TeamReply.bulkCreate(toCreate);
+  }
+
+  if (toUpdate.length > 0) {
+    await Promise.all(toUpdate.map(update =>
+      TeamReply.update(
+        {
+          reply: update.reply,
+          reply_string: update.reply_string,
+          last_modify_username: update.last_modify_username,
+          last_modify_date: update.last_modify_date
+        },
+        { where: { id: update.id } }
+      )
+    ));
+  }
+
+  // OPTIMIZED: Pre-fetch all protocol rules
+  const allProtocolRules = await ProtocolRule.findAll({
+    where: {
+      thematic_area_id: thematicAreaId,
+      question_id: allQuestionIds,
+      deleted: false
+    },
+    include: [{
+      model: ExaminationPathology,
+      as: 'examination',
+      where: { deleted: false },
+      required: true
+    }]
+  });
+
+  const rulesMap = new Map();
+  for (const rule of allProtocolRules) {
+    if (!rulesMap.has(rule.question_id)) {
+      rulesMap.set(rule.question_id, []);
+    }
+    rulesMap.get(rule.question_id).push(rule);
+  }
+
   const suggestedExaminations = [];
 
   for (const q of screening_questions) {
-    const matchingRules = await ProtocolRule.findAll({
-      where: {
-        question_id: q.id,
-        thematic_area_id: thematicAreaId,
-        answer: q.given_answer,
-        deleted: false
-      },
-      include: [{
-        model: ExaminationPathology,
-        as: 'examination',
-        where: { deleted: false },
-        required: true
-      }]
-    });
-
-    for (const rule of matchingRules) {
-      if (rule.examination) {
+    const questionRules = rulesMap.get(q.id) || [];
+    for (const rule of questionRules) {
+      if (rule.answer === q.given_answer && rule.examination) {
         suggestedExaminations.push({
           examination: rule.examination,
           rule: rule,
