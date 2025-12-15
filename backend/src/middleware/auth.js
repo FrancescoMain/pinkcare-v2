@@ -41,10 +41,13 @@ class AuthMiddleware {
         });
       }
 
-      // Fetch teams using raw SQL to avoid Sequelize's hardcoded "deleted = false" boolean conversion
+      // Fetch teams with address using raw SQL to avoid Sequelize's hardcoded "deleted = false" boolean conversion
       const teamsQuery = `
-        SELECT t.id, t.name, t.logo FROM app_team t
+        SELECT t.id, t.name, t.logo,
+               a.latitude, a.longitude, a.municipality
+        FROM app_team t
         INNER JOIN app_user_app_team ut ON t.id = ut.teams_id
+        LEFT JOIN app_address a ON t.address_id = a.id
         WHERE ut.app_user_id = :userId AND t.deleted = 'N'
       `;
 
@@ -52,6 +55,14 @@ class AuthMiddleware {
         replacements: { userId: user.id },
         type: QueryTypes.SELECT
       });
+
+      // Get user's primary location from first team with coordinates
+      const teamWithCoords = teams?.find(t => t.latitude && t.longitude);
+      const userLocation = teamWithCoords ? {
+        lat: teamWithCoords.latitude,
+        lon: teamWithCoords.longitude,
+        municipality: teamWithCoords.municipality
+      } : null;
 
       // Add user info to request
       req.user = {
@@ -62,7 +73,8 @@ class AuthMiddleware {
         surname: user.surname,
         birthday: user.birthday,
         roles: user.roles?.map(role => role.name) || [],
-        teams: teams || []
+        teams: teams || [],
+        location: userLocation
       };
       
       req.token = decoded;
@@ -168,10 +180,13 @@ class AuthMiddleware {
       });
 
       if (user) {
-        // Fetch teams using raw SQL (same reason as verifyToken)
+        // Fetch teams with address using raw SQL (same reason as verifyToken)
         const teamsQuery = `
-          SELECT t.id, t.name, t.logo FROM app_team t
+          SELECT t.id, t.name, t.logo,
+                 a.latitude, a.longitude, a.municipality
+          FROM app_team t
           INNER JOIN app_user_app_team ut ON t.id = ut.teams_id
+          LEFT JOIN app_address a ON t.address_id = a.id
           WHERE ut.app_user_id = :userId AND t.deleted = 'N'
         `;
 
@@ -179,6 +194,14 @@ class AuthMiddleware {
           replacements: { userId: user.id },
           type: QueryTypes.SELECT
         });
+
+        // Get user's primary location from first team with coordinates
+        const teamWithCoords = teams?.find(t => t.latitude && t.longitude);
+        const userLocation = teamWithCoords ? {
+          lat: teamWithCoords.latitude,
+          lon: teamWithCoords.longitude,
+          municipality: teamWithCoords.municipality
+        } : null;
 
         req.user = {
           id: user.id,
@@ -188,7 +211,8 @@ class AuthMiddleware {
           surname: user.surname,
           birthday: user.birthday,
           roles: user.roles?.map(role => role.name) || [],
-          teams: teams || []
+          teams: teams || [],
+          location: userLocation
         };
         req.token = decoded;
       }

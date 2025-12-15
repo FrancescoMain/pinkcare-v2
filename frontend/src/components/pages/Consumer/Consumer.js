@@ -5,6 +5,7 @@ import QuestionnaireForm from '../Questionnaire/QuestionnaireForm';
 import MedicalHistoryForm from './MedicalHistoryForm';
 import MensesCalendar from './Calendar/MensesCalendar';
 import Schedule from './Schedule/Schedule';
+import DoctorsList from './DoctorsList';
 import UserProfileSidebar from '../../layout/UserProfileSidebar';
 import AdvertisingSidebar from '../../layout/AdvertisingSidebar';
 import ThreeColumnLayout from '../../layout/ThreeColumnLayout';
@@ -19,6 +20,7 @@ import './Consumer.css';
  * - tab=3: advanced_screening (Questionnaire)
  * - tab=4: schedule
  * - tab=5: menses_calendar
+ * - tab=6: business_list (Lista Medici/Cliniche)
  * - tab=10: my_documents
  *
  * Layout: 3 colonne come nel legacy usando ThreeColumnLayout
@@ -88,6 +90,10 @@ const Consumer = () => {
       case 5:
         // Menses Calendar (Calendario Mestruale)
         return <MensesCalendar />;
+
+      case 6:
+        // Lista Medici/Cliniche (business_list)
+        return <DoctorsList />;
 
       case 10:
         // TODO: My Documents - not yet implemented

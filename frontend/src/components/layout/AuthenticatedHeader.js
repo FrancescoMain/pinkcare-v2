@@ -73,8 +73,8 @@ const AuthenticatedHeader = () => {
 
           {/* MEDICI - Per consumer e admin */}
           {(isConsumer || isAdmin) && (
-            <div className={`nav-item ${isActive('/business') && location.search.includes('tab=1') ? 'active' : ''}`}>
-              <Link to="/business?tab=1" className="nav-link">
+            <div className={`nav-item ${location.pathname === '/consumer' && location.search.includes('tab=6') && location.search.includes('type=3') ? 'active' : ''}`}>
+              <Link to="/consumer?tab=6&type=3" className="nav-link">
                 <i className="fas fa-user-md"></i>
                 <span>{t('resourceBundle.DOCTORS', 'MEDICI')}</span>
               </Link>
@@ -83,8 +83,8 @@ const AuthenticatedHeader = () => {
 
           {/* CENTRI SPECIALISTICI - Per consumer, admin, o doctor */}
           {(isConsumer || isAdmin || (isBusiness && user?.team?.type?.id === 'DOCTOR')) && (
-            <div className={`nav-item ${isActive('/business') && location.search.includes('tab=2') ? 'active' : ''}`}>
-              <Link to="/business?tab=2" className="nav-link">
+            <div className={`nav-item ${location.pathname === '/consumer' && location.search.includes('tab=6') && location.search.includes('type=4') ? 'active' : ''}`}>
+              <Link to="/consumer?tab=6&type=4" className="nav-link">
                 <i className="fas fa-hospital"></i>
                 <span>
                   {t('resourceBundle.CENTERS', 'CENTRI')}<br />

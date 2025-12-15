@@ -28,6 +28,7 @@ const Surgery = require('./Surgery');
 const GravidanceType = require('./GravidanceType');
 const Schedule = require('./Schedule');
 const RecommendedExamination = require('./RecommendedExamination');
+const TeamExaminationPathology = require('./TeamExaminationPathology');
 
 // Define associations
 User.belongsToMany(Role, {
@@ -369,6 +370,27 @@ ExaminationPathology.hasMany(RecommendedExamination, {
   as: 'recommendedExaminations'
 });
 
+// TeamExaminationPathology associations (Team <-> ExaminationPathology)
+TeamExaminationPathology.belongsTo(Team, {
+  foreignKey: 'teamId',
+  as: 'team'
+});
+
+TeamExaminationPathology.belongsTo(ExaminationPathology, {
+  foreignKey: 'examinationPathologyId',
+  as: 'examinationPathology'
+});
+
+Team.hasMany(TeamExaminationPathology, {
+  foreignKey: 'teamId',
+  as: 'teamExaminationPathologies'
+});
+
+ExaminationPathology.hasMany(TeamExaminationPathology, {
+  foreignKey: 'examinationPathologyId',
+  as: 'teamExaminationPathologies'
+});
+
 module.exports = {
   sequelize,
   User,
@@ -399,5 +421,6 @@ module.exports = {
   Surgery,
   GravidanceType,
   Schedule,
-  RecommendedExamination
+  RecommendedExamination,
+  TeamExaminationPathology
 };
