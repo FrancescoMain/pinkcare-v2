@@ -117,13 +117,11 @@ exports.initializeScreening = async (req, res) => {
       }
 
       if (protocol) {
-        // Include both protocol-specific questions AND "Generali" area (id = -1)
+        // Load ALL questions for user's protocol (all thematic areas)
+        // The protocol_id determines which questions appear based on user's age
         searchCriteria = {
           deleted: false,
-          [Op.or]: [
-            { protocol_id: protocol.id },
-            { thematic_area_id: -1 }
-          ]
+          protocol_id: protocol.id
         };
       } else {
         // No protocol found (user has no age or no matching protocol)
@@ -141,6 +139,8 @@ exports.initializeScreening = async (req, res) => {
     // Get all protocol rules with questions
     console.log('[QuestionnaireController] Searching protocol rules with criteria:', searchCriteria);
 
+    // OPTIMIZED: Removed 5-level nested includes that weren't being used
+    // Only load what's actually needed: question, thematic_area, and sub_questions
     const protocolRules = await ProtocolRule.findAll({
       where: searchCriteria,
       include: [
@@ -150,50 +150,10 @@ exports.initializeScreening = async (req, res) => {
           where: { deleted: false },
           include: [
             {
-              model: ProtocolRule,
-              as: 'protocol_rules',
-              where: { deleted: false },
-              required: false,
-              include: [
-                {
-                  model: ExaminationPathology,
-                  as: 'examination',
-                  required: false
-                },
-                {
-                  model: Question,
-                  as: 'question',
-                  required: false,
-                  include: [{
-                    model: ProtocolRule,
-                    as: 'protocol_rules',
-                    where: { deleted: false },
-                    required: false,
-                    include: [{
-                      model: ExaminationPathology,
-                      as: 'examination',
-                      required: false
-                    }]
-                  }]
-                }
-              ]
-            },
-            {
               model: Question,
               as: 'sub_questions',
               where: { deleted: false },
-              required: false,
-              include: [{
-                model: ProtocolRule,
-                as: 'protocol_rules',
-                where: { deleted: false },
-                required: false,
-                include: [{
-                  model: ExaminationPathology,
-                  as: 'examination',
-                  required: false
-                }]
-              }]
+              required: false
             }
           ]
         },
@@ -201,15 +161,13 @@ exports.initializeScreening = async (req, res) => {
           model: ThematicArea,
           as: 'thematic_area',
           where: { deleted: false },
-          required: false
-        },
-        {
-          model: Protocol,
-          as: 'protocol',
-          required: false
+          required: true
         }
       ],
-      order: [['thematic_area_id', 'ASC']]
+      order: [
+        ['thematic_area_id', 'ASC'],
+        ['question_id', 'ASC']
+      ]
     });
 
     console.log(`[QuestionnaireController] Found ${protocolRules.length} protocol rules`);
@@ -241,17 +199,25 @@ exports.initializeScreening = async (req, res) => {
           given_answer_string: null
         };
 
-        // Include sub_questions if they exist
+        // Include sub_questions if they exist (sorted by id for consistent order)
         if (pr.question.sub_questions && pr.question.sub_questions.length > 0) {
-          questionData.sub_questions = pr.question.sub_questions.map(sq => ({
-            ...sq.toJSON(),
-            given_answer: null,
-            given_answer_string: null
-          }));
+          questionData.sub_questions = pr.question.sub_questions
+            .slice() // Create a copy to avoid mutating original
+            .sort((a, b) => a.id - b.id) // Sort by id ascending
+            .map(sq => ({
+              ...sq.toJSON(),
+              given_answer: null,
+              given_answer_string: null
+            }));
         }
 
         thematicAreasMap[taId].screening_questions.push(questionData);
       }
+    }
+
+    // Sort questions within each thematic area by id
+    for (const ta of Object.values(thematicAreasMap)) {
+      ta.screening_questions.sort((a, b) => a.id - b.id);
     }
 
     // Convert map to array and sort to ensure "Generali" (id=-1) appears first

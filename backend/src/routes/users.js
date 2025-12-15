@@ -32,17 +32,6 @@ router.put('/profile',
 );
 
 /**
- * @route GET /api/users/:userId
- * @desc Get user by ID (admin only or own profile)
- * @access Private
- */
-router.get('/:userId',
-  AuthMiddleware.verifyToken,
-  AuthMiddleware.requireOwnershipOrAdmin('userId'),
-  userController.getUserById
-);
-
-/**
  * @route PUT /api/users/password
  * @desc Change user password
  * @access Private
@@ -51,6 +40,37 @@ router.put('/password',
   AuthMiddleware.verifyToken,
   ValidationMiddleware.validatePasswordChange,
   userController.changePassword
+);
+
+/**
+ * @route POST /api/users/profile-image
+ * @desc Upload profile image (base64)
+ * @access Private
+ */
+router.post('/profile-image',
+  AuthMiddleware.verifyToken,
+  userController.uploadProfileImage
+);
+
+/**
+ * @route GET /api/users/profile-image
+ * @desc Get current profile image
+ * @access Private
+ */
+router.get('/profile-image',
+  AuthMiddleware.verifyToken,
+  userController.getProfileImage
+);
+
+/**
+ * @route GET /api/users/:userId
+ * @desc Get user by ID (admin only or own profile)
+ * @access Private - MUST BE LAST (catches all paths)
+ */
+router.get('/:userId',
+  AuthMiddleware.verifyToken,
+  AuthMiddleware.requireOwnershipOrAdmin('userId'),
+  userController.getUserById
 );
 
 module.exports = router;

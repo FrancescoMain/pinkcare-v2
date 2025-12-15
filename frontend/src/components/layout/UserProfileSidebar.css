@@ -9,6 +9,12 @@
 /* Avatar - REPLICA ESATTA del legacy */
 .widget-thumb.author-thumb {
   margin-bottom: 20px;
+  cursor: pointer;
+}
+
+.widget-thumb.author-thumb .avatar-container {
+  position: relative;
+  display: inline-block;
 }
 
 .widget-thumb.author-thumb .user_img {
@@ -17,6 +23,40 @@
   border-radius: 50%;
   object-fit: cover;
   background: #f0f0f0;
+  transition: filter 0.2s ease;
+}
+
+/* Avatar overlay con icona camera */
+.widget-thumb.author-thumb .avatar-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.widget-thumb.author-thumb .avatar-overlay i {
+  color: #fff;
+  font-size: 24px;
+}
+
+.widget-thumb.author-thumb .avatar-overlay.uploading {
+  opacity: 1;
+}
+
+.widget-thumb.author-thumb:hover .avatar-overlay {
+  opacity: 1;
+}
+
+.widget-thumb.author-thumb:hover .user_img {
+  filter: brightness(0.8);
 }
 
 /* User info - nome e età */
@@ -234,8 +274,17 @@
   font-size: 12px;
   font-weight: 600;
   color: #515365;
-  min-width: 45px;
+  min-width: 75px;
   text-transform: capitalize;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+}
+
+.monthly-event-item .event-time {
+  font-size: 10px;
+  font-weight: 400;
+  color: #888;
 }
 
 .monthly-event-item .event-title {

@@ -662,6 +662,70 @@ class UserService {
     await user.save();
     return true;
   }
+
+  /**
+   * Update profile image (saves to team.logo)
+   * REPLICA ESATTA del legacy: immagine salvata come base64 nel campo logo del team
+   * @param {number} userId - User ID
+   * @param {string} imageBase64 - Image as base64 data URL
+   * @returns {Promise<object>} Result with logo URL
+   */
+  async updateProfileImage(userId, imageBase64) {
+    const user = await User.findByPk(userId, {
+      include: [{
+        model: Team,
+        as: 'teams'
+      }]
+    });
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    // Get user's team (first non-removed team)
+    const team = user.teams?.find(t => !t.removed);
+    if (!team) {
+      throw new Error('Team not found');
+    }
+
+    // Update team logo with base64 image
+    await Team.update(
+      {
+        logo: imageBase64,
+        lastModifyDate: new Date(),
+        lastModifyUsername: user.username
+      },
+      {
+        where: { id: team.id }
+      }
+    );
+
+    return {
+      logo: imageBase64
+    };
+  }
+
+  /**
+   * Get profile image from team.logo
+   * @param {number} userId - User ID
+   * @returns {Promise<string|null>} Base64 image or null
+   */
+  async getProfileImage(userId) {
+    const user = await User.findByPk(userId, {
+      include: [{
+        model: Team,
+        as: 'teams'
+      }]
+    });
+
+    if (!user) {
+      return null;
+    }
+
+    // Get user's team (first non-removed team)
+    const team = user.teams?.find(t => !t.removed);
+    return team?.logo || null;
+  }
 }
 
 module.exports = new UserService();

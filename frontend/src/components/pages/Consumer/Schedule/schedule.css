@@ -638,6 +638,54 @@
   box-shadow: 0 0 0 3px rgba(65, 105, 225, 0.15);
 }
 
+/* Safari datetime-local input fixes */
+.schedule-event-dialog input[type="datetime-local"] {
+  color: #333;
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  line-height: 1.5;
+}
+
+/* WebKit datetime picker styling (Safari/Chrome) */
+.schedule-event-dialog input[type="datetime-local"]::-webkit-datetime-edit {
+  color: #333;
+  padding: 0;
+}
+
+.schedule-event-dialog input[type="datetime-local"]::-webkit-datetime-edit-fields-wrapper {
+  color: #333;
+  padding: 0;
+}
+
+.schedule-event-dialog input[type="datetime-local"]::-webkit-datetime-edit-text,
+.schedule-event-dialog input[type="datetime-local"]::-webkit-datetime-edit-month-field,
+.schedule-event-dialog input[type="datetime-local"]::-webkit-datetime-edit-day-field,
+.schedule-event-dialog input[type="datetime-local"]::-webkit-datetime-edit-year-field,
+.schedule-event-dialog input[type="datetime-local"]::-webkit-datetime-edit-hour-field,
+.schedule-event-dialog input[type="datetime-local"]::-webkit-datetime-edit-minute-field,
+.schedule-event-dialog input[type="datetime-local"]::-webkit-datetime-edit-ampm-field {
+  color: #333;
+}
+
+/* Placeholder text for empty datetime inputs */
+.schedule-event-dialog input[type="datetime-local"]:not(:valid)::-webkit-datetime-edit {
+  color: #999;
+}
+
+/* Calendar/clock picker icon */
+.schedule-event-dialog input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.6;
+  filter: invert(0);
+}
+
+.schedule-event-dialog input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
 .schedule-event-dialog textarea.form-control {
   resize: vertical;
   min-height: 80px;

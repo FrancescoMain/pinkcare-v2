@@ -222,6 +222,77 @@ class UserController {
       next(error);
     }
   }
+
+  /**
+   * Upload profile image
+   * POST /api/users/profile-image
+   * Saves image as base64 in team.logo (REPLICA ESATTA del legacy)
+   */
+  async uploadProfileImage(req, res, next) {
+    try {
+      const userId = req.user.id;
+      const { image } = req.body;
+
+      if (!image) {
+        return res.status(400).json({
+          error: 'Immagine non fornita'
+        });
+      }
+
+      // Validate base64 image format
+      if (!image.startsWith('data:image/')) {
+        return res.status(400).json({
+          error: 'Formato immagine non valido. Deve essere base64 data URL.'
+        });
+      }
+
+      // Check image size (limit to ~2MB base64)
+      if (image.length > 2800000) {
+        return res.status(400).json({
+          error: 'Immagine troppo grande. Dimensione massima: 2MB'
+        });
+      }
+
+      // Save image to team.logo
+      const result = await userService.updateProfileImage(userId, image);
+
+      res.json({
+        message: 'Immagine profilo aggiornata con successo',
+        logo: result.logo
+      });
+
+    } catch (error) {
+      console.error('Upload profile image error:', error);
+
+      if (error.message === 'User not found' || error.message === 'Team not found') {
+        return res.status(404).json({
+          error: error.message === 'User not found' ? 'Utente non trovato' : 'Team non trovato'
+        });
+      }
+
+      next(error);
+    }
+  }
+
+  /**
+   * Get profile image
+   * GET /api/users/profile-image
+   * Returns the current profile image from team.logo
+   */
+  async getProfileImage(req, res, next) {
+    try {
+      const userId = req.user.id;
+      const logo = await userService.getProfileImage(userId);
+
+      res.json({
+        logo: logo || null
+      });
+
+    } catch (error) {
+      console.error('Get profile image error:', error);
+      next(error);
+    }
+  }
 }
 
 module.exports = new UserController();

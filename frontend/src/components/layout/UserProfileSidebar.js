@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import ScheduleApi from '../../services/scheduleApi';
+import ApiService from '../../services/apiService';
+import { toast } from 'react-toastify';
 import './UserProfileSidebar.css';
 
 /**
@@ -15,6 +17,9 @@ const UserProfileSidebar = () => {
   const { t } = useTranslation();
   const [monthlyEvents, setMonthlyEvents] = useState([]);
   const [eventsLoading, setEventsLoading] = useState(true);
+  const [profileImage, setProfileImage] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef(null);
 
   // Fetch eventi del mese corrente
   useEffect(() => {
@@ -47,6 +52,82 @@ const UserProfileSidebar = () => {
 
     fetchMonthlyEvents();
   }, []);
+
+  // Fetch profile image
+  useEffect(() => {
+    const fetchProfileImage = async () => {
+      try {
+        const response = await ApiService.get('/api/users/profile-image');
+        if (response?.logo) {
+          setProfileImage(response.logo);
+        }
+      } catch (error) {
+        console.error('Error fetching profile image:', error);
+      }
+    };
+
+    fetchProfileImage();
+  }, []);
+
+  // Handle image upload
+  const handleImageUpload = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      toast.error('Seleziona un file immagine valido');
+      return;
+    }
+
+    // Validate file size (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Immagine troppo grande. Dimensione massima: 2MB');
+      return;
+    }
+
+    try {
+      setUploadingImage(true);
+
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        try {
+          const base64Image = reader.result;
+
+          const response = await ApiService.post('/api/users/profile-image', {
+            image: base64Image
+          });
+
+          if (response?.logo) {
+            setProfileImage(response.logo);
+            toast.success('Immagine profilo aggiornata!');
+          }
+        } catch (error) {
+          console.error('Error uploading image:', error);
+          toast.error(error.message || 'Errore nel caricamento immagine');
+        } finally {
+          setUploadingImage(false);
+        }
+      };
+
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Error reading file:', error);
+      toast.error('Errore nella lettura del file');
+      setUploadingImage(false);
+    }
+
+    // Reset input
+    event.target.value = '';
+  };
+
+  // Trigger file input click
+  const handleAvatarClick = () => {
+    if (!uploadingImage) {
+      fileInputRef.current?.click();
+    }
+  };
 
   // Calcola età
   const calculateAge = (birthday) => {
@@ -104,12 +185,28 @@ const UserProfileSidebar = () => {
     <div className="ui-block">
       {/* User Card - REPLICA ESATTA del legacy top-header-author */}
       <div className="top-header-author">
-        {/* Avatar centrato come legacy */}
-        <div className="widget-thumb author-thumb">
-          <img
-            src="/styles/olympus/assets/images/avatar.jpg"
-            alt="author"
-            className="user_img"
+        {/* Avatar centrato come legacy - con icona per cambio foto */}
+        <div className="widget-thumb author-thumb" onClick={handleAvatarClick}>
+          <div className="avatar-container">
+            <img
+              src={profileImage || "/styles/olympus/assets/images/avatar.jpg"}
+              alt="author"
+              className="user_img"
+            />
+            <div className={`avatar-overlay ${uploadingImage ? 'uploading' : ''}`}>
+              {uploadingImage ? (
+                <i className="fas fa-spinner fa-spin"></i>
+              ) : (
+                <i className="fas fa-camera"></i>
+              )}
+            </div>
+          </div>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleImageUpload}
+            accept="image/*"
+            style={{ display: 'none' }}
           />
         </div>
 
@@ -150,6 +247,12 @@ const UserProfileSidebar = () => {
                       day: '2-digit',
                       month: 'short'
                     })}
+                    <span className="event-time">
+                      {new Date(event.start).toLocaleTimeString('it-IT', {
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })}
+                    </span>
                   </span>
                   <span className="event-title" title={event.title}>
                     {event.title}

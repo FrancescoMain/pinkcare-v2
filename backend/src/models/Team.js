@@ -149,6 +149,10 @@ const Team = sequelize.define('Team', {
     type: DataTypes.STRING,
     field: 'linkshop_to_validate'
   },
+  logo: {
+    type: DataTypes.TEXT,  // Base64 images can be large
+    field: 'logo'
+  },
   addressId: {
     type: DataTypes.BIGINT,
     field: 'address_id'
