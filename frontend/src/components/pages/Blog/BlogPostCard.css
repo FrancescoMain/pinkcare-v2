@@ -63,8 +63,9 @@
 .more-dropdown {
   display: none;
   position: absolute;
-  top: 100%;
-  right: 0;
+  top: 0;
+  left: 100%;
+  margin-left: 5px;
   background: white;
   border-radius: 5px;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
@@ -72,7 +73,6 @@
   z-index: 1000;
   list-style: none;
   padding: 10px 0;
-  margin: 5px 0 0 0;
   border: 1px solid #e6ecf5;
 }
 
