@@ -18,6 +18,7 @@ import Footer from "./components/layout/Footer";
 import CookieBanner from "./components/CookieBanner";
 import LoginPage from "./components/pages/Login/Login";
 import Profile from "./components/pages/Profile/Profile";
+import Dashboard from "./components/pages/Dashboard/Dashboard";
 import PasswordRecovery from "./components/pages/PasswordRecovery";
 import PasswordRecoveryTest from "./components/pages/PasswordRecoveryTest";
 import ProtectedRoute from "./components/common/ProtectedRoute";
@@ -52,6 +53,14 @@ function App() {
           <Route path="/api/auth/password-recovery" element={<PasswordRecovery />} />
 
           {/* Route autenticate con AuthenticatedLayout */}
+          <Route path="/home" element={
+            <ProtectedRoute>
+              <AuthenticatedLayout>
+                <Dashboard />
+              </AuthenticatedLayout>
+            </ProtectedRoute>
+          } />
+
           <Route path="/profile" element={
             <ProtectedRoute>
               <AuthenticatedLayout>

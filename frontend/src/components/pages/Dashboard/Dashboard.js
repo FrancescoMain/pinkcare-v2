@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ApiClient } from '../../../config/api';
+import ThreeColumnLayout from '../../layout/ThreeColumnLayout';
+import UserProfileSidebar from '../../layout/UserProfileSidebar';
+import AdvertisingSidebar from '../../layout/AdvertisingSidebar';
 import './Dashboard.css';
 
 /**
@@ -22,8 +25,18 @@ const Dashboard = () => {
   const loadDashboardData = async () => {
     try {
       setLoading(true);
-      const data = await ApiClient.get('/api/dashboard');
-      setDashboardData(data);
+      // Load dashboard data (user, suggestedScreening)
+      const dashboardResponse = await ApiClient.get('/api/dashboard');
+
+      // Load blog posts from /api/blog (same endpoint as Blog page)
+      const blogResponse = await ApiClient.get('/api/blog', {
+        params: { page: 0, limit: 10 }
+      });
+
+      setDashboardData({
+        ...dashboardResponse,
+        blogPosts: blogResponse.posts || []
+      });
     } catch (error) {
       console.error('Error loading dashboard:', error);
     } finally {
@@ -67,67 +80,69 @@ const Dashboard = () => {
   const { user, suggestedScreening, blogPosts } = dashboardData;
 
   return (
-    <div className="dashboard-container">
-      {/* Banner Questionario - Replica: <div class="ui-block"> with questionario class */}
-      {!user.filledPersonalForm && (
+    <ThreeColumnLayout
+      leftSidebar={<UserProfileSidebar />}
+      rightSidebar={<AdvertisingSidebar />}
+      leftColSize={2}
+      centerColSize={8}
+      rightColSize={2}
+    >
+      <div className="dashboard-container">
+        {/* Banner Questionario - Replica: <div class="ui-block"> with questionario class */}
         <div className="ui-block">
           <a href="/consumer?tab=3" className="tile" style={{ float: 'none' }}>
             <div className="ui-block-container questionario">
-              <span style={{ textAlign: 'center' }}>
-                {t('resourceBundle.Complete_questionnaire', 'Completa il questionario')}
-              </span>
+              <span style={{ textAlign: 'center' }} dangerouslySetInnerHTML={{
+                __html: t('resourceBundle.Complete_questionnaire', 'Ottieni il tuo Programma di prevenzione e cura personalizzato <br/>Completa il Questionario')
+              }} />
             </div>
           </a>
         </div>
-      )}
 
-      {/* Programma di cura personalizzato - Replica: suggestedScreening section */}
-      {suggestedScreening && suggestedScreening.length > 0 && (
-        <div className="ui-block">
-          <div className="ui-block-title">
-            <h5 className="title">
-              {t('resourceBundle.Customized_care_program', 'Programma di cura personalizzato')}
-            </h5>
-          </div>
-          <div className="container">
-            <div className="row">
-              {suggestedScreening.map((screening) => (
-                <div key={screening.id} className="col col-12 col-sm-12 col-lg-6 col-xl-4">
-                  <div className="ui-block available-widget">
-                    <div className="h6 title">{screening.examination.label}</div>
-                    <div className="more">
-                      <a
-                        href={`/business?exam_id=${screening.examination.id}`}
-                        className="btn btn-xs bg-blue"
-                        style={{ marginBottom: 0, marginLeft: '15px' }}
-                      >
-                        {t('resourceBundle.Find_doctor', 'Trova un medico')}
-                      </a>
+        {/* Programma di cura personalizzato - Legacy style */}
+        {suggestedScreening && suggestedScreening.length > 0 && (
+          <div className="ui-block">
+            <div className="ui-block-title">
+              <h5 className="title">
+                {t('resourceBundle.Customized_care_program', 'Programma di cura personalizzato')}
+              </h5>
+            </div>
+            <div className="container">
+              <div className="row">
+                {suggestedScreening.map((screening) => (
+                  <div key={screening.id} className="col-12 col-md-4">
+                    <div className="ui-block available-widget">
+                      <div className="h6 title">{screening.examination.label}</div>
+                      <div className="more">
+                        <a
+                          href={`/consumer?tab=6&type=4&exam_id=${screening.examination.id}`}
+                          className="btn btn-xs bg-blue"
+                        >
+                          {t('resourceBundle.Find_doctor', 'Trova medico')}
+                        </a>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Dal nostro blog - Replica: blogPostList section */}
-      {blogPosts && blogPosts.length > 0 && (
-        <div className="ui-block">
-          <div className="ui-block-title">
-            <h5 className="title">
-              {t('resourceBundle.From_our_blog', 'Dal nostro blog')}
-            </h5>
-            <p style={{ display: 'table-footer-group' }}>
-              {t('resourceBundle.Content_chosen_for_you', 'Contenuti scelti per te')}
-            </p>
-          </div>
+        {/* Dal nostro blog - Replica: blogPostList section */}
+        {blogPosts && blogPosts.length > 0 && (
+          <div className="ui-block">
+            <div className="ui-block-title">
+              <h5 className="title">
+                {t('resourceBundle.From_our_blog', 'Dal nostro blog')}
+              </h5>
+              <p style={{ display: 'table-footer-group' }}>
+                {t('resourceBundle.Content_chosen_for_you', 'Contenuti scelti per te')}
+              </p>
+            </div>
 
-          {blogPosts.map((post, index) => (
-            <div key={post.id} className="row">
-              <div className="d-none d-sm-block col col-md-2"></div>
-              <div className="col col-12 col-md-8">
+            {blogPosts.map((post, index) => (
+              <div key={post.id}>
                 {/* Post - Replica: article.hentry.post structure */}
                 <article className="hentry post has-post-thumbnail thumb-full-width">
                   {/* Control buttons - Social sharing */}
@@ -156,13 +171,16 @@ const Dashboard = () => {
                     <div className="author-date">
                       <h3>{post.headline}</h3>
                       <div className="post__date">
-                        {new Date(post.insertionDate).toLocaleString('it-IT', {
+                        {new Date(post.insertion_date).toLocaleString('it-IT', {
                           day: '2-digit',
                           month: '2-digit',
                           year: 'numeric',
                           hour: '2-digit',
                           minute: '2-digit'
                         })}
+                        {post.insertion_username && (
+                          <>&nbsp; Da &nbsp; <b>{post.insertion_username}</b></>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -208,12 +226,11 @@ const Dashboard = () => {
                   </div>
                 </article>
               </div>
-              <div className="d-none d-sm-block col col-md-2"></div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </ThreeColumnLayout>
   );
 };
 

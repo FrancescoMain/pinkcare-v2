@@ -21,16 +21,21 @@ const DoctorsList = () => {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Inizializza il type direttamente dal URL per evitare doppio fetch
+  // Inizializza type e examination direttamente dal URL per evitare doppio fetch
   const getInitialType = () => {
     const typeParam = searchParams.get('type');
     return typeParam ? parseInt(typeParam, 10) : null;
   };
 
+  const getInitialExamination = () => {
+    const examParam = searchParams.get('exam_id');
+    return examParam ? parseInt(examParam, 10) : null;
+  };
+
   // State
   const [filters, setFilters] = useState(() => ({
     type: getInitialType(), // 3=DOCTOR, 4=CLINIC, null=both
-    examination: null,
+    examination: getInitialExamination(),
     pathology: null,
     municipalityId: null,
     municipalityName: null,
@@ -69,14 +74,16 @@ const DoctorsList = () => {
   // Aggiorna stato quando cambiano i searchParams (navigazione)
   useEffect(() => {
     const typeParam = searchParams.get('type');
+    const examParam = searchParams.get('exam_id');
     const doctorIdParam = searchParams.get('doctorId');
 
     setSelectedDoctorId(doctorIdParam ? parseInt(doctorIdParam, 10) : null);
 
-    // Aggiorna sempre il type in base all'URL (null se non presente)
+    // Aggiorna type e examination in base all'URL
     setFilters(prev => ({
       ...prev,
-      type: typeParam ? parseInt(typeParam, 10) : null
+      type: typeParam ? parseInt(typeParam, 10) : null,
+      examination: examParam ? parseInt(examParam, 10) : prev.examination
     }));
   }, [searchParams]);
 

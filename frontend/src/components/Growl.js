@@ -77,7 +77,7 @@ const GrowlMessage = ({ message, onClose }) => {
   );
 };
 
-const Growl = ({ messages = [], onRemoveMessage, sticky = true, life = 600000 }) => {
+const Growl = ({ messages = [], onRemove, sticky = true, life = 600000 }) => {
   console.log('[Growl] Render - messages:', messages, 'length:', messages?.length);
 
   if (!messages || messages.length === 0) {
@@ -96,7 +96,7 @@ const Growl = ({ messages = [], onRemoveMessage, sticky = true, life = 600000 })
             sticky: message.sticky !== undefined ? message.sticky : sticky,
             life: message.life !== undefined ? message.life : life
           }}
-          onClose={onRemoveMessage}
+          onClose={onRemove}
         />
       ))}
     </div>

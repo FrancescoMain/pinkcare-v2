@@ -20,6 +20,8 @@ class BlogController {
       // Get user's team
       const userTeamId = user.teams?.[0]?.id || null;
 
+      console.log('[BlogController] getPosts - userId:', user.id, 'primaryRole:', primaryRole, 'userTeamId:', userTeamId, 'teams:', JSON.stringify(user.teams));
+
       // Get user's age range and pathologies if consumer
       let userAgeRange = null;
       let userPathologies = null;

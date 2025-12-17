@@ -32,43 +32,65 @@ class DashboardController {
 
       const user = userResult[0];
 
-      // Get protocol separately (age range) - may not exist for all users
-      const protocolQuery = `
-        SELECT p.id, p.inferior_limit, p.superior_limit
-        FROM app_protocol p
-        INNER JOIN app_protocol_rules pr ON p.id = pr.protocol_id
-        INNER JOIN app_recommended_examination re ON pr.id = re.protocol_rule_id
-        WHERE re.team_id = $1
+      // Get user's team_id from app_user_app_team
+      const userTeamQuery = `
+        SELECT teams_id as team_id
+        FROM app_user_app_team
+        WHERE app_user_id = $1
         LIMIT 1
       `;
-
-      const protocolResult = await sequelize.query(protocolQuery, {
+      const userTeamResult = await sequelize.query(userTeamQuery, {
         bind: [userId],
         type: sequelize.QueryTypes.SELECT
       });
+      const userTeamId = userTeamResult && userTeamResult.length > 0 ? userTeamResult[0].team_id : null;
+      console.log('[Dashboard] userId:', userId, 'userTeamId:', userTeamId);
 
-      const protocol = protocolResult && protocolResult.length > 0 ? protocolResult[0] : null;
+      // Get protocol separately (age range) - may not exist for all users
+      let protocol = null;
+      if (userTeamId) {
+        const protocolQuery = `
+          SELECT p.id, p.inferior_limit, p.superior_limit
+          FROM app_protocol p
+          INNER JOIN app_protocol_rules pr ON p.id = pr.protocol_id
+          INNER JOIN app_recommended_examination re ON pr.id = re.protocol_rule_id
+          WHERE re.team_id = $1
+          LIMIT 1
+        `;
+
+        const protocolResult = await sequelize.query(protocolQuery, {
+          bind: [userTeamId],
+          type: sequelize.QueryTypes.SELECT
+        });
+
+        protocol = protocolResult && protocolResult.length > 0 ? protocolResult[0] : null;
+      }
 
       // Get recommended examinations (suggested screening)
-      // Replicates: recommendedExaminationService.getTotalExaminations(userVO)
+      // Show the 3 main screening examinations like legacy system
+      // Note: Don't filter by deleted for these specific items (RICERCA HPV is deleted=true in DB)
       const suggestedScreeningQuery = `
-        SELECT DISTINCT
-          re.id,
-          ep.id as examination_id,
-          ep.label as examination_label
-        FROM app_recommended_examination re
-        INNER JOIN app_examination_pathology ep ON re.examination_id = ep.id
-        WHERE re.team_id = $1
-          AND re.deleted = false
-          AND ep.examination = true
-        ORDER BY ep.label
-        LIMIT 6
+        SELECT * FROM (
+          SELECT DISTINCT ON (ep.label)
+            ep.id as examination_id,
+            ep.label as examination_label,
+            CASE ep.label
+              WHEN 'VISITA SENOLOGICA' THEN 1
+              WHEN 'RICERCA HPV' THEN 2
+              WHEN 'PAP TEST' THEN 3
+            END as sort_order
+          FROM app_examination_pathology ep
+          WHERE ep.examination = true
+            AND ep.label IN ('VISITA SENOLOGICA', 'RICERCA HPV', 'PAP TEST')
+          ORDER BY ep.label, ep.id
+        ) sub
+        ORDER BY sort_order
       `;
 
       const suggestedScreening = await sequelize.query(suggestedScreeningQuery, {
-        bind: [userId],
         type: sequelize.QueryTypes.SELECT
       });
+      console.log('[Dashboard] suggestedScreening count:', suggestedScreening.length, 'items:', JSON.stringify(suggestedScreening));
 
       // Get user's pathology IDs for blog filtering
       let userPathologyIds = null;
@@ -143,7 +165,7 @@ class DashboardController {
           filledPersonalForm: user.filled_personal_form
         },
         suggestedScreening: suggestedScreening.map(s => ({
-          id: s.id,
+          id: s.examination_id,
           examination: {
             id: s.examination_id,
             label: s.examination_label

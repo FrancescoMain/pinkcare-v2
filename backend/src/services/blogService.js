@@ -11,12 +11,7 @@ class BlogService {
       {
         model: db.Team,
         as: 'team',
-        attributes: ['id', 'name', 'logo'],
-        include: [{
-          model: db.Typology,
-          as: 'type',
-          attributes: ['id', 'label']
-        }]
+        attributes: ['id', 'name', 'logo', 'type_id']
       },
       {
         model: db.BlogPostAgeRange,
@@ -59,6 +54,7 @@ class BlogService {
     // Role-based filtering
     if (userRole === 'ROLE_BUSINESS') {
       where.team_id = userTeamId;
+      console.log('[BlogService] Filtering by team_id:', userTeamId);
     }
 
     // Text search
@@ -128,6 +124,8 @@ class BlogService {
       ];
     }
 
+    console.log('[BlogService] Query where:', JSON.stringify(where));
+
     const { count, rows } = await db.BlogPost.findAndCountAll({
       where,
       include,
@@ -136,6 +134,8 @@ class BlogService {
       offset: page * limit,
       distinct: true
     });
+
+    console.log('[BlogService] Found', count, 'posts');
 
     return {
       posts: rows,

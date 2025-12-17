@@ -61,10 +61,10 @@ const AuthenticatedHeader = () => {
 
       <div className="header-content-wrapper">
         <div className="search-bar">
-          {/* HOME - Solo per consumer */}
-          {isConsumer && (
-            <div className={`nav-item ${location.pathname === '/profile' && !location.search ? 'active' : ''}`}>
-              <Link to="/profile" className="nav-link">
+          {/* HOME - Per consumer e business */}
+          {(isConsumer || isBusiness) && (
+            <div className={`nav-item ${location.pathname === '/home' ? 'active' : ''}`}>
+              <Link to="/home" className="nav-link">
                 <i className="fas fa-home"></i>
                 <span>{t('resourceBundle.HOME', 'HOME')}</span>
               </Link>

@@ -343,8 +343,8 @@ const LoginPage = ({ errorHandler }) => {
           console.log('🎯 Redirecting to admin dashboard');
           navigate('/admin/dashboard');
         } else {
-          console.log('🎯 Redirecting to profile page');
-          navigate('/profile'); // Default redirect like legacy /app/profile
+          console.log('🎯 Redirecting to dashboard (home)');
+          navigate('/dashboard'); // Redirect to home page after login
         }
       }, 1500);
     } catch (error) {
