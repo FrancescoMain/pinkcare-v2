@@ -328,7 +328,12 @@ class BlogService {
       });
       if (postData.age_ranges && !postData.all_age_ranges) {
         for (const ageRangeId of postData.age_ranges) {
+          const [ageRangeResult] = await db.sequelize.query(
+            "SELECT nextval('app_blog_post_age_range_id_seq') as id",
+            { transaction }
+          );
           await db.BlogPostAgeRange.create({
+            id: ageRangeResult[0].id,
             blog_post_id: id,
             age_range_id: ageRangeId
           }, { transaction });
@@ -342,7 +347,12 @@ class BlogService {
       });
       if (postData.categories && !postData.all_categories) {
         for (const categoryId of postData.categories) {
+          const [categoryResult] = await db.sequelize.query(
+            "SELECT nextval('app_blog_post_category_id_seq') as id",
+            { transaction }
+          );
           await db.BlogPostCategory.create({
+            id: categoryResult[0].id,
             blog_post_id: id,
             category_id: categoryId
           }, { transaction });
@@ -356,7 +366,12 @@ class BlogService {
       });
       if (postData.thematic_areas && !postData.all_thematic_areas) {
         for (const thematicAreaId of postData.thematic_areas) {
+          const [thematicAreaResult] = await db.sequelize.query(
+            "SELECT nextval('app_blog_post_thematic_area_id_seq') as id",
+            { transaction }
+          );
           await db.BlogPostThematicArea.create({
+            id: thematicAreaResult[0].id,
             blog_post_id: id,
             thematic_area_id: thematicAreaId
           }, { transaction });
@@ -370,7 +385,12 @@ class BlogService {
       });
       if (postData.pathologies && !postData.all_pathologies) {
         for (const pathologyId of postData.pathologies) {
+          const [pathologyResult] = await db.sequelize.query(
+            "SELECT nextval('app_blog_post_pathology_id_seq') as id",
+            { transaction }
+          );
           await db.BlogPostPathology.create({
+            id: pathologyResult[0].id,
             blog_post_id: id,
             pathology_id: pathologyId
           }, { transaction });
