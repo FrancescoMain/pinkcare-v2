@@ -60,11 +60,13 @@
   font-size: 18px;
 }
 
-.more-dropdown {
+/* Dropdown specifico per BlogPostCard - posizionato a destra del pulsante */
+.post__author .more .more-dropdown {
   display: none;
   position: absolute;
   top: 0;
   left: 100%;
+  right: auto;
   margin-left: 5px;
   background: white;
   border-radius: 5px;
@@ -76,16 +78,16 @@
   border: 1px solid #e6ecf5;
 }
 
-.more:hover .more-dropdown {
+.post__author .more:hover .more-dropdown {
   display: block;
 }
 
-.more-dropdown li {
+.post__author .more .more-dropdown li {
   padding: 0;
   margin: 0;
 }
 
-.more-dropdown li a {
+.post__author .more .more-dropdown li a {
   display: block;
   padding: 12px 20px;
   color: #515365;
@@ -96,16 +98,16 @@
   white-space: nowrap;
 }
 
-.more-dropdown li a:hover {
+.post__author .more .more-dropdown li a:hover {
   background: #f5f5f5;
   color: #e42080;
 }
 
-.more-dropdown li:first-child a {
+.post__author .more .more-dropdown li:first-child a {
   border-radius: 5px 5px 0 0;
 }
 
-.more-dropdown li:last-child a {
+.post__author .more .more-dropdown li:last-child a {
   border-radius: 0 0 5px 5px;
 }
 
