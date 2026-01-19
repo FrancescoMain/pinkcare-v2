@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
+import { AuthService } from '../../services/authService';
 import { downloadClinicalHistoryPDF } from '../../services/clinicalHistoryApi';
 import './AuthenticatedHeader.css';
 
@@ -12,7 +13,7 @@ import './AuthenticatedHeader.css';
 const AuthenticatedHeader = () => {
   const { t } = useTranslation();
   const location = useLocation();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   const isActive = (path) => {
     return location.pathname === path ? 'active' : '';
@@ -336,7 +337,7 @@ const AuthenticatedHeader = () => {
 
           {/* Pulsante Logout */}
           <div className="nav-item">
-            <a href="#" onClick={(e) => { e.preventDefault(); logout(); }} className="nav-link logout" title="Logout">
+            <a href="#" onClick={(e) => { e.preventDefault(); AuthService.removeToken(); window.location.href = '/'; }} className="nav-link logout" title="Logout">
               <i className="fas fa-power-off"></i>
             </a>
           </div>
