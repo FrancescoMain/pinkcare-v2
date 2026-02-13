@@ -93,18 +93,21 @@ class DashboardController {
       console.log('[Dashboard] suggestedScreening count:', suggestedScreening.length, 'items:', JSON.stringify(suggestedScreening));
 
       // Get user's pathology IDs for blog filtering
+      // Legacy: recommendedExaminationService.getUserPathologyIds(userVO.team)
+      // Pathologies are entries in app_examination_pathology where examination = false
       let userPathologyIds = null;
-      if (protocol) {
+      if (userTeamId) {
         const pathologyQuery = `
-          SELECT DISTINCT pr.pathology_id
-          FROM app_protocol_rules pr
-          WHERE pr.protocol_id = $1 AND pr.pathology_id IS NOT NULL
+          SELECT DISTINCT re.examination_id as pathology_id
+          FROM app_recommended_examination re
+          INNER JOIN app_examination_pathology ep ON re.examination_id = ep.id
+          WHERE re.team_id = $1 AND ep.examination = false
         `;
         const pathologies = await sequelize.query(pathologyQuery, {
-          bind: [protocol.id],
+          bind: [userTeamId],
           type: sequelize.QueryTypes.SELECT
         });
-        userPathologyIds = pathologies.map(p => p.pathology_id);
+        userPathologyIds = pathologies.length > 0 ? pathologies.map(p => p.pathology_id) : null;
       }
 
       // Get blog posts

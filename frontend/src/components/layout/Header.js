@@ -73,7 +73,7 @@ const Header = ({ userVO = null }) => {
         if (response?.user?.role === "ADMIN") {
           navigate("/admin/dashboard");
         } else {
-          navigate("/profile");
+          navigate("/home");
         }
       }, 1000);
     } catch (error) {

@@ -43,7 +43,7 @@ const MainContainer = ({ userVO = null, children, errorHandler }) => {
       showSuccessMessage('Login Mobile', 'Login effettuato con successo');
 
       // Navigate to profile page after successful login
-      navigate('/profile');
+      navigate('/home');
 
     } catch (error) {
       console.error('❌ Mobile Login error:', error);

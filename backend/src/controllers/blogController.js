@@ -52,6 +52,44 @@ class BlogController {
   }
 
   /**
+   * GET /api/blog/public
+   * Get public blog posts (no auth required)
+   */
+  async getPublicPosts(req, res) {
+    try {
+      const { ageRangeId, categoryId, thematicAreaId, page = 0, limit = 15 } = req.query;
+
+      const result = await blogService.findPublicPosts(
+        { ageRangeId, categoryId, thematicAreaId },
+        parseInt(page),
+        parseInt(limit)
+      );
+
+      res.json(result);
+    } catch (error) {
+      console.error('Error getting public blog posts:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * GET /api/blog/public/:id
+   * Get single public blog post (no auth required)
+   */
+  async getPublicPost(req, res) {
+    try {
+      const post = await blogService.getPost(req.params.id);
+      if (!post || !post.publish_in_public) {
+        return res.status(404).json({ error: 'Post not found' });
+      }
+      res.json(post);
+    } catch (error) {
+      console.error('Error getting public blog post:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
    * GET /api/blog/:id
    * Get single blog post
    */

@@ -13,6 +13,11 @@ const ExaminationPathology = sequelize.define('ExaminationPathology', {
   examination: {
     type: DataTypes.BOOLEAN,
     defaultValue: false
+  },
+  periodicalControlDays: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    field: 'periodical_control_days'
   }
 }, {
   tableName: 'app_examination_pathology',

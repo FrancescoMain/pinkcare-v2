@@ -107,24 +107,22 @@ const Dashboard = () => {
                 {t('resourceBundle.Customized_care_program', 'Programma di cura personalizzato')}
               </h5>
             </div>
-            <div className="container">
-              <div className="row">
-                {suggestedScreening.map((screening) => (
-                  <div key={screening.id} className="col-12 col-md-4">
-                    <div className="ui-block available-widget">
-                      <div className="h6 title">{screening.examination.label}</div>
-                      <div className="more">
-                        <a
-                          href={`/consumer?tab=6&type=4&exam_id=${screening.examination.id}`}
-                          className="btn btn-xs bg-blue"
-                        >
-                          {t('resourceBundle.Find_doctor', 'Trova medico')}
-                        </a>
-                      </div>
+            <div className="row">
+              {suggestedScreening.map((screening) => (
+                <div key={screening.id} className="col-12 col-md-4">
+                  <div className="ui-block available-widget">
+                    <div className="h6 title">{screening.examination.label}</div>
+                    <div className="more">
+                      <a
+                        href={`/consumer?tab=6&type=4&exam_id=${screening.examination.id}`}
+                        className="btn btn-xs bg-blue"
+                      >
+                        {t('resourceBundle.Find_doctor', 'Trova medico')}
+                      </a>
                     </div>
                   </div>
-                ))}
-              </div>
+                </div>
+              ))}
             </div>
           </div>
         )}

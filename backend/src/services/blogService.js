@@ -146,6 +146,83 @@ class BlogService {
   }
 
   /**
+   * Get public blog posts (publish_in_public = true)
+   * Matches legacy flow: blogPostService.find(searchedPost, joinString, orderList, offset, limit)
+   * where searchedPost.publish_in_public = true
+   */
+  async findPublicPosts(filters = {}, page = 0, limit = 15) {
+    const where = { deleted: false, publish_in_public: true };
+    const include = [
+      {
+        model: db.Team,
+        as: 'team',
+        attributes: ['id', 'name', 'logo', 'type_id']
+      },
+      {
+        model: db.BlogPostAgeRange,
+        as: 'age_ranges',
+        include: [{
+          model: db.Protocol,
+          as: 'age_range',
+          attributes: ['id', 'age_range', 'inferior_limit', 'superior_limit']
+        }]
+      },
+      {
+        model: db.BlogPostCategory,
+        as: 'categories',
+        include: [{
+          model: db.Typology,
+          as: 'category',
+          attributes: ['id', 'label']
+        }]
+      },
+      {
+        model: db.BlogPostThematicArea,
+        as: 'thematic_areas',
+        include: [{
+          model: db.ThematicArea,
+          as: 'thematic_area',
+          attributes: ['id', 'label']
+        }]
+      }
+    ];
+
+    // Age range filter
+    if (filters.ageRangeId) {
+      include[1].where = { age_range_id: filters.ageRangeId };
+      include[1].required = true;
+    }
+
+    // Category filter
+    if (filters.categoryId) {
+      include[2].where = { category_id: filters.categoryId };
+      include[2].required = true;
+    }
+
+    // Thematic area filter
+    if (filters.thematicAreaId) {
+      include[3].where = { thematic_area_id: filters.thematicAreaId };
+      include[3].required = true;
+    }
+
+    const { count, rows } = await db.BlogPost.findAndCountAll({
+      where,
+      include,
+      order: [['insertion_date', 'DESC']],
+      limit,
+      offset: page * limit,
+      distinct: true
+    });
+
+    return {
+      posts: rows,
+      totalCount: count,
+      page,
+      totalPages: Math.ceil(count / limit)
+    };
+  }
+
+  /**
    * Get single blog post by ID
    */
   async getPost(id) {

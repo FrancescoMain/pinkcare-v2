@@ -1,0 +1,347 @@
+/* Replica esatta di examinations_history.xhtml styling */
+
+/* table-careers - from legacy Olympus main.css */
+.table-careers {
+  width: 100%;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.table-careers > li {
+  display: table;
+  width: 100%;
+  padding: 30px 35px;
+  border-bottom: 1px solid #e6ecf5;
+}
+
+.table-careers li:hover {
+  background-color: #e6ecf5;
+}
+
+.table-careers > li > span {
+  display: table-cell;
+  vertical-align: middle;
+  width: 20%;
+}
+
+.table-careers span.position,
+.table-careers span.type {
+  color: #515365;
+}
+
+.table-careers .head {
+  border: none;
+  box-shadow: none;
+  text-align: center;
+}
+
+.table-careers .head span {
+  font-size: 12px;
+  text-transform: uppercase;
+  font-weight: bold;
+}
+
+.table-careers .head:hover {
+  background-color: transparent;
+}
+
+.table-careers .btn {
+  margin: 0;
+}
+
+.table-careers .date {
+  color: #888;
+  font-size: 13px;
+}
+
+.table-careers .type.bold {
+  font-weight: 700;
+}
+
+/* Calendar row inside table */
+.table-careers li.calendar-row {
+  padding: 0 35px 15px;
+  display: block;
+}
+
+.table-careers li.calendar-row:hover {
+  background-color: transparent;
+}
+
+/* More dropdown in table rows */
+.table-careers .available-widget {
+  position: relative;
+}
+
+.table-careers .available-widget .more {
+  position: relative;
+  display: inline-block;
+  font-size: 16px;
+  padding-left: 15px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.table-careers .available-widget .more .more-dropdown {
+  display: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 190px;
+  box-shadow: 0 0 34px 0 rgba(63, 66, 87, 0.1);
+  background-color: #fff;
+  border-radius: 4px;
+  text-align: left;
+  padding: 15px 20px;
+  z-index: 5;
+  list-style: none;
+  margin: 0;
+}
+
+.table-careers .available-widget .more:hover .more-dropdown {
+  display: block;
+}
+
+.table-careers .available-widget .more .more-dropdown li a {
+  padding: 7px 0;
+  font-size: 12px;
+  color: #515365;
+  display: block;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.table-careers .available-widget .more .more-dropdown li a:hover {
+  color: #ff5e3a;
+}
+
+/* Accordion examinations history */
+.accordion-exams_history .ui-block-title {
+  cursor: pointer;
+  padding: 15px 25px;
+}
+
+.accordion-exams_history .ui-block-title a {
+  color: #515365;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.accordion-exams_history .ui-block-title a:hover {
+  color: #ff5e3a;
+}
+
+.accordion-exams_history .icons-wrap {
+  margin-left: 8px;
+  transition: transform 0.2s ease;
+}
+
+.accordion-exams_history a[aria-expanded="true"] .icons-wrap {
+  display: inline-block;
+  transform: rotate(180deg);
+}
+
+/* Inline calendar - same as recommendedExamList */
+.accordion-exams_history .inline_calendar {
+  background-color: #fff;
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 0 34px 0 rgba(63, 66, 87, 0.34);
+  border-radius: 4px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.accordion-exams_history .inline_calendar .form-control {
+  margin-bottom: 8px;
+}
+
+.accordion-exams_history .inline_calendar .form-group {
+  margin-bottom: 10px;
+}
+
+.accordion-exams_history .inline_calendar .form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #515365;
+  margin-bottom: 4px;
+}
+
+.accordion-exams_history .inline_calendar .calendar-buttons {
+  display: flex;
+  gap: 5px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.accordion-exams_history .inline_calendar .calendar-buttons .btn {
+  margin: 0;
+}
+
+.accordion-exams_history .inline_calendar .btn-default {
+  background-color: #e6ecf5;
+  border: 1px solid #e6ecf5;
+  color: #515365;
+}
+
+.accordion-exams_history .inline_calendar .btn-default:hover {
+  background-color: #d5dce8;
+}
+
+.accordion-exams_history .inline_calendar .btn-primary {
+  background-color: #e42080;
+  border-color: #e42080;
+  color: #fff;
+}
+
+.accordion-exams_history .inline_calendar .btn-primary:hover {
+  background-color: #c91b6e;
+}
+
+/* Paperclip icon in history */
+.table-careers .fa-paperclip {
+  color: #515365;
+  font-size: 14px;
+  margin-left: 5px;
+}
+
+.table-careers .fa-paperclip:hover {
+  color: #ff5e3a;
+}
+
+/* Attachment dialog - replica PrimeFaces dialog */
+.dlg-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dlg-content {
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 0 34px 0 rgba(63, 66, 87, 0.34);
+  min-width: 400px;
+  max-width: 600px;
+  width: 90%;
+}
+
+.dlg-header {
+  padding: 15px 20px;
+  border-bottom: 1px solid #e6ecf5;
+}
+
+.dlg-header h6 {
+  margin: 0;
+  font-weight: 700;
+  color: #515365;
+}
+
+.dlg-body {
+  padding: 20px;
+}
+
+.attachment-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 5px 0;
+}
+
+.attachment-row .att-name {
+  flex: 1;
+  color: #515365;
+  font-size: 13px;
+}
+
+.attachment-row a {
+  color: #515365;
+}
+
+.attachment-row a:hover {
+  color: #ff5e3a;
+}
+
+.upload-section {
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid #e6ecf5;
+}
+
+.file-upload-label {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #515365;
+  font-size: 13px;
+  padding: 8px 0;
+}
+
+.file-upload-label:hover {
+  color: #e42080;
+}
+
+.file-upload-label .fa-plus {
+  color: #515365;
+}
+
+.file-upload-label:hover .fa-plus {
+  color: #e42080;
+}
+
+/* Dialog footer buttons - replica legacy PrimeFaces */
+.dlg-footer {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 15px 20px;
+  border-top: 1px solid #e6ecf5;
+}
+
+.dlg-footer .btn {
+  padding: 6px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+}
+
+.dlg-footer .btn-default {
+  background-color: #c2c4d0;
+  color: #515365;
+}
+
+.dlg-footer .btn-default:hover {
+  background-color: #b0b3c2;
+}
+
+.dlg-footer .btn-default:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dlg-footer .btn-primary {
+  background-color: #9a8dba;
+  color: #fff;
+}
+
+.dlg-footer .btn-primary:hover {
+  background-color: #8578a6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .table-careers li {
+    padding: 15px;
+  }
+}

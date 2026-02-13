@@ -29,6 +29,9 @@ const GravidanceType = require('./GravidanceType');
 const Schedule = require('./Schedule');
 const RecommendedExamination = require('./RecommendedExamination');
 const TeamExaminationPathology = require('./TeamExaminationPathology');
+const AttachedFile = require('./AttachedFile');
+const ClinicDocument = require('./ClinicDocument');
+const UserClinic = require('./UserClinic');
 
 // Define associations
 User.belongsToMany(Role, {
@@ -234,6 +237,16 @@ ScreeningResult.belongsTo(Screening, {
   as: 'screening'
 });
 
+ScreeningResult.belongsTo(RecommendedExamination, {
+  foreignKey: 'result_id',
+  as: 'result'
+});
+
+RecommendedExamination.hasMany(ScreeningResult, {
+  foreignKey: 'result_id',
+  as: 'screeningResults'
+});
+
 TeamReply.belongsTo(Team, {
   foreignKey: 'team_id',
   as: 'team'
@@ -391,6 +404,27 @@ ExaminationPathology.hasMany(TeamExaminationPathology, {
   as: 'teamExaminationPathologies'
 });
 
+// AttachedFile associations
+AttachedFile.belongsTo(RecommendedExamination, {
+  foreignKey: 'resultId',
+  as: 'result'
+});
+
+RecommendedExamination.hasMany(AttachedFile, {
+  foreignKey: 'resultId',
+  as: 'attachedFiles'
+});
+
+// UserClinic associations
+UserClinic.belongsTo(User, { foreignKey: 'userId', as: 'user' });
+UserClinic.belongsTo(Team, { foreignKey: 'clinicId', as: 'clinic' });
+User.hasMany(UserClinic, { foreignKey: 'userId', as: 'userClinics' });
+Team.hasMany(UserClinic, { foreignKey: 'clinicId', as: 'userClinics' });
+
+// ClinicDocument associations
+ClinicDocument.belongsTo(UserClinic, { foreignKey: 'appUserClinicId', as: 'userClinic' });
+UserClinic.hasMany(ClinicDocument, { foreignKey: 'appUserClinicId', as: 'documents' });
+
 module.exports = {
   sequelize,
   User,
@@ -422,5 +456,8 @@ module.exports = {
   GravidanceType,
   Schedule,
   RecommendedExamination,
-  TeamExaminationPathology
+  TeamExaminationPathology,
+  AttachedFile,
+  ClinicDocument,
+  UserClinic
 };

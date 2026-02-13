@@ -7,6 +7,7 @@ const {
   ExaminationPathology,
   Screening,
   ScreeningResult,
+  RecommendedExamination,
   TeamReply,
   Team,
   sequelize
@@ -196,7 +197,15 @@ exports.initializeScreening = async (req, res) => {
         const questionData = {
           ...pr.question.toJSON(),
           given_answer: null,
-          given_answer_string: null
+          given_answer_string: null,
+          // Attach protocol_rules so frontend can determine when to show sub-questions
+          protocol_rules: [{
+            id: pr.id,
+            has_sub_question: pr.has_sub_question,
+            answer: pr.answer,
+            thematic_area_id: pr.thematic_area_id,
+            question_id: pr.question_id
+          }]
         };
 
         // Include sub_questions if they exist (sorted by id for consistent order)
@@ -212,6 +221,15 @@ exports.initializeScreening = async (req, res) => {
         }
 
         thematicAreasMap[taId].screening_questions.push(questionData);
+      } else {
+        // Same question appears with a different protocol rule — accumulate it
+        existingQuestion.protocol_rules.push({
+          id: pr.id,
+          has_sub_question: pr.has_sub_question,
+          answer: pr.answer,
+          thematic_area_id: pr.thematic_area_id,
+          question_id: pr.question_id
+        });
       }
     }
 
@@ -345,12 +363,26 @@ exports.elaborateScreening = async (req, res) => {
     });
 
     if (!screening) {
-      screening = await Screening.create({
-        team_id: userTeam.id,
-        thematic_area_id: thematicAreaId,
-        insertion_username: user.username,
-        last_modify_username: user.username
+      const now = new Date();
+      const [insertResult] = await sequelize.query(`
+        INSERT INTO app_screening (
+          id, team_id, thematic_area_id, deleted, archived,
+          insertion_date, insertion_username, last_modify_date, last_modify_username
+        ) VALUES (
+          nextval('app_screening_id_seq'),
+          :teamId, :thematicAreaId, false, false,
+          :now, :username, :now, :username
+        ) RETURNING *
+      `, {
+        replacements: {
+          teamId: userTeam.id,
+          thematicAreaId: thematicAreaId,
+          now,
+          username: user.username
+        },
+        type: QueryTypes.INSERT
       });
+      screening = insertResult[0];
       console.log('[QuestionnaireController] Created new screening:', screening.id);
     } else {
       console.log('[QuestionnaireController] Using existing screening:', screening.id);
@@ -452,9 +484,30 @@ exports.elaborateScreening = async (req, res) => {
       }
     }
 
-    // Step 4: Batch create new replies
+    // Step 4: Batch create new replies using raw SQL with nextval
     if (toCreate.length > 0) {
-      await TeamReply.bulkCreate(toCreate);
+      for (const item of toCreate) {
+        await sequelize.query(`
+          INSERT INTO app_team_reply (
+            id, team_id, question_id, screening_id, answer, answer_string,
+            deleted, insertion_date, insertion_username, last_modify_date, last_modify_username
+          ) VALUES (
+            nextval('app_team_reply_id_seq'),
+            :teamId, :questionId, :screeningId, :reply, :replyString,
+            false, NOW(), :username, NOW(), :username
+          )
+        `, {
+          replacements: {
+            teamId: item.team_id,
+            questionId: item.question_id,
+            screeningId: item.screening_id,
+            reply: item.reply,
+            replyString: item.reply_string || null,
+            username: item.insertion_username
+          },
+          type: QueryTypes.INSERT
+        });
+      }
       console.log(`[QuestionnaireController] Batch created ${toCreate.length} new replies`);
     }
 
@@ -539,6 +592,19 @@ exports.elaborateScreening = async (req, res) => {
     }
 
     console.log(`[QuestionnaireController] Found ${suggestedExaminations.length} suggested examinations`);
+
+    // REPLICA ESATTA del legacy: save RecommendedExamination + ScreeningResult
+    // Step 1: Delete old ScreeningResult records for this screening
+    await ScreeningResult.destroy({
+      where: { screening_id: screening.id }
+    });
+
+    // Step 2: Create/reuse RecommendedExamination records
+    const savedRecommendations = await saveRecommendedExaminations(
+      suggestedExaminations, screening, userTeam, user.username
+    );
+
+    console.log(`[QuestionnaireController] Saved ${savedRecommendations.length} recommended examinations`);
 
     res.json({
       success: true,
@@ -625,12 +691,26 @@ async function elaborateSingleThematicArea(req, thematicArea) {
   });
 
   if (!screening) {
-    screening = await Screening.create({
-      team_id: userTeam.id,
-      thematic_area_id: thematicAreaId,
-      insertion_username: user.username,
-      last_modify_username: user.username
+    const now = new Date();
+    const [insertResult] = await sequelize.query(`
+      INSERT INTO app_screening (
+        id, team_id, thematic_area_id, deleted, archived,
+        insertion_date, insertion_username, last_modify_date, last_modify_username
+      ) VALUES (
+        nextval('app_screening_id_seq'),
+        :teamId, :thematicAreaId, false, false,
+        :now, :username, :now, :username
+      ) RETURNING *
+    `, {
+      replacements: {
+        teamId: userTeam.id,
+        thematicAreaId: thematicAreaId,
+        now,
+        username: user.username
+      },
+      type: QueryTypes.INSERT
     });
+    screening = insertResult[0];
   } else {
     screening.last_modify_username = user.username;
     screening.last_modify_date = new Date();
@@ -721,7 +801,28 @@ async function elaborateSingleThematicArea(req, thematicArea) {
   }
 
   if (toCreate.length > 0) {
-    await TeamReply.bulkCreate(toCreate);
+    for (const item of toCreate) {
+      await sequelize.query(`
+        INSERT INTO app_team_reply (
+          id, team_id, question_id, screening_id, answer, answer_string,
+          deleted, insertion_date, insertion_username, last_modify_date, last_modify_username
+        ) VALUES (
+          nextval('app_team_reply_id_seq'),
+          :teamId, :questionId, :screeningId, :reply, :replyString,
+          false, NOW(), :username, NOW(), :username
+        )
+      `, {
+        replacements: {
+          teamId: item.team_id,
+          questionId: item.question_id,
+          screeningId: item.screening_id,
+          reply: item.reply,
+          replyString: item.reply_string || null,
+          username: item.insertion_username
+        },
+        type: QueryTypes.INSERT
+      });
+    }
   }
 
   if (toUpdate.length > 0) {
@@ -774,12 +875,133 @@ async function elaborateSingleThematicArea(req, thematicArea) {
         });
       }
     }
+
+    // Check sub-questions (was missing - REPLICA ESATTA del legacy)
+    if (q.sub_questions && q.sub_questions.length > 0) {
+      for (const sq of q.sub_questions) {
+        const subQuestionRules = rulesMap.get(sq.id) || [];
+        for (const rule of subQuestionRules) {
+          if (rule.answer === sq.given_answer || (sq.type_question === 'select' && sq.given_answer_string)) {
+            if (rule.examination) {
+              suggestedExaminations.push({
+                examination: rule.examination,
+                rule: rule,
+                question: sq
+              });
+            }
+          }
+        }
+      }
+    }
   }
+
+  // REPLICA ESATTA del legacy: save RecommendedExamination + ScreeningResult
+  await ScreeningResult.destroy({
+    where: { screening_id: screening.id }
+  });
+
+  const savedRecommendations = await saveRecommendedExaminations(
+    suggestedExaminations, screening, userTeam, user.username
+  );
 
   return {
     screening,
     suggestedExaminations
   };
+}
+
+/**
+ * Helper: Save RecommendedExamination + ScreeningResult records
+ * REPLICA ESATTA del legacy ScreeningServiceImpl.elaborateScreening():
+ * - Creates/reuses RecommendedExamination for each suggested exam
+ * - Creates ScreeningResult linking screening → recommended_examination
+ * - Deduplicates: reuses existing unconfirmed exams for same team+examination
+ */
+async function saveRecommendedExaminations(suggestedExaminations, screening, userTeam, username) {
+  const screeningId = screening.id;
+  const teamId = userTeam.id;
+  const now = new Date();
+
+  // Pre-fetch existing unconfirmed RecommendedExaminations for this team (to reuse)
+  const existingRecommended = await RecommendedExamination.findAll({
+    where: {
+      teamId: teamId,
+      confirmed: false,
+      deleted: false
+    }
+  });
+
+  // Map by examination_id for O(1) lookup
+  const existingMap = new Map();
+  for (const re of existingRecommended) {
+    existingMap.set(re.examinationId, re);
+  }
+
+  const savedRecommendations = [];
+  const screeningResults = [];
+  const seenExamIds = new Set(); // Avoid duplicates
+
+  for (const suggested of suggestedExaminations) {
+    const examId = suggested.examination.id;
+
+    // Skip if already processed this examination in this batch
+    if (seenExamIds.has(examId)) continue;
+    seenExamIds.add(examId);
+
+    let recommendedExam = existingMap.get(examId);
+
+    if (!recommendedExam) {
+      // Create new RecommendedExamination using raw SQL (sequence issue)
+      const [insertResult] = await sequelize.query(`
+        INSERT INTO app_recommended_examination (
+          id, team_id, examination_id, screening_id, protocol_rule_id,
+          confirmed, deleted, periodical_control,
+          insertion_date, insertion_username, last_modify_date, last_modify_username
+        ) VALUES (
+          nextval('app_recommended_examination_id_seq'),
+          :teamId, :examId, :screeningId, :ruleId,
+          false, false, false,
+          :now, :username, :now, :username
+        ) RETURNING *
+      `, {
+        replacements: {
+          teamId,
+          examId,
+          screeningId,
+          ruleId: suggested.rule.id,
+          now,
+          username
+        },
+        type: QueryTypes.INSERT
+      });
+      recommendedExam = insertResult[0];
+    }
+
+    savedRecommendations.push(recommendedExam);
+
+    // Create ScreeningResult linking screening → recommended_examination
+    const reId = recommendedExam.id;
+    await sequelize.query(`
+      INSERT INTO app_screening_result (
+        id, screening_id, result_id, deleted,
+        insertion_date, insertion_username, last_modify_date, last_modify_username
+      ) VALUES (
+        nextval('app_screening_result_id_seq'),
+        :screeningId, :resultId, false,
+        :now, :username, :now, :username
+      )
+    `, {
+      replacements: {
+        screeningId,
+        resultId: reId,
+        now,
+        username
+      },
+      type: QueryTypes.INSERT
+    });
+  }
+
+  return savedRecommendations;
 }
 
 /**

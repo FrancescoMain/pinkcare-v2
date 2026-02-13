@@ -343,8 +343,8 @@ const LoginPage = ({ errorHandler }) => {
           console.log('🎯 Redirecting to admin dashboard');
           navigate('/admin/dashboard');
         } else {
-          console.log('🎯 Redirecting to dashboard (home)');
-          navigate('/dashboard'); // Redirect to home page after login
+          console.log('🎯 Redirecting to home');
+          navigate('/home');
         }
       }, 1500);
     } catch (error) {

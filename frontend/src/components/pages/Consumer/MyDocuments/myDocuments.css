@@ -1,0 +1,97 @@
+.my-documents {
+  padding: 0 25px;
+}
+
+.recomm-header {
+  background-color: #f0f4ff;
+  border: 1px solid #d0d8f0;
+  border-radius: 4px;
+  padding: 12px 18px;
+  margin-bottom: 15px;
+}
+
+.recomm-header p {
+  margin: 0;
+  color: #515365;
+  font-size: 14px;
+}
+
+.documents-filters {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.documents-filters .filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.documents-filters .filter-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #515365;
+  text-transform: uppercase;
+}
+
+.documents-filters .form-control-sm {
+  padding: 4px 8px;
+  font-size: 13px;
+  min-width: 150px;
+}
+
+.documents-filters .btn-primary {
+  background-color: #e42080;
+  border-color: #e42080;
+  color: #fff;
+}
+
+.documents-filters .btn-primary:hover {
+  background-color: #c91b6e;
+}
+
+.my-documents .actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.my-documents .actions a {
+  color: #515365;
+  font-size: 14px;
+}
+
+.my-documents .actions a:hover {
+  color: #e42080;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  padding: 15px 0;
+}
+
+.pagination-controls .page-info {
+  font-size: 13px;
+  color: #515365;
+}
+
+.pagination-controls .btn-default {
+  background-color: #e6ecf5;
+  border: 1px solid #e6ecf5;
+  color: #515365;
+}
+
+.pagination-controls .btn-default:hover {
+  background-color: #d5dce8;
+}
+
+.pagination-controls .btn-default:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

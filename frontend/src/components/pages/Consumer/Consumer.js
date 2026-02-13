@@ -6,6 +6,9 @@ import MedicalHistoryForm from './MedicalHistoryForm';
 import MensesCalendar from './Calendar/MensesCalendar';
 import Schedule from './Schedule/Schedule';
 import DoctorsList from './DoctorsList';
+import RecommendedExamList from './RecommendedExamList/RecommendedExamList';
+import ExaminationsHistory from './ExaminationsHistory/ExaminationsHistory';
+import MyDocuments from './MyDocuments/MyDocuments';
 import UserProfileSidebar from '../../layout/UserProfileSidebar';
 import AdvertisingSidebar from '../../layout/AdvertisingSidebar';
 import ThreeColumnLayout from '../../layout/ThreeColumnLayout';
@@ -59,22 +62,12 @@ const Consumer = () => {
         return <MedicalHistoryForm />;
 
       case 1:
-        // TODO: Recommended Examination List - not yet implemented
-        return (
-          <div className="tab-placeholder">
-            <h3>Recommended Examination List</h3>
-            <p>Da implementare</p>
-          </div>
-        );
+        // Recommended Examination List (Esami consigliati)
+        return <RecommendedExamList />;
 
       case 2:
-        // TODO: Examinations History - not yet implemented
-        return (
-          <div className="tab-placeholder">
-            <h3>Examinations History</h3>
-            <p>Da implementare</p>
-          </div>
-        );
+        // Examinations History (Controlli)
+        return <ExaminationsHistory />;
 
       case 3:
         // Advanced Screening (Questionnaire)
@@ -96,13 +89,7 @@ const Consumer = () => {
         return <DoctorsList />;
 
       case 10:
-        // TODO: My Documents - not yet implemented
-        return (
-          <div className="tab-placeholder">
-            <h3>My Documents</h3>
-            <p>Da implementare</p>
-          </div>
-        );
+        return <MyDocuments />;
 
       default:
         return (
@@ -116,7 +103,7 @@ const Consumer = () => {
 
   return (
     <ThreeColumnLayout
-      leftSidebar={<UserProfileSidebar />}
+      leftSidebar={<UserProfileSidebar key={activeTab} />}
       rightSidebar={<AdvertisingSidebar />}
       leftColSize={2}
       centerColSize={8}
