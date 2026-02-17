@@ -51,32 +51,27 @@ class DoctorsService {
     const whereConditions = [];
     const replacements = {};
 
-    // Only searchable and active teams
+    // Only searchable teams (matches legacy: searchable = 'Y' AND deleted = 'N', no active check)
     whereConditions.push("t.searchable = true");
     whereConditions.push("t.deleted = 'N'");
-    whereConditions.push("t.active = 'Y'");
 
     // Filter by type (DOCTOR or CLINIC)
     if (type) {
       whereConditions.push("t.type_id = :typeId");
       replacements.typeId = type;
     } else {
-      // Default: only doctors and clinics
-      whereConditions.push("t.type_id IN (:doctorType, :clinicType)");
-      replacements.doctorType = DoctorsService.TYPES.DOCTOR;
-      replacements.clinicType = DoctorsService.TYPES.CLINIC;
+      // Default: business types (matches legacy: type.business = true)
+      whereConditions.push("typ.business = true");
     }
 
-    // Filter by examination
+    // Filter by examination (exam_id from "nearest solution" — can be exam or pathology)
     if (examination) {
       whereConditions.push(`
         EXISTS (
           SELECT 1 FROM app_team_examination_pathology tep
-          JOIN app_examination_pathology ep ON ep.id = tep.examination_pathology_id
           WHERE tep.team_id = t.id
             AND tep.deleted = false
-            AND ep.examination = true
-            AND ep.id = :examinationId
+            AND tep.examination_pathology_id = :examinationId
         )
       `);
       replacements.examinationId = examination;
@@ -87,11 +82,9 @@ class DoctorsService {
       whereConditions.push(`
         EXISTS (
           SELECT 1 FROM app_team_examination_pathology tep
-          JOIN app_examination_pathology ep ON ep.id = tep.examination_pathology_id
           WHERE tep.team_id = t.id
             AND tep.deleted = false
-            AND ep.examination = false
-            AND ep.id = :pathologyId
+            AND tep.examination_pathology_id = :pathologyId
         )
       `);
       replacements.pathologyId = pathology;
@@ -183,6 +176,7 @@ class DoctorsService {
       FROM app_team t
       LEFT JOIN app_user u ON t.representative_id = u.id
       LEFT JOIN app_address a ON t.address_id = a.id
+      LEFT JOIN app_typology typ ON t.type_id = typ.id
       ${whereClause}
     `;
 

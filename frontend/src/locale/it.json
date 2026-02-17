@@ -190,7 +190,12 @@
     "no_suggested_exams": "Nessun esame suggerito",
     "no_history": "Nessun esame nello storico",
     "save": "Salva",
-    "confirm": "Conferma"
+    "confirm": "Conferma",
+    "prenatal_examinations": "Esami Prenatali",
+    "next_prenatal_examinations": "Esami Prenatali Successivi",
+    "week_pertinence": "Settimana gestionale di pertinenza",
+    "no_date": "Nessuna data",
+    "week_short": "Settimana"
   },
   "documents": {
     "typology": "Tipologia",

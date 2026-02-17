@@ -76,6 +76,22 @@ class ExaminationApi {
   }
 
   /**
+   * Get current prenatal examinations
+   * @returns {Promise} - Promise with examinations array
+   */
+  static async getPrenatalExaminations() {
+    return ApiService.get('/api/examinations/prenatal');
+  }
+
+  /**
+   * Get next prenatal examinations
+   * @returns {Promise} - Promise with examinations array
+   */
+  static async getNextPrenatalExaminations() {
+    return ApiService.get('/api/examinations/prenatal-next');
+  }
+
+  /**
    * Get suggested (unconfirmed) examinations for history page
    * @returns {Promise} - Promise with examinations array
    */

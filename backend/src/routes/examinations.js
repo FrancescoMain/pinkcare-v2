@@ -50,6 +50,18 @@ router.get('/screening',
   examinationController.getScreeningExaminations
 );
 
+// Get current prenatal examinations
+router.get('/prenatal',
+  AuthMiddleware.verifyToken,
+  examinationController.getPrenatalExaminations
+);
+
+// Get next prenatal examinations
+router.get('/prenatal-next',
+  AuthMiddleware.verifyToken,
+  examinationController.getNextPrenatalExaminations
+);
+
 // Get suggested (unconfirmed) examinations for history page
 router.get('/suggested',
   AuthMiddleware.verifyToken,

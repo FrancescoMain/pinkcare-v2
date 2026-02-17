@@ -1,347 +1,829 @@
-/* Replica esatta di examinations_history.xhtml styling */
+/* ExaminationsHistory — Modern Card-based Design */
 
-/* table-careers - from legacy Olympus main.css */
-.table-careers {
-  width: 100%;
-  list-style: none;
-  padding: 0;
-  margin: 0;
+/* ===== Container ===== */
+.eh-container {
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 10px 0;
 }
 
-.table-careers > li {
-  display: table;
-  width: 100%;
-  padding: 30px 35px;
-  border-bottom: 1px solid #e6ecf5;
+/* ===== Section Card ===== */
+.eh-section {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
 }
 
-.table-careers li:hover {
-  background-color: #e6ecf5;
+.eh-section:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.09);
 }
 
-.table-careers > li > span {
-  display: table-cell;
-  vertical-align: middle;
-  width: 20%;
+.eh-section--prenatal {
+  border-left: 4px solid #e42080;
 }
 
-.table-careers span.position,
-.table-careers span.type {
-  color: #515365;
+.eh-section--next-prenatal {
+  border-left: 4px solid #c71a6b;
 }
 
-.table-careers .head {
-  border: none;
-  box-shadow: none;
-  text-align: center;
+.eh-section--suggested {
+  border-left: 4px solid #E18A17;
 }
 
-.table-careers .head span {
-  font-size: 12px;
-  text-transform: uppercase;
-  font-weight: bold;
+.eh-section--history {
+  border-left: 4px solid #21CD24;
 }
 
-.table-careers .head:hover {
-  background-color: transparent;
+/* ===== Section Header (Accordion) ===== */
+.eh-section-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s ease;
 }
 
-.table-careers .btn {
-  margin: 0;
+.eh-section--prenatal .eh-section-header,
+.eh-section--next-prenatal .eh-section-header {
+  background: linear-gradient(135deg, rgba(228, 32, 128, 0.06) 0%, rgba(255, 255, 255, 0) 100%);
 }
 
-.table-careers .date {
-  color: #888;
-  font-size: 13px;
+.eh-section--suggested .eh-section-header {
+  background: linear-gradient(135deg, rgba(225, 138, 23, 0.06) 0%, rgba(255, 255, 255, 0) 100%);
 }
 
-.table-careers .type.bold {
-  font-weight: 700;
+.eh-section--history .eh-section-header {
+  background: linear-gradient(135deg, rgba(33, 205, 36, 0.06) 0%, rgba(255, 255, 255, 0) 100%);
 }
 
-/* Calendar row inside table */
-.table-careers li.calendar-row {
-  padding: 0 35px 15px;
-  display: block;
+.eh-section-header:hover {
+  background-color: rgba(0, 0, 0, 0.02);
 }
 
-.table-careers li.calendar-row:hover {
-  background-color: transparent;
-}
-
-/* More dropdown in table rows */
-.table-careers .available-widget {
-  position: relative;
-}
-
-.table-careers .available-widget .more {
-  position: relative;
-  display: inline-block;
+.eh-section-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
   font-size: 16px;
-  padding-left: 15px;
-  cursor: pointer;
-  vertical-align: middle;
+  color: #fff;
+  margin-right: 14px;
 }
 
-.table-careers .available-widget .more .more-dropdown {
-  display: none;
-  position: absolute;
-  top: 100%;
-  right: 0;
-  width: 190px;
-  box-shadow: 0 0 34px 0 rgba(63, 66, 87, 0.1);
-  background-color: #fff;
-  border-radius: 4px;
-  text-align: left;
-  padding: 15px 20px;
-  z-index: 5;
-  list-style: none;
-  margin: 0;
+.eh-section--prenatal .eh-section-icon,
+.eh-section--next-prenatal .eh-section-icon {
+  background: linear-gradient(135deg, #e42080, #c71a6b);
 }
 
-.table-careers .available-widget .more:hover .more-dropdown {
-  display: block;
+.eh-section--suggested .eh-section-icon {
+  background: linear-gradient(135deg, #E18A17, #c97812);
 }
 
-.table-careers .available-widget .more .more-dropdown li a {
-  padding: 7px 0;
-  font-size: 12px;
-  color: #515365;
-  display: block;
+.eh-section--history .eh-section-icon {
+  background: linear-gradient(135deg, #21CD24, #1aad1c);
+}
+
+.eh-section-title {
+  flex: 1;
+  font-size: 15px;
   font-weight: 700;
-  text-decoration: none;
+  color: #2d3748;
+  line-height: 1.3;
 }
 
-.table-careers .available-widget .more .more-dropdown li a:hover {
-  color: #ff5e3a;
+.eh-section-subtitle {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  color: #888;
+  margin-top: 2px;
 }
 
-/* Accordion examinations history */
-.accordion-exams_history .ui-block-title {
-  cursor: pointer;
-  padding: 15px 25px;
+.eh-section-count {
+  background: #f0f0f0;
+  color: #666;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 12px;
+  margin-right: 12px;
+  flex-shrink: 0;
 }
 
-.accordion-exams_history .ui-block-title a {
-  color: #515365;
-  text-decoration: none;
-  display: inline-block;
+.eh-section--prenatal .eh-section-count,
+.eh-section--next-prenatal .eh-section-count {
+  background: rgba(228, 32, 128, 0.1);
+  color: #e42080;
 }
 
-.accordion-exams_history .ui-block-title a:hover {
-  color: #ff5e3a;
+.eh-section--suggested .eh-section-count {
+  background: rgba(225, 138, 23, 0.1);
+  color: #E18A17;
 }
 
-.accordion-exams_history .icons-wrap {
-  margin-left: 8px;
-  transition: transform 0.2s ease;
+.eh-section--history .eh-section-count {
+  background: rgba(33, 205, 36, 0.1);
+  color: #1aad1c;
 }
 
-.accordion-exams_history a[aria-expanded="true"] .icons-wrap {
-  display: inline-block;
+.eh-chevron {
+  font-size: 14px;
+  color: #aaa;
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+}
+
+.eh-chevron--open {
   transform: rotate(180deg);
 }
 
-/* Inline calendar - same as recommendedExamList */
-.accordion-exams_history .inline_calendar {
-  background-color: #fff;
-  position: relative;
-  z-index: 1;
-  box-shadow: 0 0 34px 0 rgba(63, 66, 87, 0.34);
-  border-radius: 4px;
-  padding: 15px;
-  margin-bottom: 15px;
+/* ===== Section Body ===== */
+.eh-section-body {
+  padding: 0 20px 16px;
 }
 
-.accordion-exams_history .inline_calendar .form-control {
-  margin-bottom: 8px;
-}
-
-.accordion-exams_history .inline_calendar .form-group {
-  margin-bottom: 10px;
-}
-
-.accordion-exams_history .inline_calendar .form-group label {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  color: #515365;
-  margin-bottom: 4px;
-}
-
-.accordion-exams_history .inline_calendar .calendar-buttons {
+/* ===== Exam Row (Prenatal + Suggested) ===== */
+.eh-exam-item {
   display: flex;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 8px;
+  transition: background-color 0.15s ease;
+  gap: 10px;
+}
+
+.eh-exam-item:not(:last-child) {
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.eh-exam-item:hover {
+  background-color: rgba(228, 32, 128, 0.03);
+}
+
+.eh-exam-name {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  color: #2d3748;
+  min-width: 0;
+}
+
+.eh-exam-name small {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  color: #888;
+  margin-top: 2px;
+}
+
+/* ===== Badges ===== */
+.eh-badge {
+  display: inline-flex;
+  align-items: center;
   gap: 5px;
-  margin-top: 10px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.eh-badge i {
+  font-size: 11px;
+}
+
+.eh-badge--future {
+  background: rgba(33, 205, 36, 0.1);
+  color: #1a8d1c;
+}
+
+.eh-badge--past {
+  background: rgba(225, 138, 23, 0.1);
+  color: #c97812;
+}
+
+.eh-badge--none {
+  background: #f3f4f6;
+  color: #aaa;
+}
+
+.eh-badge--week {
+  background: rgba(228, 32, 128, 0.08);
+  color: #c71a6b;
+  font-size: 11px;
+}
+
+/* ===== Action Buttons (inline, visible) ===== */
+.eh-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.eh-action-btn {
+  border: none !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  padding: 6px 12px !important;
+  transition: all 0.15s ease;
+  background: transparent;
+  white-space: nowrap;
+  line-height: 1.4 !important;
+}
+
+.eh-action-label {
+  font-size: 11px;
+}
+
+.eh-action-btn--calendar {
+  color: #e42080 !important;
+  background: rgba(228, 32, 128, 0.08) !important;
+}
+
+.eh-action-btn--calendar:hover {
+  background: rgba(228, 32, 128, 0.18) !important;
+}
+
+.eh-action-btn--calendar.active {
+  background: #e42080 !important;
+  color: #fff !important;
+}
+
+.eh-action-btn--location {
+  color: #3b82f6 !important;
+  background: rgba(59, 130, 246, 0.08) !important;
+}
+
+.eh-action-btn--location:hover {
+  background: rgba(59, 130, 246, 0.18) !important;
+}
+
+.eh-action-btn--remove {
+  color: #ef4444 !important;
+  background: rgba(239, 68, 68, 0.08) !important;
+}
+
+.eh-action-btn--remove:hover {
+  background: rgba(239, 68, 68, 0.18) !important;
+}
+
+.eh-action-btn--attach {
+  color: #8b5cf6 !important;
+  background: rgba(139, 92, 246, 0.08) !important;
+}
+
+.eh-action-btn--attach:hover {
+  background: rgba(139, 92, 246, 0.18) !important;
+}
+
+/* ===== Inline Calendar Panel ===== */
+.eh-calendar-panel {
+  background: linear-gradient(135deg, rgba(228, 32, 128, 0.04) 0%, rgba(255, 255, 255, 0.6) 100%);
+  border: 1px solid rgba(228, 32, 128, 0.12);
+  border-radius: 10px;
+  padding: 16px;
+  margin: 8px 0 12px;
+}
+
+.eh-calendar-panel .form-group {
+  margin-bottom: 12px;
+}
+
+.eh-calendar-panel .form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.eh-calendar-panel .form-control {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #2d3748;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  box-sizing: border-box;
+}
+
+.eh-calendar-panel .form-control:focus {
+  outline: none;
+  border-color: #e42080;
+  box-shadow: 0 0 0 3px rgba(228, 32, 128, 0.12);
+}
+
+.eh-calendar-panel textarea.form-control {
+  resize: vertical;
+  min-height: 50px;
+}
+
+.eh-calendar-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
   flex-wrap: wrap;
 }
 
-.accordion-exams_history .inline_calendar .calendar-buttons .btn {
-  margin: 0;
+.eh-btn {
+  padding: 9px 20px !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  border: none !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  transition: all 0.15s ease;
+  display: inline-flex !important;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  line-height: 1.4 !important;
 }
 
-.accordion-exams_history .inline_calendar .btn-default {
-  background-color: #e6ecf5;
-  border: 1px solid #e6ecf5;
-  color: #515365;
+.eh-btn--primary {
+  background: #e42080 !important;
+  color: #fff !important;
 }
 
-.accordion-exams_history .inline_calendar .btn-default:hover {
-  background-color: #d5dce8;
+.eh-btn--primary:hover {
+  background: #c91b6e !important;
+  box-shadow: 0 2px 8px rgba(228, 32, 128, 0.3);
 }
 
-.accordion-exams_history .inline_calendar .btn-primary {
-  background-color: #e42080;
-  border-color: #e42080;
-  color: #fff;
+.eh-btn--secondary {
+  background: #edf2f7 !important;
+  color: #4a5568 !important;
 }
 
-.accordion-exams_history .inline_calendar .btn-primary:hover {
-  background-color: #c91b6e;
+.eh-btn--secondary:hover {
+  background: #e2e8f0 !important;
 }
 
-/* Paperclip icon in history */
-.table-careers .fa-paperclip {
-  color: #515365;
+.eh-btn--ghost {
+  background: transparent !important;
+  color: #888 !important;
+}
+
+.eh-btn--ghost:hover {
+  background: #f7f7f7 !important;
+  color: #555 !important;
+}
+
+/* ===== History Timeline ===== */
+.eh-timeline {
+  position: relative;
+  padding-left: 28px;
+}
+
+.eh-timeline::before {
+  content: '';
+  position: absolute;
+  left: 10px;
+  top: 8px;
+  bottom: 8px;
+  width: 2px;
+  background: linear-gradient(180deg, #21CD24 0%, rgba(33, 205, 36, 0.2) 100%);
+  border-radius: 2px;
+}
+
+.eh-timeline-item {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.eh-timeline-dot {
+  position: absolute;
+  left: -22px;
+  top: 16px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #21CD24;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 2px rgba(33, 205, 36, 0.2);
+}
+
+.eh-timeline-card {
+  background: rgba(33, 205, 36, 0.04);
+  border: 1px solid rgba(33, 205, 36, 0.12);
+  border-radius: 10px;
+  padding: 12px 16px;
+  transition: box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.eh-timeline-card:hover {
+  background: rgba(33, 205, 36, 0.08);
+  box-shadow: 0 2px 8px rgba(33, 205, 36, 0.1);
+}
+
+.eh-timeline-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.eh-timeline-exam-name {
   font-size: 14px;
-  margin-left: 5px;
+  font-weight: 600;
+  color: #2d3748;
+  flex: 1;
+  min-width: 0;
 }
 
-.table-careers .fa-paperclip:hover {
-  color: #ff5e3a;
+.eh-timeline-clip {
+  color: #888;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 4px;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  background: transparent;
+  border: none;
 }
 
-/* Attachment dialog - replica PrimeFaces dialog */
-.dlg-overlay {
+.eh-timeline-clip:hover {
+  color: #e42080;
+  background: rgba(228, 32, 128, 0.08);
+}
+
+.eh-timeline-meta {
+  display: flex;
+  gap: 16px;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #888;
+  flex-wrap: wrap;
+}
+
+.eh-timeline-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.eh-timeline-note {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #666;
+  font-style: italic;
+}
+
+/* ===== Empty State ===== */
+.eh-empty {
+  text-align: center;
+  padding: 30px 20px;
+  color: #aaa;
+}
+
+.eh-empty i {
+  font-size: 32px;
+  margin-bottom: 10px;
+  display: block;
+  opacity: 0.5;
+}
+
+.eh-empty span {
+  font-size: 14px;
+}
+
+/* ===== Attachment Dialog ===== */
+.eh-dlg-overlay {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.45);
   z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: ehFadeIn 0.2s ease;
 }
 
-.dlg-content {
+@keyframes ehFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ehSlideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.eh-dlg {
   background-color: #fff;
-  border-radius: 4px;
-  box-shadow: 0 0 34px 0 rgba(63, 66, 87, 0.34);
-  min-width: 400px;
-  max-width: 600px;
+  border-radius: 14px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  min-width: 380px;
+  max-width: 520px;
   width: 90%;
+  overflow: hidden;
+  animation: ehSlideUp 0.25s ease;
 }
 
-.dlg-header {
-  padding: 15px 20px;
-  border-bottom: 1px solid #e6ecf5;
+.eh-dlg-header {
+  background: linear-gradient(135deg, #e42080, #c71a6b);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
-.dlg-header h6 {
+.eh-dlg-header h6 {
   margin: 0;
   font-weight: 700;
-  color: #515365;
+  color: #fff;
+  font-size: 15px;
 }
 
-.dlg-body {
+.eh-dlg-close {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: #fff;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.eh-dlg-close:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.eh-dlg-body {
   padding: 20px;
 }
 
-.attachment-row {
+.eh-dlg-success {
+  color: #1a8d1c;
+  font-weight: 600;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.eh-att-item {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  padding: 5px 0;
+  padding: 10px 12px;
+  background: #f9fafb;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  gap: 10px;
+  transition: background 0.15s ease;
 }
 
-.attachment-row .att-name {
+.eh-att-item:hover {
+  background: #f1f5f9;
+}
+
+.eh-att-icon {
+  color: #e42080;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.eh-att-name {
   flex: 1;
-  color: #515365;
   font-size: 13px;
+  color: #2d3748;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.attachment-row a {
-  color: #515365;
+.eh-att-actions {
+  display: flex;
+  gap: 4px;
 }
 
-.attachment-row a:hover {
-  color: #ff5e3a;
-}
-
-.upload-section {
-  margin-top: 15px;
-  padding-top: 10px;
-  border-top: 1px solid #e6ecf5;
-}
-
-.file-upload-label {
+.eh-att-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
   cursor: pointer;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 8px;
-  color: #515365;
+  justify-content: center;
   font-size: 13px;
-  padding: 8px 0;
+  transition: all 0.15s ease;
+  background: transparent;
 }
 
-.file-upload-label:hover {
+.eh-att-btn--view {
+  color: #3b82f6;
+}
+
+.eh-att-btn--view:hover {
+  background: rgba(59, 130, 246, 0.1);
+}
+
+.eh-att-btn--delete {
+  color: #ef4444;
+}
+
+.eh-att-btn--delete:hover {
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.eh-upload-zone {
+  margin-top: 16px;
+  border: 2px dashed #e0e0e0;
+  border-radius: 10px;
+  padding: 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.eh-upload-zone:hover {
+  border-color: #e42080;
+  background: rgba(228, 32, 128, 0.03);
+}
+
+.eh-upload-zone i {
+  font-size: 20px;
+  color: #bbb;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.eh-upload-zone:hover i {
   color: #e42080;
 }
 
-.file-upload-label .fa-plus {
-  color: #515365;
+.eh-upload-zone span {
+  font-size: 13px;
+  color: #888;
 }
 
-.file-upload-label:hover .fa-plus {
+.eh-upload-zone:hover span {
   color: #e42080;
 }
 
-/* Dialog footer buttons - replica legacy PrimeFaces */
-.dlg-footer {
+.eh-dlg-footer {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  padding: 15px 20px;
-  border-top: 1px solid #e6ecf5;
+  padding: 14px 20px;
+  background: #fafafa;
+  border-top: 1px solid #f0f0f0;
 }
 
-.dlg-footer .btn {
-  padding: 6px 18px;
-  font-size: 13px;
-  font-weight: 600;
-  border-radius: 4px;
-  border: none;
-  cursor: pointer;
+.eh-dlg-footer .eh-btn {
+  flex-shrink: 0;
 }
 
-.dlg-footer .btn-default {
-  background-color: #c2c4d0;
-  color: #515365;
-}
-
-.dlg-footer .btn-default:hover {
-  background-color: #b0b3c2;
-}
-
-.dlg-footer .btn-default:disabled {
+.eh-dlg-footer .eh-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.dlg-footer .btn-primary {
-  background-color: #9a8dba;
-  color: #fff;
+/* ===== Loading & Error States ===== */
+.eh-loading {
+  text-align: center;
+  padding: 50px 20px;
+  color: #888;
+  font-size: 15px;
 }
 
-.dlg-footer .btn-primary:hover {
-  background-color: #8578a6;
+.eh-error {
+  text-align: center;
+  padding: 30px 20px;
+  color: #dc3545;
+  font-size: 15px;
 }
 
-/* Responsive */
+/* ===== Responsive ===== */
 @media (max-width: 768px) {
-  .table-careers li {
-    padding: 15px;
+  .eh-container {
+    gap: 14px;
+  }
+
+  .eh-exam-item {
+    flex-wrap: wrap;
+    padding: 12px 10px;
+    gap: 8px;
+  }
+
+  .eh-exam-name {
+    flex-basis: 100%;
+    min-width: unset;
+  }
+
+  .eh-badge {
+    font-size: 11px;
+    padding: 3px 8px;
+  }
+
+  .eh-actions {
+    margin-left: auto;
+  }
+
+  .eh-action-label {
+    display: none;
+  }
+
+  .eh-action-btn {
+    padding: 6px;
+  }
+
+  .eh-section-header {
+    padding: 14px 16px;
+  }
+
+  .eh-section-body {
+    padding: 0 14px 14px;
+  }
+
+  .eh-timeline {
+    padding-left: 24px;
+  }
+
+  .eh-timeline-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .eh-calendar-panel {
+    padding: 12px;
+  }
+
+  /* Dialog slides up from bottom on mobile */
+  .eh-dlg-overlay {
+    align-items: flex-end;
+  }
+
+  .eh-dlg {
+    min-width: unset;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 14px 14px 0 0;
+    max-height: 85vh;
+    overflow-y: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .eh-section-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+    margin-right: 10px;
+  }
+
+  .eh-section-title {
+    font-size: 14px;
+  }
+
+  .eh-calendar-buttons {
+    flex-direction: column;
+  }
+
+  .eh-calendar-buttons .eh-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .eh-dlg-footer {
+    flex-direction: column;
+  }
+
+  .eh-dlg-footer .eh-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .eh-timeline-meta {
+    flex-direction: column;
+    gap: 4px;
   }
 }

@@ -201,6 +201,52 @@ class ExaminationController {
     }
   }
   /**
+   * Get current prenatal examinations
+   * GET /api/examinations/prenatal
+   */
+  async getPrenatalExaminations(req, res) {
+    try {
+      const teamId = req.user.teams[0]?.id;
+      const { childbirthdate, ovulationDate } = req.user;
+
+      if (!teamId) {
+        return res.status(400).json({ error: 'Team non trovato per l\'utente' });
+      }
+
+      const examinations = await examinationService.getPregnancyExaminations(teamId, childbirthdate, ovulationDate, false);
+      return res.json({ examinations });
+    } catch (error) {
+      console.error('[ExaminationController] getPrenatalExaminations error:', error);
+      return res.status(500).json({
+        error: 'Errore nel caricamento degli esami prenatali'
+      });
+    }
+  }
+
+  /**
+   * Get next prenatal examinations
+   * GET /api/examinations/prenatal-next
+   */
+  async getNextPrenatalExaminations(req, res) {
+    try {
+      const teamId = req.user.teams[0]?.id;
+      const { childbirthdate, ovulationDate } = req.user;
+
+      if (!teamId) {
+        return res.status(400).json({ error: 'Team non trovato per l\'utente' });
+      }
+
+      const examinations = await examinationService.getPregnancyExaminations(teamId, childbirthdate, ovulationDate, true);
+      return res.json({ examinations });
+    } catch (error) {
+      console.error('[ExaminationController] getNextPrenatalExaminations error:', error);
+      return res.status(500).json({
+        error: 'Errore nel caricamento degli esami prenatali successivi'
+      });
+    }
+  }
+
+  /**
    * Get suggested (unconfirmed) examinations for history page
    * GET /api/examinations/suggested
    */

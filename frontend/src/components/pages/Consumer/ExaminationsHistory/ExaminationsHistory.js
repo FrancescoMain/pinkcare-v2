@@ -7,46 +7,59 @@ import './examinationsHistory.css';
 
 /**
  * ExaminationsHistory - Replica esatta di examinations_history.xhtml
- * 2 sezioni accordion:
- * 1. Esami suggeriti (unconfirmed) - tabella con calendar inline + allegati
- * 2. Storico esami (confirmed) - tabella con paperclip allegati
+ * 4 sezioni accordion:
+ * 1. Esami Prenatali (visibile solo se gravidanza attiva)
+ * 2. Esami Prenatali Successivi (visibile solo se gravidanza attiva)
+ * 3. Esami suggeriti (unconfirmed) - tabella con calendar inline + allegati
+ * 4. Storico esami (confirmed) - tabella con paperclip allegati
  */
 const ExaminationsHistory = () => {
   const { t } = useTranslation();
   const [, setSearchParams] = useSearchParams();
   const fileInputRef = useRef(null);
 
+  const [prenatalExams, setPrenatalExams] = useState([]);
+  const [nextPrenatalExams, setNextPrenatalExams] = useState([]);
   const [suggestedExams, setSuggestedExams] = useState([]);
   const [historyExams, setHistoryExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Calendar state
+  // Calendar state — selectedExam stores a unique key like "prenatal-123" or "suggested-456"
   const [selectedExam, setSelectedExam] = useState(null);
   const [pickerDate, setPickerDate] = useState('');
   const [noteText, setNoteText] = useState('');
 
   // Attachment dialog state
-  const [attachmentDialog, setAttachmentDialog] = useState(null); // { examId, examLabel }
+  const [attachmentDialog, setAttachmentDialog] = useState(null); // { examId, examLabel, isHistory }
   const [attachments, setAttachments] = useState([]);
   const [loadingAttachments, setLoadingAttachments] = useState(false);
   const [uploadSuccess, setUploadSuccess] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
 
-  // Accordion state
-  const [openSections, setOpenSections] = useState({ suggested: true, history: true });
+  // Accordion state — prenatal open, nextPrenatal collapsed (like legacy)
+  const [openSections, setOpenSections] = useState({
+    prenatal: true,
+    nextPrenatal: false,
+    suggested: true,
+    history: true
+  });
 
   const loadData = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [suggestedRes, historyRes] = await Promise.all([
+      const [suggestedRes, historyRes, prenatalRes, nextPrenatalRes] = await Promise.all([
         ExaminationApi.getSuggestedExaminations(),
-        ExaminationApi.getExaminationHistory()
+        ExaminationApi.getExaminationHistory(),
+        ExaminationApi.getPrenatalExaminations().catch(() => ({ examinations: [] })),
+        ExaminationApi.getNextPrenatalExaminations().catch(() => ({ examinations: [] }))
       ]);
       setSuggestedExams(suggestedRes.examinations || []);
       setHistoryExams(historyRes.examinations || []);
+      setPrenatalExams(prenatalRes.examinations || []);
+      setNextPrenatalExams(nextPrenatalRes.examinations || []);
     } catch (err) {
       console.error('Error loading examinations:', err);
       setError(t('examinations.error_loading'));
@@ -82,9 +95,12 @@ const ExaminationsHistory = () => {
     });
   };
 
+  // Generate a unique key for an exam in a given section
+  const examKey = (section, exam) => `${section}-${exam.id || `v-${exam.examinationId}-${exam.protocolRuleId}`}`;
+
   // Calendar handlers
-  const openDatePicker = (examId, exam) => {
-    setSelectedExam(examId);
+  const openDatePicker = (key, exam) => {
+    setSelectedExam(key);
     setPickerDate(exam.controlDate ? exam.controlDate.substring(0, 16) : '');
     setNoteText('');
   };
@@ -148,8 +164,8 @@ const ExaminationsHistory = () => {
   };
 
   // Attachment handlers
-  const openAttachmentDialog = async (examId, examLabel) => {
-    setAttachmentDialog({ examId, examLabel });
+  const openAttachmentDialog = async (examId, examLabel, isHistory = false) => {
+    setAttachmentDialog({ examId, examLabel, isHistory });
     setLoadingAttachments(true);
     setUploadSuccess(false);
     setSelectedFile(null);
@@ -161,6 +177,32 @@ const ExaminationsHistory = () => {
       setAttachments([]);
     } finally {
       setLoadingAttachments(false);
+    }
+  };
+
+  // Open attachment dialog for exams that may not have an id yet (virtual/prenatal)
+  const openAttachmentForExam = async (exam) => {
+    if (exam.id) {
+      openAttachmentDialog(exam.id, exam.label);
+      return;
+    }
+    // Virtual exam: create the DB record first (with null date) to get an id for attachments
+    try {
+      const saveRes = await ExaminationApi.markExamDate(
+        'new',
+        null,
+        exam.examinationId,
+        exam.protocolRuleId
+      );
+      const newId = saveRes.examination?.id;
+      if (newId) {
+        openAttachmentDialog(newId, exam.label);
+        loadData();
+      } else {
+        toast.error(t('examinations.error_saving'));
+      }
+    } catch (err) {
+      toast.error(t('examinations.error_saving'));
     }
   };
 
@@ -219,274 +261,351 @@ const ExaminationsHistory = () => {
     setOpenSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
-  // Status icon for suggested exams table
-  const getStatusCell = (exam) => {
-    if (exam.controlDate && isDateFuture(exam.controlDate)) {
+  // Date badge helper
+  const renderDateBadge = (dateStr) => {
+    if (!dateStr) {
       return (
-        <span>
-          <a href="#" onClick={(e) => { e.preventDefault(); openDatePicker(exam.id, exam); }}
-            title={t('examinations.control_date')}>
-            <i className="far fa-calendar-alt"></i>
-          </a>
+        <span className="eh-badge eh-badge--none" title={t('examinations.control_date')}>
+          <i className="far fa-calendar"></i> {t('examinations.no_date')}
         </span>
       );
     }
-    if (exam.controlDate && isDatePastOrToday(exam.controlDate)) {
+    if (isDateFuture(dateStr)) {
       return (
-        <span>
-          <a href="#" onClick={(e) => { e.preventDefault(); openDatePicker(exam.id, exam); }}
-            title={t('examinations.confirm_control_date')}>
-            <i className="far fa-question-circle" style={{ color: '#e18a17' }}></i>
-          </a>
+        <span className="eh-badge eh-badge--future" title={t('examinations.control_date')}>
+          <i className="far fa-calendar-check"></i> {formatDateTime(dateStr)}
         </span>
       );
     }
-    return <span></span>;
+    return (
+      <span className="eh-badge eh-badge--past" title={t('examinations.confirm_control_date')}>
+        <i className="far fa-question-circle"></i> {formatDateTime(dateStr)}
+      </span>
+    );
+  };
+
+  // Inline calendar panel (shared)
+  const renderCalendarPanel = (exam) => (
+    <div className="eh-calendar-panel">
+      <div className="form-group">
+        <label>{t('examinations.date_and_time')}</label>
+        <input
+          type="datetime-local"
+          value={pickerDate}
+          onChange={(e) => setPickerDate(e.target.value)}
+          className="form-control"
+        />
+      </div>
+      {pickerDate && isDatePastOrToday(pickerDate) && (
+        <div className="form-group">
+          <textarea
+            className="form-control"
+            placeholder={t('examinations.note_placeholder')}
+            value={noteText}
+            onChange={(e) => setNoteText(e.target.value)}
+            rows={2}
+          />
+        </div>
+      )}
+      <div className="eh-calendar-buttons">
+        <button className="eh-btn eh-btn--secondary"
+          onClick={() => openAttachmentForExam(exam)}>
+          <i className="fas fa-paperclip"></i> {t('examinations.attached')}
+        </button>
+        {pickerDate && isDateFuture(pickerDate) && (
+          <button className="eh-btn eh-btn--primary" onClick={() => handleSaveDate(exam)}>
+            <i className="far fa-save"></i> {t('examinations.save')}
+          </button>
+        )}
+        {pickerDate && isDatePastOrToday(pickerDate) && (
+          <button className="eh-btn eh-btn--primary" onClick={() => handleConfirmExam(exam)}>
+            <i className="fas fa-check"></i> {t('examinations.confirm')}
+          </button>
+        )}
+        <button className="eh-btn eh-btn--ghost" onClick={closeDatePicker}>
+          {t('examinations.close')}
+        </button>
+      </div>
+    </div>
+  );
+
+  /**
+   * Render an exam row (unified for prenatal, nextPrenatal, and suggested sections)
+   */
+  const renderExamRow = (exam, sectionKey) => {
+    const key = examKey(sectionKey, exam);
+    const isOpen = selectedExam === key;
+    return (
+      <React.Fragment key={key}>
+        <div className="eh-exam-item">
+          <div className="eh-exam-name">
+            {exam.label}
+            {exam.examinationInfo && <small>{exam.examinationInfo}</small>}
+          </div>
+          {renderDateBadge(exam.controlDate)}
+          {exam.intervalWeek && (
+            <span className="eh-badge eh-badge--week" title={t('examinations.week_pertinence')}>
+              <i className="far fa-clock"></i> <span dangerouslySetInnerHTML={{ __html: exam.intervalWeek }} />
+            </span>
+          )}
+          {exam.calculatedDate && (
+            <span className="eh-badge eh-badge--none" title={t('examinations.calculated_control_date')}>
+              <i className="far fa-clock"></i> {formatDate(exam.calculatedDate)}
+            </span>
+          )}
+          <div className="eh-actions">
+            <button
+              className={`eh-action-btn eh-action-btn--calendar${isOpen ? ' active' : ''}`}
+              onClick={() => isOpen ? closeDatePicker() : openDatePicker(key, exam)}
+              title={exam.controlDate ? t('examinations.view_details') : t('examinations.mark_date')}
+            >
+              <i className="far fa-calendar-alt"></i>
+              <span className="eh-action-label">{exam.controlDate ? t('examinations.view_details') : t('examinations.mark_date')}</span>
+            </button>
+            {exam.examinationId && (
+              <button
+                className="eh-action-btn eh-action-btn--location"
+                onClick={() => goToNearestSolution(exam.examinationId)}
+                title={t('examinations.nearest_solution')}
+              >
+                <i className="fas fa-map-marker-alt"></i>
+                <span className="eh-action-label">{t('examinations.nearest_solution')}</span>
+              </button>
+            )}
+            {exam.controlDate && exam.id && (
+              <button
+                className="eh-action-btn eh-action-btn--remove"
+                onClick={() => handleRemoveReservation(exam)}
+                title={t('examinations.remove_reservation')}
+              >
+                <i className="fas fa-times"></i>
+                <span className="eh-action-label">{t('examinations.remove_reservation')}</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {isOpen && renderCalendarPanel(exam)}
+      </React.Fragment>
+    );
   };
 
   if (loading) {
-    return <div style={{ textAlign: 'center', padding: '40px', color: '#666' }}>Caricamento...</div>;
+    return <div className="eh-loading">Caricamento...</div>;
   }
 
   if (error) {
-    return <div style={{ textAlign: 'center', padding: '20px', color: '#dc3545' }}>{error}</div>;
+    return <div className="eh-error">{error}</div>;
   }
 
   return (
-    <div>
-      <div id="accordion" role="tablist" aria-multiselectable="true" className="accordion-exams_history">
-        <div className="card">
+    <div className="eh-container">
 
-          {/* Sezione 1: Esami suggeriti (unconfirmed) */}
-          <div className="ui-block-title" role="tab">
-            <div className="h6 mb-0">
-              <a href="#" onClick={(e) => { e.preventDefault(); toggleSection('suggested'); }}
-                aria-expanded={openSections.suggested}
-                className={openSections.suggested ? '' : 'collapsed'}>
-                {t('examinations.suggested_examinations')}
-                <span className="icons-wrap"><i className="fas fa-angle-down"></i></span>
-              </a>
-              <br />
-              <span style={{ fontWeight: 100 }}>{t('examinations.suggested_examinations_subtitle')}</span>
+      {/* Sezione 1: Esami Prenatali */}
+      {prenatalExams.length > 0 && (
+        <div className="eh-section eh-section--prenatal">
+          <div className="eh-section-header" onClick={() => toggleSection('prenatal')}>
+            <div className="eh-section-icon">
+              <i className="fas fa-baby"></i>
             </div>
+            <div className="eh-section-title">
+              {t('examinations.prenatal_examinations')}
+            </div>
+            <span className="eh-section-count">{prenatalExams.length}</span>
+            <i className={`fas fa-chevron-down eh-chevron${openSections.prenatal ? ' eh-chevron--open' : ''}`}></i>
           </div>
 
-          {openSections.suggested && (
-            <div className="row">
-              <div className="col col-12 col-sm-12 col-lg-10 m-auto">
-                <ul className="table-careers svg_icon">
-                  <li className="head">
-                    <span>{t('examinations.examination')}</span>
-                    <span>{t('examinations.control_date')}</span>
-                    <span>{t('examinations.manage_reservation')}</span>
-                    <span>{t('examinations.calculated_control_date')}</span>
-                  </li>
-                  {suggestedExams.length > 0 ? (
-                    suggestedExams.map((exam) => (
-                      <React.Fragment key={exam.id || `v-${exam.examinationId}-${exam.protocolRuleId}`}>
-                        <li>
-                          <span className="available-widget">
-                            <div>{exam.label}</div>
-                            <div className="more">
-                              <i className="fas fa-ellipsis-h"></i>
-                              <ul className="more-dropdown">
-                                {exam.examinationId && (
-                                  <li>
-                                    <a href="#" onClick={(e) => { e.preventDefault(); goToNearestSolution(exam.examinationId); }}>
-                                      {t('examinations.nearest_solution')}
-                                    </a>
-                                  </li>
-                                )}
-                                <li>
-                                  <a href="#" onClick={(e) => { e.preventDefault(); selectedExam === exam.id ? closeDatePicker() : openDatePicker(exam.id, exam); }}>
-                                    {exam.controlDate ? t('examinations.view_details') : t('examinations.mark_date')}
-                                  </a>
-                                </li>
-                                {exam.controlDate && exam.id && (
-                                  <li>
-                                    <a href="#" onClick={(e) => { e.preventDefault(); handleRemoveReservation(exam); }}>
-                                      {t('examinations.remove_reservation')}
-                                    </a>
-                                  </li>
-                                )}
-                              </ul>
-                            </div>
-                          </span>
-                          <span className="date">{formatDateTime(exam.controlDate)}</span>
-                          {getStatusCell(exam)}
-                          <span className="date">{formatDate(exam.calculatedDate)}</span>
-                        </li>
-
-                        {/* Inline calendar */}
-                        {selectedExam === exam.id && (
-                          <li className="calendar-row">
-                            <div className="inline_calendar" style={{ width: '100%' }}>
-                              <div className="form-group">
-                                <label>{t('examinations.date_and_time')}</label>
-                                <input
-                                  type="datetime-local"
-                                  value={pickerDate}
-                                  onChange={(e) => setPickerDate(e.target.value)}
-                                  className="form-control"
-                                />
-                              </div>
-                              {pickerDate && isDatePastOrToday(pickerDate) && (
-                                <div className="form-group">
-                                  <textarea
-                                    className="form-control"
-                                    placeholder={t('examinations.note_placeholder')}
-                                    value={noteText}
-                                    onChange={(e) => setNoteText(e.target.value)}
-                                    rows={2}
-                                  />
-                                </div>
-                              )}
-                              <div className="calendar-buttons">
-                                {exam.id && (
-                                  <button className="btn btn-sm btn-default"
-                                    onClick={() => openAttachmentDialog(exam.id, exam.label)}>
-                                    {t('examinations.attached')}
-                                  </button>
-                                )}
-                                {pickerDate && isDateFuture(pickerDate) && (
-                                  <button className="btn btn-sm btn-primary" onClick={() => handleSaveDate(exam)}>
-                                    {t('examinations.save')}
-                                  </button>
-                                )}
-                                {pickerDate && isDatePastOrToday(pickerDate) && (
-                                  <button className="btn btn-sm btn-primary" onClick={() => handleConfirmExam(exam)}>
-                                    {t('examinations.confirm')}
-                                  </button>
-                                )}
-                                <button className="btn btn-sm btn-default" onClick={closeDatePicker}>
-                                  {t('examinations.close')}
-                                </button>
-                              </div>
-                            </div>
-                          </li>
-                        )}
-                      </React.Fragment>
-                    ))
-                  ) : (
-                    <li style={{ textAlign: 'center', color: '#888', padding: '20px' }}>
-                      <span>{t('examinations.no_suggested_exams')}</span>
-                    </li>
-                  )}
-                </ul>
-              </div>
+          {openSections.prenatal && (
+            <div className="eh-section-body">
+              {prenatalExams.map((exam) => renderExamRow(exam, 'prenatal'))}
             </div>
           )}
-
-          {/* Sezione 2: Storico esami (confirmed) */}
-          <div className="ui-block-title" role="tab">
-            <h6 className="mb-1">
-              <a href="#" onClick={(e) => { e.preventDefault(); toggleSection('history'); }}
-                aria-expanded={openSections.history}
-                className={openSections.history ? '' : 'collapsed'}>
-                {t('examinations.examinations_history')}
-                <span className="icons-wrap"><i className="fas fa-angle-down"></i></span>
-              </a>
-            </h6>
-          </div>
-
-          {openSections.history && (
-            <div className="row">
-              <div className="col col-12 col-sm-12 col-lg-10 m-auto">
-                <ul className="table-careers">
-                  <li className="head">
-                    <span>{t('examinations.control_date')}</span>
-                    <span>{t('examinations.next_control_date')}</span>
-                    <span>{t('examinations.examination')}</span>
-                    <span>{t('examinations.result')}</span>
-                  </li>
-                  {historyExams.length > 0 ? (
-                    historyExams.map((exam) => (
-                      <li key={exam.id}>
-                        <span className="date">{formatDateTime(exam.controlDate)}</span>
-                        <span className="date">{formatDate(exam.nextControlDate)}</span>
-                        <span className="type bold">
-                          {exam.label}&nbsp;
-                          {exam.id && (
-                            <a href="#" onClick={(e) => { e.preventDefault(); openAttachmentDialog(exam.id, exam.label); }}
-                              title={t('examinations.show_report')}>
-                              <i className="fas fa-paperclip"></i>
-                            </a>
-                          )}
-                        </span>
-                        <span>{exam.note || ''}</span>
-                      </li>
-                    ))
-                  ) : (
-                    <li style={{ textAlign: 'center', color: '#888', padding: '20px' }}>
-                      <span>{t('examinations.no_history')}</span>
-                    </li>
-                  )}
-                </ul>
-              </div>
-            </div>
-          )}
-
         </div>
+      )}
+
+      {/* Sezione 2: Esami Prenatali Successivi */}
+      {nextPrenatalExams.length > 0 && (
+        <div className="eh-section eh-section--next-prenatal">
+          <div className="eh-section-header" onClick={() => toggleSection('nextPrenatal')}>
+            <div className="eh-section-icon">
+              <i className="fas fa-baby"></i>
+            </div>
+            <div className="eh-section-title">
+              {t('examinations.next_prenatal_examinations')}
+            </div>
+            <span className="eh-section-count">{nextPrenatalExams.length}</span>
+            <i className={`fas fa-chevron-down eh-chevron${openSections.nextPrenatal ? ' eh-chevron--open' : ''}`}></i>
+          </div>
+
+          {openSections.nextPrenatal && (
+            <div className="eh-section-body">
+              {nextPrenatalExams.map((exam) => renderExamRow(exam, 'nextPrenatal'))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Sezione 3: Esami suggeriti */}
+      <div className="eh-section eh-section--suggested">
+        <div className="eh-section-header" onClick={() => toggleSection('suggested')}>
+          <div className="eh-section-icon">
+            <i className="fas fa-clipboard-list"></i>
+          </div>
+          <div className="eh-section-title">
+            {t('examinations.suggested_examinations')}
+            <span className="eh-section-subtitle">{t('examinations.suggested_examinations_subtitle')}</span>
+          </div>
+          <span className="eh-section-count">{suggestedExams.length}</span>
+          <i className={`fas fa-chevron-down eh-chevron${openSections.suggested ? ' eh-chevron--open' : ''}`}></i>
+        </div>
+
+        {openSections.suggested && (
+          <div className="eh-section-body">
+            {suggestedExams.length > 0 ? (
+              suggestedExams.map((exam) => renderExamRow(exam, 'suggested'))
+            ) : (
+              <div className="eh-empty">
+                <i className="fas fa-clipboard-list"></i>
+                <span>{t('examinations.no_suggested_exams')}</span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Dialog Allegati - Replica esatta di dlg_historical_attachments del legacy */}
+      {/* Sezione 4: Storico esami — Timeline */}
+      <div className="eh-section eh-section--history">
+        <div className="eh-section-header" onClick={() => toggleSection('history')}>
+          <div className="eh-section-icon">
+            <i className="fas fa-history"></i>
+          </div>
+          <div className="eh-section-title">
+            {t('examinations.examinations_history')}
+          </div>
+          <span className="eh-section-count">{historyExams.length}</span>
+          <i className={`fas fa-chevron-down eh-chevron${openSections.history ? ' eh-chevron--open' : ''}`}></i>
+        </div>
+
+        {openSections.history && (
+          <div className="eh-section-body">
+            {historyExams.length > 0 ? (
+              <div className="eh-timeline">
+                {historyExams.map((exam) => (
+                  <div className="eh-timeline-item" key={exam.id}>
+                    <div className="eh-timeline-dot"></div>
+                    <div className="eh-timeline-card">
+                      <div className="eh-timeline-header">
+                        <span className="eh-timeline-exam-name">{exam.label}</span>
+                        <span className="eh-badge eh-badge--future">
+                          <i className="far fa-calendar-check"></i> {formatDateTime(exam.controlDate)}
+                        </span>
+                        {exam.id && (
+                          <button
+                            className="eh-timeline-clip"
+                            onClick={() => openAttachmentDialog(exam.id, exam.label, true)}
+                            title={t('examinations.show_report')}
+                          >
+                            <i className="fas fa-paperclip"></i>
+                          </button>
+                        )}
+                      </div>
+                      <div className="eh-timeline-meta">
+                        {exam.nextControlDate && (
+                          <span>
+                            <i className="far fa-calendar"></i> {t('examinations.next_control_date')}: {formatDate(exam.nextControlDate)}
+                          </span>
+                        )}
+                      </div>
+                      {exam.note && (
+                        <div className="eh-timeline-note">{exam.note}</div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="eh-empty">
+                <i className="fas fa-history"></i>
+                <span>{t('examinations.no_history')}</span>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Dialog Allegati */}
       {attachmentDialog && (
-        <div className="dlg-overlay" onClick={closeAttachmentDialog}>
-          <div className="dlg-content" onClick={(e) => e.stopPropagation()}>
-            <div className="dlg-header">
+        <div className="eh-dlg-overlay" onClick={closeAttachmentDialog}>
+          <div className="eh-dlg" onClick={(e) => e.stopPropagation()}>
+            <div className="eh-dlg-header">
               <h6>{t('examinations.attached')}</h6>
+              <button className="eh-dlg-close" onClick={closeAttachmentDialog}>
+                <i className="fas fa-times"></i>
+              </button>
             </div>
-            <div className="dlg-body">
+            <div className="eh-dlg-body">
               {uploadSuccess && (
-                <h5 style={{ color: 'green', marginBottom: '10px' }}>Referto caricato con successo</h5>
+                <div className="eh-dlg-success">Referto caricato con successo</div>
               )}
               {loadingAttachments ? (
-                <p>Caricamento...</p>
+                <p style={{ color: '#888' }}>Caricamento...</p>
               ) : attachments.length === 0 && !uploadSuccess ? (
-                <p>{t('examinations.no_file_attached')}</p>
+                <div className="eh-empty">
+                  <i className="fas fa-paperclip"></i>
+                  <span>{t('examinations.no_file_attached')}</span>
+                </div>
               ) : (
                 attachments.map((att) => (
-                  <div key={att.id} className="attachment-row">
-                    <span className="att-name">{att.publicName}</span>
-                    <a href="#" onClick={(e) => { e.preventDefault(); handleDownloadAttachment(att.id, att.publicName); }}
-                      title={t('examinations.view')}>
-                      <i className="far fa-eye" style={{ fontSize: '14px' }}></i>
-                    </a>
-                    <a href="#" onClick={(e) => { e.preventDefault(); handleDeleteAttachment(att.id); }}
-                      title={t('examinations.delete')} style={{ marginLeft: '5px' }}>
-                      <i className="fa fa-times" style={{ fontSize: '14px' }}></i>
-                    </a>
+                  <div key={att.id} className="eh-att-item">
+                    <i className="fas fa-file-alt eh-att-icon"></i>
+                    <span className="eh-att-name">{att.publicName}</span>
+                    <div className="eh-att-actions">
+                      <button
+                        className="eh-att-btn eh-att-btn--view"
+                        onClick={() => handleDownloadAttachment(att.id, att.publicName)}
+                        title={t('examinations.view')}
+                      >
+                        <i className="far fa-eye"></i>
+                      </button>
+                      <button
+                        className="eh-att-btn eh-att-btn--delete"
+                        onClick={() => handleDeleteAttachment(att.id)}
+                        title={t('examinations.delete')}
+                      >
+                        <i className="fa fa-times"></i>
+                      </button>
+                    </div>
                   </div>
                 ))
               )}
-              <div className="upload-section">
-                <label className="file-upload-label">
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileSelect}
-                    style={{ display: 'none' }}
-                  />
-                  <i className="fa fa-plus"></i>
-                  <span>{selectedFile ? selectedFile.name : t('examinations.add_file_from_pc')}</span>
-                </label>
-              </div>
+              <label className="eh-upload-zone">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileSelect}
+                  style={{ display: 'none' }}
+                />
+                <i className="fa fa-plus"></i>
+                <span>{selectedFile ? selectedFile.name : t('examinations.add_file_from_pc')}</span>
+              </label>
             </div>
-            <div className="dlg-footer">
+            <div className="eh-dlg-footer">
               <button
-                className="btn btn-default"
+                className="eh-btn eh-btn--secondary"
                 onClick={handleUploadClick}
                 disabled={!selectedFile || uploading}
               >
                 {uploading ? 'Caricamento...' : t('examinations.upload')}
               </button>
-              <button
-                className="btn btn-primary"
-                onClick={() => { closeAttachmentDialog(); setSearchParams({ tab: '10', recomm: String(attachmentDialog.examId) }); }}
-              >
-                {t('examinations.upload_report')}
-              </button>
-              <button className="btn btn-default" onClick={closeAttachmentDialog}>
+              {attachmentDialog.isHistory && (
+                <button
+                  className="eh-btn eh-btn--primary"
+                  onClick={() => { closeAttachmentDialog(); setSearchParams({ tab: '10', recomm: String(attachmentDialog.examId) }); }}
+                >
+                  {t('examinations.upload_report')}
+                </button>
+              )}
+              <button className="eh-btn eh-btn--ghost" onClick={closeAttachmentDialog}>
                 {t('examinations.close')}
               </button>
             </div>

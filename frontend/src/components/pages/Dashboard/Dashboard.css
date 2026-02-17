@@ -132,6 +132,11 @@
   height: 16px;
 }
 
+/* Programma di cura - padding interno */
+.ui-block > .row {
+  padding: 0 15px;
+}
+
 /* Legacy fallback styles */
 .ui-block.available-widget {
   background: #fff;

@@ -72,6 +72,8 @@ class AuthMiddleware {
         name: user.name,
         surname: user.surname,
         birthday: user.birthday,
+        childbirthdate: user.childbirthdate,
+        ovulationDate: user.ovulationDate,
         roles: user.roles?.map(role => role.name) || [],
         teams: teams || [],
         location: userLocation
@@ -210,6 +212,8 @@ class AuthMiddleware {
           name: user.name,
           surname: user.surname,
           birthday: user.birthday,
+          childbirthdate: user.childbirthdate,
+          ovulationDate: user.ovulationDate,
           roles: user.roles?.map(role => role.name) || [],
           teams: teams || [],
           location: userLocation

@@ -412,6 +412,164 @@ class ExaminationService {
   }
 
   /**
+   * Get pregnancy (prenatal) examinations
+   * Replicates legacy getPregnancyExaminations(userVO, next)
+   * @param {number} teamId - Team ID
+   * @param {Date|string} childbirthdate - Expected delivery date
+   * @param {Date|string} ovulationDate - Ovulation date
+   * @param {boolean} next - false=current prenatal, true=next prenatal
+   * @returns {Promise<Array>} Array of prenatal examination objects
+   */
+  async getPregnancyExaminations(teamId, childbirthdate, ovulationDate, next) {
+    if (!childbirthdate || !ovulationDate) {
+      return [];
+    }
+
+    // Calculate current gestational week (same as legacy: ChronoUnit.WEEKS.between + 1)
+    const ovDate = new Date(ovulationDate);
+    const now = new Date();
+    const diffMs = now.getTime() - ovDate.getTime();
+    const week = Math.floor(diffMs / (7 * 24 * 60 * 60 * 1000)) + 1;
+
+    if (week == null || isNaN(week)) {
+      return [];
+    }
+
+    // Get protocol rules filtered by week
+    const whereClause = {
+      deleted: false,
+      week_inferior_limit: next
+        ? { [Op.gt]: week }
+        : { [Op.lte]: week }
+    };
+
+    const protocolRules = await ProtocolRule.findAll({
+      where: whereClause,
+      include: [
+        {
+          model: ExaminationPathology,
+          as: 'examination',
+          where: { examination: true },
+          required: true
+        }
+      ]
+    });
+
+    if (protocolRules.length === 0) {
+      return [];
+    }
+
+    // Fetch all unconfirmed recommended examinations for this team
+    const allExams = await RecommendedExamination.findAll({
+      where: { teamId },
+      include: [
+        {
+          model: ExaminationPathology,
+          as: 'examination',
+          attributes: ['id', 'label', 'periodicalControlDays']
+        },
+        {
+          model: ProtocolRule,
+          as: 'protocolRule',
+          attributes: ['id', 'week_inferior_limit', 'week_superior_limit']
+        }
+      ]
+    });
+
+    // Build result following legacy logic
+    const pregnancyExams = [];
+
+    for (const pr of protocolRules) {
+      if (!pr.examination) continue;
+
+      const examinationId = pr.examination.id;
+      const intervalWeek = `${pr.week_inferior_limit} - ${pr.week_superior_limit}`;
+      const examinationInfo = pr.examination_info || '';
+
+      // Find existing recommended examination matching team + examination
+      const existingIdx = allExams.findIndex(
+        e => e.examinationId === examinationId
+      );
+
+      if (existingIdx !== -1) {
+        const reTemp = allExams[existingIdx];
+
+        // Check if the existing exam matches the current/next criteria
+        if (!reTemp.confirmed && reTemp.protocolRule != null &&
+            ((!next && week >= reTemp.protocolRule.week_inferior_limit) ||
+             (next && week < reTemp.protocolRule.week_inferior_limit))) {
+          pregnancyExams.push({
+            ...this._transformExam(reTemp),
+            intervalWeek,
+            examinationInfo
+          });
+        } else if (!reTemp.confirmed || (reTemp.protocolRule != null && reTemp.protocolRuleId !== pr.id)) {
+          // Virtual object for this protocol rule
+          pregnancyExams.push({
+            id: null,
+            examinationId,
+            protocolRuleId: pr.id,
+            label: pr.examination.label,
+            controlDate: null,
+            nextControlDate: null,
+            calculatedDate: null,
+            periodicalControl: false,
+            confirmed: false,
+            note: null,
+            periodicalControlDays: pr.examination.periodicalControlDays,
+            intervalWeek,
+            examinationInfo
+          });
+        }
+      } else {
+        // No existing exam at all — create virtual
+        pregnancyExams.push({
+          id: null,
+          examinationId,
+          protocolRuleId: pr.id,
+          label: pr.examination.label,
+          controlDate: null,
+          nextControlDate: null,
+          calculatedDate: null,
+          periodicalControl: false,
+          confirmed: false,
+          note: null,
+          periodicalControlDays: pr.examination.periodicalControlDays,
+          intervalWeek,
+          examinationInfo
+        });
+      }
+    }
+
+    // Deduplication (legacy logic): same exam with different dates → keep both;
+    // same exam with same date → concatenate intervalWeek with <br/>
+    const finalExams = [];
+    for (const re of pregnancyExams) {
+      const existingIdx = finalExams.findIndex(
+        f => f.examinationId === re.examinationId && f.protocolRuleId === re.protocolRuleId
+      );
+
+      if (existingIdx === -1) {
+        // Also check by examinationId only (legacy uses .equals on team+examination)
+        const sameExamIdx = finalExams.findIndex(f => f.examinationId === re.examinationId);
+        if (sameExamIdx === -1) {
+          finalExams.push(re);
+        } else {
+          const listElement = finalExams[sameExamIdx];
+          if (listElement.controlDate != null && re.controlDate != null &&
+              listElement.controlDate !== re.controlDate) {
+            finalExams.push(re);
+          } else if (re.intervalWeek) {
+            listElement.intervalWeek = (listElement.intervalWeek || '') + '<br/>' + re.intervalWeek;
+          }
+        }
+      }
+    }
+
+    return finalExams;
+  }
+
+  /**
    * Get all unconfirmed examinations for the "Suggested Examinations" table
    * Replicates flowScope.examinations in examinations_history.xhtml
    * @param {number} teamId - Team ID
