@@ -7,8 +7,11 @@ const router = express.Router();
 const examinationController = require('../controllers/examinationController');
 const AuthMiddleware = require('../middleware/auth');
 
-// Multer config for file uploads
-const uploadDir = path.join(__dirname, '../../uploads/examinations');
+// Multer config for file uploads — use /tmp on Vercel (read-only filesystem)
+const isVercel = !!process.env.VERCEL;
+const uploadDir = isVercel
+  ? '/tmp/uploads/examinations'
+  : path.join(__dirname, '../../uploads/examinations');
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
