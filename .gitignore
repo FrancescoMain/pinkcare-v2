@@ -77,3 +77,6 @@ temp/
 
 # Cache
 .cache/
+
+# User uploads
+backend/uploads/
