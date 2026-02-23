@@ -6,7 +6,7 @@ import React from 'react';
  *
  * @param {boolean} inline - If true, render inline version for header
  */
-const CalendarLegend = ({ inline = false }) => {
+const CalendarLegend = ({ inline = false, hasPregnancy = false }) => {
   const legendItems = [
     { colorClass: 'menses', label: 'Ciclo', icon: 'fa-square', iconStyle: { color: '#f39ac6' } },
     { colorClass: 'expectation', label: 'Prossimo Ciclo' },
@@ -49,19 +49,23 @@ const CalendarLegend = ({ inline = false }) => {
           </div>
         ))}
 
-        {/* Pregnancy Trimesters (hidden by default, shown when pregnant) */}
-        <div className="legend-item pregnancy-legend pregnancy-1" style={{ display: 'none' }}>
-          <span className="legend-color pregnancy-1"></span>
-          <span className="legend-label">Primo Trimestre di gravidanza</span>
-        </div>
-        <div className="legend-item pregnancy-legend pregnancy-2" style={{ display: 'none' }}>
-          <span className="legend-color pregnancy-2"></span>
-          <span className="legend-label">Secondo Trimestre di gravidanza</span>
-        </div>
-        <div className="legend-item pregnancy-legend pregnancy-3" style={{ display: 'none' }}>
-          <span className="legend-color pregnancy-3"></span>
-          <span className="legend-label">Terzo Trimestre di gravidanza</span>
-        </div>
+        {/* Pregnancy Trimesters (shown only when pregnant) */}
+        {hasPregnancy && (
+          <>
+            <div className="legend-item pregnancy-legend pregnancy-1">
+              <span className="legend-color pregnancy-1"></span>
+              <span className="legend-label">Primo Trimestre di gravidanza</span>
+            </div>
+            <div className="legend-item pregnancy-legend pregnancy-2">
+              <span className="legend-color pregnancy-2"></span>
+              <span className="legend-label">Secondo Trimestre di gravidanza</span>
+            </div>
+            <div className="legend-item pregnancy-legend pregnancy-3">
+              <span className="legend-color pregnancy-3"></span>
+              <span className="legend-label">Terzo Trimestre di gravidanza</span>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

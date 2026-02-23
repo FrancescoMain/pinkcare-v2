@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import ScheduleApi from '../../services/scheduleApi';
 import ApiService from '../../services/apiService';
 import { toast } from 'react-toastify';
+import PregnancyWidget from '../pages/Consumer/Pregnancy/PregnancyWidget';
 import './UserProfileSidebar.css';
 
 /**
@@ -176,11 +177,6 @@ const UserProfileSidebar = () => {
     navigate('/consumer?tab=0');
   };
 
-  const handleCalcolaDataParto = () => {
-    // TODO: Implementare calcolo data parto (calendario mestruale?)
-    navigate('/consumer?tab=5');
-  };
-
   return (
     <div className="ui-block">
       {/* User Card - REPLICA ESATTA del legacy top-header-author */}
@@ -308,12 +304,8 @@ const UserProfileSidebar = () => {
         </div>
       )}
 
-      {/* Pulsante Calcola Data Parto - REPLICA ESATTA del legacy */}
-      <div className="widget w-build-fav btn-wid calcola-parto" onClick={handleCalcolaDataParto}>
-        <div className="ibm">
-          <h4>Calcola data parto</h4>
-        </div>
-      </div>
+      {/* Calcola Data Parto - Widget con dialoghi integrati */}
+      <PregnancyWidget />
     </div>
   );
 };

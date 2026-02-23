@@ -225,7 +225,7 @@ const MensesCalendar = () => {
       {/* Title Block (Legacy style) */}
       <div className="calendar-title-block">
         <h5>Calendario Mestruale</h5>
-        <CalendarLegend inline />
+        <CalendarLegend inline hasPregnancy={events.some(e => parseInt(e.typeId) === EVENT_TYPES.PREGNANCY)} />
       </div>
 
       <div className="calendar-container">
@@ -278,7 +278,7 @@ const MensesCalendar = () => {
               onDayClick={handleDayClick}
             />
 
-            <CalendarLegend />
+            <CalendarLegend hasPregnancy={events.some(e => parseInt(e.typeId) === EVENT_TYPES.PREGNANCY)} />
           </>
         )}
       </div>

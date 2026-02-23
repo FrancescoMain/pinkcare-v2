@@ -30,9 +30,16 @@ const DayCell = ({ date, events, isToday, onDayClick }) => {
   const hasFertility = events.some(e => parseInt(e.typeId) === EVENT_TYPES.FERTILITY);
   const hasExpectation = events.some(e => parseInt(e.typeId) === EVENT_TYPES.MENSES_EXPECTATION);
 
-  // Check for pregnancy trimesters
+  // Check for pregnancy trimesters - calculate dynamically from event beginning and cell date
   const pregnancyEvent = events.find(e => parseInt(e.typeId) === EVENT_TYPES.PREGNANCY);
-  const pregnancyTrimester = pregnancyEvent?.trimester || null;
+  let pregnancyTrimester = null;
+  if (pregnancyEvent && date) {
+    const beginDate = new Date(pregnancyEvent.beginning);
+    const weeks = Math.floor((date.getTime() - beginDate.getTime()) / (7 * 24 * 60 * 60 * 1000));
+    if (weeks <= 13) pregnancyTrimester = 1;
+    else if (weeks <= 26) pregnancyTrimester = 2;
+    else pregnancyTrimester = 3;
+  }
 
   // Check for other events (symptoms, drugs, moods, weight, temperature)
   const hasOtherEvents = events.some(e =>
