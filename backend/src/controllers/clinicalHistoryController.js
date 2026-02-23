@@ -20,6 +20,7 @@ exports.getConsumerData = async (req, res) => {
       // Get active teams for user (from auth middleware)
       const teams = req.user.teams;
       if (!teams || teams.length === 0) {
+        console.warn('[StoriaClinica GET] No teams for userId:', userId);
         return res.status(400).json({
           success: false,
           message: 'Utente non associato a nessun team'
@@ -27,8 +28,15 @@ exports.getConsumerData = async (req, res) => {
       }
 
       const teamId = teams[0].id; // Use first team
+      console.log('[StoriaClinica GET] Loading data for teamId:', teamId, 'userId:', userId);
 
       const consumerData = await clinicalHistoryService.getConsumerDetails(teamId);
+
+      // Log key fields to help diagnose production issues
+      console.log('[StoriaClinica GET] representative exists:', !!consumerData.representative);
+      console.log('[StoriaClinica GET] representative name:', consumerData.representative?.name);
+      console.log('[StoriaClinica GET] address exists:', !!consumerData.address);
+
       const surgeries = await clinicalHistoryService.getTeamSurgeries(teamId);
 
       // Calculate pregnancy statistics
@@ -44,7 +52,7 @@ exports.getConsumerData = async (req, res) => {
         }
       });
     } catch (error) {
-      console.error('Error in getConsumerData:', error);
+      console.error('[StoriaClinica GET] Error:', error.message, error.stack);
       res.status(500).json({
         success: false,
         message: 'Error fetching consumer data',
@@ -61,6 +69,7 @@ exports.updateConsumerForm = async (req, res) => {
     try {
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
+        console.warn('[StoriaClinica PUT] Validation errors:', JSON.stringify(errors.array()));
         return res.status(400).json({
           success: false,
           errors: errors.array()
@@ -74,6 +83,7 @@ exports.updateConsumerForm = async (req, res) => {
       // Get active teams for user (from auth middleware)
       const teams = req.user.teams;
       if (!teams || teams.length === 0) {
+        console.warn('[StoriaClinica PUT] No teams for userId:', userId);
         return res.status(400).json({
           success: false,
           message: 'Utente non associato a nessun team'
@@ -81,6 +91,7 @@ exports.updateConsumerForm = async (req, res) => {
       }
 
       const teamId = teams[0].id; // Use first team
+      console.log('[StoriaClinica PUT] Saving data for teamId:', teamId, 'userId:', userId);
 
       const updatedConsumer = await clinicalHistoryService.updateConsumerForm(
         teamId,
@@ -88,13 +99,15 @@ exports.updateConsumerForm = async (req, res) => {
         username
       );
 
+      console.log('[StoriaClinica PUT] Save successful for teamId:', teamId);
+
       res.json({
         success: true,
         message: 'Consumer data updated successfully',
         data: updatedConsumer
       });
     } catch (error) {
-      console.error('Error in updateConsumerForm:', error);
+      console.error('[StoriaClinica PUT] Error:', error.message, error.stack);
       res.status(500).json({
         success: false,
         message: 'Error updating consumer data',

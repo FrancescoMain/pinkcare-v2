@@ -9,17 +9,17 @@ const AuthMiddleware = require('../middleware/auth');
  * All routes require authentication
  */
 
-// Validation middleware
+// Validation middleware — use checkFalsy so empty strings skip validation
 const validateConsumerUpdate = [
-  body('representative.name').optional({ nullable: true }).isString().trim(),
-  body('representative.surname').optional({ nullable: true }).isString().trim(),
-  body('representative.email').optional({ nullable: true }).isEmail(),
-  body('representative.birthday').optional({ nullable: true }).isISO8601(),
-  body('representative.weight').optional({ nullable: true }).isFloat({ min: 0 }),
-  body('representative.height').optional({ nullable: true }).isFloat({ min: 0 }),
-  body('address.streetType').optional({ nullable: true }).isString(),
-  body('address.street').optional({ nullable: true }).isString(),
-  body('address.streetNumber').optional({ nullable: true }).isString()
+  body('representative.name').optional({ checkFalsy: true }).isString().trim(),
+  body('representative.surname').optional({ checkFalsy: true }).isString().trim(),
+  body('representative.email').optional({ checkFalsy: true }).isEmail(),
+  body('representative.birthday').optional({ checkFalsy: true }).isISO8601(),
+  body('representative.weight').optional({ checkFalsy: true }).isFloat({ min: 0 }),
+  body('representative.height').optional({ checkFalsy: true }).isFloat({ min: 0 }),
+  body('address.streetType').optional({ checkFalsy: true }).isString(),
+  body('address.street').optional({ checkFalsy: true }).isString(),
+  body('address.streetNumber').optional({ checkFalsy: true }).isString()
 ];
 
 /**

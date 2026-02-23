@@ -352,12 +352,15 @@ class ClinicalHistoryService {
 
   /**
    * Update consumer form data
+   * Uses a transaction to ensure atomicity (important for serverless/Vercel)
    * @param {number} teamId - Team ID
    * @param {Object} data - Updated consumer data
    * @param {string} username - Username for audit
    * @returns {Promise<Object>} Updated consumer
    */
   async updateConsumerForm(teamId, data, username) {
+    const t = await sequelize.transaction();
+
     try {
       const consumer = await Team.findByPk(teamId, {
         include: [
@@ -369,70 +372,95 @@ class ClinicalHistoryService {
             model: Address,
             as: 'address'
           }
-        ]
+        ],
+        transaction: t
       });
 
       if (!consumer) {
+        await t.rollback();
         throw new Error('Consumer not found');
       }
 
       const now = new Date();
 
-      // Update representative (user) data
+      // Update representative (user) data — only send allowed User model fields
       if (data.representative && consumer.representative) {
-        const repData = { ...data.representative };
-        repData.lastModifyDate = now;
-        repData.lastModifyUsername = username;
-        repData.filledPersonalForm = true;
+        const rep = data.representative;
+
+        // Extract only known User model fields to avoid Sequelize issues
+        const repData = {
+          name: rep.name,
+          surname: rep.surname,
+          email: rep.email,
+          birthday: rep.birthday || null,
+          gender: rep.gender,
+          weight: rep.weight != null ? parseFloat(rep.weight) : null,
+          height: rep.height != null ? parseFloat(rep.height) : null,
+          sedentaryLifestyle: rep.sedentaryLifestyle,
+          ageFirstMenstruation: rep.ageFirstMenstruation != null ? parseInt(rep.ageFirstMenstruation) : null,
+          regularityMenstruation: rep.regularityMenstruation,
+          durationPeriod: rep.durationPeriod != null ? parseInt(rep.durationPeriod) : null,
+          durationMenstruation: rep.durationMenstruation != null ? parseInt(rep.durationMenstruation) : null,
+          medicine: rep.medicine,
+          lastModifyDate: now,
+          lastModifyUsername: username,
+          filledPersonalForm: true
+        };
 
         // Handle birthPlace - extract ID from object if sent as object
-        if (repData.birthPlace && typeof repData.birthPlace === 'object') {
-          repData.birthPlaceId = repData.birthPlace.id;
-          delete repData.birthPlace;
+        if (rep.birthPlace && typeof rep.birthPlace === 'object') {
+          repData.birthPlaceId = rep.birthPlace.id;
+        } else if (rep.birthPlace === null) {
+          repData.birthPlaceId = null;
         }
 
-        await consumer.representative.update(repData);
+        // Coerce string booleans to actual booleans (RadioGroup sends strings)
+        if (typeof repData.gender === 'string') {
+          repData.gender = repData.gender === 'true';
+        }
+        if (typeof repData.sedentaryLifestyle === 'string') {
+          repData.sedentaryLifestyle = repData.sedentaryLifestyle === 'true';
+        }
+        if (typeof repData.regularityMenstruation === 'string') {
+          repData.regularityMenstruation = repData.regularityMenstruation === 'true';
+        }
+
+        console.log('[StoriaClinica] Updating representative with:', JSON.stringify(repData, null, 2));
+        await consumer.representative.update(repData, { transaction: t });
       }
 
       // Update address data
       if (data.address) {
-        const addressData = { ...data.address };
-
-        // Handle municipality - extract name if sent as object
-        if (addressData.municipality && typeof addressData.municipality === 'object') {
-          addressData.municipality = addressData.municipality.name;
-        }
-
-        // Remove id if present (to avoid conflicts)
-        delete addressData.id;
+        const addr = data.address;
+        const addressData = {
+          streetType: addr.streetType,
+          street: addr.street,
+          streetNumber: addr.streetNumber,
+          municipality: typeof addr.municipality === 'object' ? addr.municipality?.name : addr.municipality,
+          province: addr.province,
+          postCode: addr.postCode
+        };
 
         if (consumer.address) {
-          // Update existing address
-          await consumer.address.update(addressData);
+          await consumer.address.update(addressData, { transaction: t });
         } else {
-          // Create new address and associate with team
-          const newAddress = await Address.create(addressData);
-          await consumer.update({ addressId: newAddress.id });
+          const newAddress = await Address.create(addressData, { transaction: t });
+          await consumer.update({ addressId: newAddress.id }, { transaction: t });
         }
       }
 
-      // Update team data
-      const teamData = {
-        ...data.team,
+      // Update team audit fields
+      await consumer.update({
         lastModifyDate: now,
         lastModifyUsername: username
-      };
-      delete teamData.id; // Don't update the primary key
-      delete teamData.representative;
-      delete teamData.address;
-
-      await consumer.update(teamData);
+      }, { transaction: t });
 
       // Handle pregnancies
       if (data.gravidanceTypes !== undefined) {
         // Delete existing
         await GravidanceType.destroy({
-          where: { userId: consumer.representativeId }
+          where: { userId: consumer.representativeId },
+          transaction: t
         });
 
         // Create new (only if there are pregnancies)
@@ -441,9 +469,9 @@ class ClinicalHistoryService {
             const gt = data.gravidanceTypes[i];
             await GravidanceType.create({
               userId: consumer.representativeId,
-              seqGravidance: i + 1, // Sequence number starts from 1
+              seqGravidance: i + 1,
               natur: gt.natur
-            });
+            }, { transaction: t });
           }
         }
       }
@@ -451,7 +479,6 @@ class ClinicalHistoryService {
       // Handle surgeries
       if (data.surgeries && Array.isArray(data.surgeries)) {
         for (const surgery of data.surgeries) {
-          // Update parent surgery
           if (surgery.id) {
             await TeamSurgery.update({
               executed: surgery.executed,
@@ -459,11 +486,11 @@ class ClinicalHistoryService {
               lastModifyDate: now,
               lastModifyUsername: username
             }, {
-              where: { id: surgery.id }
+              where: { id: surgery.id },
+              transaction: t
             });
           }
 
-          // Update children surgeries
           if (surgery.children && surgery.children.length > 0) {
             for (const child of surgery.children) {
               if (child.id) {
@@ -472,7 +499,8 @@ class ClinicalHistoryService {
                   lastModifyDate: now,
                   lastModifyUsername: username
                 }, {
-                  where: { id: child.id }
+                  where: { id: child.id },
+                  transaction: t
                 });
               }
             }
@@ -480,7 +508,10 @@ class ClinicalHistoryService {
         }
       }
 
-      // Reload with fresh data
+      // Commit the transaction
+      await t.commit();
+
+      // Reload with fresh data (outside transaction)
       await consumer.reload({
         include: [
           {
@@ -507,6 +538,8 @@ class ClinicalHistoryService {
 
       return consumer;
     } catch (error) {
+      // Rollback if transaction is still active
+      try { await t.rollback(); } catch (rollbackErr) { /* already rolled back */ }
       console.error('Error updating consumer form:', error);
       throw error;
     }

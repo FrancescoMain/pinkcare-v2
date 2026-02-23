@@ -168,12 +168,17 @@ const MedicalHistoryForm = () => {
     try {
       setSaving(true);
 
+      console.log('[StoriaClinica] Saving formData:', JSON.stringify(formData, null, 2));
       await updateConsumerForm(formData);
       showSuccessMessage('Operazione eseguita con successo');
       await loadConsumerData(); // Reload data
     } catch (error) {
-      console.error('Error saving consumer data:', error);
-      showErrorMessage('Errore', 'Impossibile salvare i dati');
+      console.error('[StoriaClinica] Error saving:', error);
+      // Show more detail if available (e.g., validation errors)
+      const detail = error?.details?.errors
+        ? error.details.errors.map(e => e.msg).join(', ')
+        : error?.message || 'Impossibile salvare i dati';
+      showErrorMessage('Errore', detail);
     } finally {
       setSaving(false);
     }
