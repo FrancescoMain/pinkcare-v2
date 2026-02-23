@@ -30,9 +30,10 @@ exports.getConsumerData = async (req, res) => {
       const teamId = teams[0].id; // Use first team
       console.log('[StoriaClinica GET] Loading data for teamId:', teamId, 'userId:', userId);
 
-      const consumerData = await clinicalHistoryService.getConsumerDetails(teamId);
+      const consumerData = await clinicalHistoryService.getConsumerDetails(teamId, userId);
 
       // Log key fields to help diagnose production issues
+      console.log('[StoriaClinica GET] representativeId:', consumerData.representativeId);
       console.log('[StoriaClinica GET] representative exists:', !!consumerData.representative);
       console.log('[StoriaClinica GET] representative name:', consumerData.representative?.name);
       console.log('[StoriaClinica GET] address exists:', !!consumerData.address);
@@ -96,7 +97,8 @@ exports.updateConsumerForm = async (req, res) => {
       const updatedConsumer = await clinicalHistoryService.updateConsumerForm(
         teamId,
         data,
-        username
+        username,
+        userId
       );
 
       console.log('[StoriaClinica PUT] Save successful for teamId:', teamId);
@@ -251,7 +253,7 @@ exports.downloadClinicalHistoryPDF = async (req, res) => {
       const teamId = teams[0].id; // Use first team
 
       // Get all necessary data (don't initialize surgeries if empty - read-only for PDF)
-      const consumerData = await clinicalHistoryService.getConsumerDetails(teamId);
+      const consumerData = await clinicalHistoryService.getConsumerDetails(teamId, userId);
       const surgeries = await clinicalHistoryService.getTeamSurgeries(teamId, false);
       const screeningData = await clinicalHistoryService.getScreeningDataForThematicAreas(teamId);
 

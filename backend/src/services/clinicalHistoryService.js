@@ -24,10 +24,12 @@ class ClinicalHistoryService {
 
   /**
    * Get complete consumer details including all clinical data
+   * If the Team has no representativeId, link the logged-in user as representative
    * @param {number} teamId - Consumer team ID
+   * @param {number} userId - Logged-in user ID (used to link representative if missing)
    * @returns {Promise<Object>} Complete consumer data
    */
-  async getConsumerDetails(teamId) {
+  async getConsumerDetails(teamId, userId = null) {
     try {
       const consumer = await Team.findByPk(teamId, {
         include: [
@@ -56,6 +58,25 @@ class ClinicalHistoryService {
 
       if (!consumer) {
         throw new Error('Consumer not found');
+      }
+
+      // If representativeId is null, link the logged-in user as the representative
+      if (!consumer.representativeId && userId) {
+        console.log('[StoriaClinica] Team', teamId, 'has no representativeId — linking userId', userId);
+        await consumer.update({ representativeId: userId });
+        await consumer.reload({
+          include: [
+            {
+              model: User,
+              as: 'representative',
+              include: [
+                { model: GravidanceType, as: 'gravidanceTypes', required: false },
+                { model: Municipality, as: 'birthPlace', required: false }
+              ]
+            },
+            { model: Address, as: 'address' }
+          ]
+        });
       }
 
       return consumer;
@@ -356,9 +377,10 @@ class ClinicalHistoryService {
    * @param {number} teamId - Team ID
    * @param {Object} data - Updated consumer data
    * @param {string} username - Username for audit
+   * @param {number} userId - Logged-in user ID (used to link representative if missing)
    * @returns {Promise<Object>} Updated consumer
    */
-  async updateConsumerForm(teamId, data, username) {
+  async updateConsumerForm(teamId, data, username, userId = null) {
     const t = await sequelize.transaction();
 
     try {
@@ -379,6 +401,19 @@ class ClinicalHistoryService {
       if (!consumer) {
         await t.rollback();
         throw new Error('Consumer not found');
+      }
+
+      // If representativeId is null, link the logged-in user as the representative
+      if (!consumer.representativeId && userId) {
+        console.log('[StoriaClinica] Team', teamId, 'has no representativeId — linking userId', userId, 'in transaction');
+        await consumer.update({ representativeId: userId }, { transaction: t });
+        await consumer.reload({
+          include: [
+            { model: User, as: 'representative' },
+            { model: Address, as: 'address' }
+          ],
+          transaction: t
+        });
       }
 
       const now = new Date();
