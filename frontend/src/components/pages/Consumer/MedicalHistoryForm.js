@@ -58,12 +58,21 @@ const MedicalHistoryForm = () => {
       // Fetch consumer data (teamId is obtained from authenticated user in backend)
       const response = await getConsumerData();
 
+      console.log('[StoriaClinica] API response:', JSON.stringify(response, null, 2));
+
       // response is {success: true, data: {consumer, surgeries, pregnancyStats}}
       if (!response || !response.data) {
+        console.error('[StoriaClinica] Invalid response structure:', response);
         throw new Error('Invalid response structure');
       }
 
       const { consumer, surgeries, pregnancyStats } = response.data;
+
+      console.log('[StoriaClinica] consumer:', JSON.stringify(consumer, null, 2));
+      console.log('[StoriaClinica] consumer.representative:', JSON.stringify(consumer?.representative, null, 2));
+      console.log('[StoriaClinica] consumer.address:', JSON.stringify(consumer?.address, null, 2));
+      console.log('[StoriaClinica] surgeries count:', surgeries?.length);
+      console.log('[StoriaClinica] pregnancyStats:', pregnancyStats);
 
       // Convert birthday from ISO format to YYYY-MM-DD for date input
       const representative = consumer.representative ? { ...consumer.representative } : {};
