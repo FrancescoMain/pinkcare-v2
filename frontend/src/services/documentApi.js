@@ -3,6 +3,14 @@ import { buildApiUrl, getAuthHeaders } from '../config/api';
 
 class DocumentApi {
 
+  static async getClinics() {
+    return ApiService.get('/api/documents/clinics');
+  }
+
+  static async getBusinessTeams(typeId) {
+    return ApiService.get(`/api/documents/teams?typeId=${typeId}`);
+  }
+
   static async getDocuments(params = {}) {
     const query = new URLSearchParams();
     if (params.typology) query.set('typology', params.typology);

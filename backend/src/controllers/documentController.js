@@ -175,6 +175,29 @@ class DocumentController {
       });
     }
   }
+
+  /**
+   * Get all business teams by typology for filter dropdown
+   * GET /api/documents/teams?typeId=3|4
+   */
+  async getBusinessTeams(req, res) {
+    try {
+      const { typeId } = req.query;
+
+      if (!typeId || ![3, 4].includes(parseInt(typeId))) {
+        return res.json({ teams: [] });
+      }
+
+      const teams = await documentService.getBusinessTeamsByType(parseInt(typeId));
+
+      return res.json({ teams });
+    } catch (error) {
+      console.error('[DocumentController] getBusinessTeams error:', error);
+      return res.status(500).json({
+        error: 'Errore nel caricamento dei team'
+      });
+    }
+  }
 }
 
 module.exports = new DocumentController();

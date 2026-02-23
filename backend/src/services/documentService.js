@@ -267,6 +267,42 @@ class DocumentService {
       typeId: c.type_id
     }));
   }
+
+  /**
+   * Get all business teams by typology for filter dropdowns
+   * For doctors (type_id=3): returns representative name+surname
+   * For clinics (type_id=4): returns team name
+   * @param {number} typeId - Typology ID (3=doctor, 4=clinic)
+   * @returns {Promise<Array>} Array of {clinicId, denomination, typeId}
+   */
+  async getBusinessTeamsByType(typeId) {
+    const query = `
+      SELECT t.id as clinic_id, t.name as team_name, t.type_id,
+             u.name as rep_name, u.surname as rep_surname
+      FROM app_team t
+      LEFT JOIN app_user u ON t.representative_id = u.id
+      WHERE t.deleted = 'N' AND t.type_id = :typeId
+      ORDER BY CASE WHEN :typeId = 3 THEN u.surname ELSE t.name END ASC
+    `;
+
+    const teams = await sequelize.query(query, {
+      replacements: { typeId },
+      type: QueryTypes.SELECT
+    });
+
+    return teams
+      .filter(t => {
+        if (parseInt(typeId) === 3) return t.rep_name || t.rep_surname;
+        return t.team_name && t.team_name.trim() !== '';
+      })
+      .map(t => ({
+        clinicId: t.clinic_id,
+        denomination: parseInt(typeId) === 3
+          ? `${t.rep_name || ''} ${t.rep_surname || ''}`.trim()
+          : t.team_name,
+        typeId: t.type_id
+      }));
+  }
 }
 
 module.exports = new DocumentService();

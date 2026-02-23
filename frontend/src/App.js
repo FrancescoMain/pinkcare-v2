@@ -23,6 +23,7 @@ import PasswordRecovery from "./components/pages/PasswordRecovery";
 import PasswordRecoveryTest from "./components/pages/PasswordRecoveryTest";
 import ProtectedRoute from "./components/common/ProtectedRoute";
 import Consumer from "./components/pages/Consumer/Consumer";
+import Hospitalization from "./components/pages/Hospitalization/Hospitalization";
 import { AuthProvider } from "./context/AuthContext";
 import { useErrorHandler } from "./hooks/useErrorHandler";
 // Importa stili globali PinkCare - DEVE essere caricato per ultimo
@@ -89,6 +90,14 @@ function App() {
             <ProtectedRoute>
               <AuthenticatedLayout>
                 <Consumer />
+              </AuthenticatedLayout>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/hospitalization" element={
+            <ProtectedRoute>
+              <AuthenticatedLayout>
+                <Hospitalization />
               </AuthenticatedLayout>
             </ProtectedRoute>
           } />

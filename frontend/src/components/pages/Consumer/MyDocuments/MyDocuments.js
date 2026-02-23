@@ -23,9 +23,26 @@ const MyDocuments = () => {
   // Filters
   const [typology, setTypology] = useState('');
   const [clinicId, setClinicId] = useState('');
-  const [doctorId, setDoctorId] = useState('');
+  const [teamsList, setTeamsList] = useState([]);
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
+
+  // Load teams list when typology changes
+  useEffect(() => {
+    if (!typology) {
+      setTeamsList([]);
+      return;
+    }
+    const loadTeams = async () => {
+      try {
+        const res = await DocumentApi.getBusinessTeams(typology);
+        setTeamsList(res.teams || []);
+      } catch (err) {
+        setTeamsList([]);
+      }
+    };
+    loadTeams();
+  }, [typology]);
 
   const loadDocuments = useCallback(async (pageNum = 0) => {
     setLoading(true);
@@ -33,7 +50,6 @@ const MyDocuments = () => {
       const params = { page: pageNum };
       if (typology) params.typology = typology;
       if (clinicId) params.clinicId = clinicId;
-      if (doctorId) params.doctorId = doctorId;
 
       const res = await DocumentApi.getDocuments(params);
       setDocuments(res.documents || []);
@@ -47,15 +63,21 @@ const MyDocuments = () => {
     } finally {
       setLoading(false);
     }
-  }, [typology, clinicId, doctorId, t]);
+  }, [typology, clinicId, t]);
 
   useEffect(() => {
     loadDocuments(page);
   }, [page, loadDocuments]);
 
-  const handleFind = () => {
+  const handleTypologyChange = (newTypology) => {
+    setTypology(newTypology);
+    setClinicId('');
     setPage(0);
-    loadDocuments(0);
+  };
+
+  const handleClinicChange = (newClinicId) => {
+    setClinicId(newClinicId);
+    setPage(0);
   };
 
   const handleDownload = async (doc) => {
@@ -67,7 +89,7 @@ const MyDocuments = () => {
   };
 
   const handleDelete = async (doc) => {
-    if (!window.confirm(t('documents.confirm_delete') || 'Eliminare?')) return;
+    if (!window.confirm('Sei sicuro di voler rimuovere il documento?')) return;
     try {
       await DocumentApi.deleteDocument(doc.id);
       toast.success(t('documents.deleted') || 'Documento eliminato');
@@ -82,7 +104,6 @@ const MyDocuments = () => {
     try {
       await DocumentApi.attachToExam(doc.id, recommExamId);
       toast.success('Referto associato all\'esame con successo');
-      // Navigate back to examinations history
       setSearchParams({ tab: '2' });
     } catch (err) {
       toast.error(t('documents.error_attaching') || 'Errore nell\'associazione del referto');
@@ -90,7 +111,6 @@ const MyDocuments = () => {
   };
 
   const handleAttachLink = (doc) => {
-    // Navigate to tab 2 (exam history) with refert parameter
     setSearchParams({ tab: '2', refert: String(doc.id) });
   };
 
@@ -116,22 +136,55 @@ const MyDocuments = () => {
       {/* Filters */}
       <div className="documents-filters">
         <div className="filter-group">
-          <label>{t('documents.typology') || 'Tipologia'}</label>
+          <label>Tipologia</label>
           <select
             className="form-control form-control-sm"
             value={typology}
-            onChange={(e) => { setTypology(e.target.value); setClinicId(''); setDoctorId(''); }}
+            onChange={(e) => handleTypologyChange(e.target.value)}
           >
-            <option value="">{t('documents.all') || 'Tutte'}</option>
-            <option value="4">{t('documents.clinic') || 'Clinica'}</option>
-            <option value="3">{t('documents.doctor') || 'Medico'}</option>
+            <option value="">---</option>
+            <option value="4">Clinica</option>
+            <option value="3">Medico</option>
           </select>
         </div>
-        <div className="filter-group">
-          <button className="btn btn-sm btn-primary" onClick={handleFind}>
-            {t('documents.find') || 'Cerca'}
-          </button>
-        </div>
+
+        {/* Secondary dropdown: Clinica (when typology = 4) */}
+        {typology === '4' && (
+          <div className="filter-group">
+            <label>Clinica</label>
+            <select
+              className="form-control form-control-sm"
+              value={clinicId}
+              onChange={(e) => handleClinicChange(e.target.value)}
+            >
+              <option value="">---</option>
+              {teamsList.map(c => (
+                <option key={c.clinicId} value={c.clinicId}>
+                  {c.denomination}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {/* Secondary dropdown: Cognome Medico (when typology = 3) */}
+        {typology === '3' && (
+          <div className="filter-group">
+            <label>Cognome Medico</label>
+            <select
+              className="form-control form-control-sm"
+              value={clinicId}
+              onChange={(e) => handleClinicChange(e.target.value)}
+            >
+              <option value="">---</option>
+              {teamsList.map(c => (
+                <option key={c.clinicId} value={c.clinicId}>
+                  {c.denomination}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {/* Table */}
@@ -139,58 +192,63 @@ const MyDocuments = () => {
         <p style={{ textAlign: 'center', padding: '20px' }}>Caricamento...</p>
       ) : (
         <>
-          <ul className="table-careers">
-            <li className="head">
-              <span>{t('documents.upload_date') || 'Data caricamento'}</span>
-              <span>{t('documents.name') || 'Nome'}</span>
-              <span>{t('documents.details') || 'Dettagli'}</span>
-              <span>{t('documents.denomination') || 'Denominazione'}</span>
-              <span style={{ width: '15%' }}></span>
-            </li>
-            {documents.length > 0 ? (
-              documents.map((doc) => (
-                <li key={doc.id}>
-                  <span className="date">{formatDate(doc.dataLoad)}</span>
-                  <span className="type bold">{doc.nameFile}</span>
-                  <span>{doc.details || ''}</span>
-                  <span>{doc.denomination || ''}</span>
-                  <span className="actions">
-                    {/* Attach to exam - when in recomm mode */}
-                    {recommExamId && (
-                      <a href="#" onClick={(e) => { e.preventDefault(); handleAttachToExam(doc); }}
-                        title="Allega all'esame">
-                        <i className="fas fa-paperclip"></i>
+          <table className="table table-hover documents-table">
+            <thead>
+              <tr>
+                <th style={{ width: '10%' }}>Data caricamento</th>
+                <th>Nome</th>
+                <th>Dettagli</th>
+                <th>Denominazione</th>
+                <th style={{ width: '15%' }}></th>
+              </tr>
+            </thead>
+            <tbody>
+              {documents.length > 0 ? (
+                documents.map((doc) => (
+                  <tr key={doc.id}>
+                    <td>{formatDate(doc.dataLoad)}</td>
+                    <td className="bold">{doc.nameFile}</td>
+                    <td>{doc.details || ''}</td>
+                    <td>{doc.denomination || ''}</td>
+                    <td className="actions">
+                      {/* Attach to exam - when in recomm mode */}
+                      {recommExamId && (
+                        <a href="#" onClick={(e) => { e.preventDefault(); handleAttachToExam(doc); }}
+                          title="Allega referto all'esame">
+                          <i className="fas fa-paperclip"></i>
+                        </a>
+                      )}
+                      {/* Download */}
+                      <a href="#" onClick={(e) => { e.preventDefault(); handleDownload(doc); }}
+                        title="Download">
+                        <i className="fas fa-download"></i>
                       </a>
-                    )}
-                    {/* Download */}
-                    <a href="#" onClick={(e) => { e.preventDefault(); handleDownload(doc); }}
-                      title={t('documents.download') || 'Scarica'}>
-                      <i className="fas fa-download"></i>
-                    </a>
-                    {/* Attach link - only when NOT in recomm mode */}
-                    {!recommExamId && (
-                      <a href="#" onClick={(e) => { e.preventDefault(); handleAttachLink(doc); }}
-                        title={t('documents.attach_to_exam') || 'Allega ad esame'}>
-                        <i className="fas fa-paperclip"></i>
-                      </a>
-                    )}
-                    {/* Delete - only when NOT in recomm mode */}
-                    {!recommExamId && (
-                      <a href="#" onClick={(e) => { e.preventDefault(); handleDelete(doc); }}
-                        title={t('documents.delete') || 'Elimina'}
-                        style={{ marginLeft: '5px' }}>
-                        <i className="fas fa-trash"></i>
-                      </a>
-                    )}
-                  </span>
-                </li>
-              ))
-            ) : (
-              <li style={{ textAlign: 'center', color: '#888', padding: '20px' }}>
-                <span>{t('documents.no_documents') || 'Nessun documento presente'}</span>
-              </li>
-            )}
-          </ul>
+                      {/* Attach link - only when NOT in recomm mode */}
+                      {!recommExamId && (
+                        <a href="#" onClick={(e) => { e.preventDefault(); handleAttachLink(doc); }}
+                          title="Allega referto ad un esame">
+                          <i className="fas fa-paperclip"></i>
+                        </a>
+                      )}
+                      {/* Delete - only when NOT in recomm mode */}
+                      {!recommExamId && (
+                        <a href="#" onClick={(e) => { e.preventDefault(); handleDelete(doc); }}
+                          title="Rimuovi">
+                          <i className="fas fa-trash-alt"></i>
+                        </a>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" style={{ textAlign: 'center', color: '#888', padding: '20px' }}>
+                    Nessun documento presente
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
 
           {/* Pagination */}
           {totalPages > 1 && (
@@ -199,8 +257,9 @@ const MyDocuments = () => {
                 className="btn btn-sm btn-default"
                 disabled={page === 0}
                 onClick={() => setPage(p => p - 1)}
+                style={{ width: '40px' }}
               >
-                {t('documents.previous') || 'Precedente'}
+                &lt;
               </button>
               <span className="page-info">
                 Pagina {page + 1} di {totalPages}
@@ -209,8 +268,9 @@ const MyDocuments = () => {
                 className="btn btn-sm btn-default"
                 disabled={page >= totalPages - 1}
                 onClick={() => setPage(p => p + 1)}
+                style={{ width: '40px' }}
               >
-                {t('documents.next') || 'Successivo'}
+                &gt;
               </button>
             </div>
           )}

@@ -17,6 +17,12 @@ router.get('/clinics',
   documentController.getDocumentClinics
 );
 
+// Get all business teams by typology (for secondary filter dropdown)
+router.get('/teams',
+  AuthMiddleware.verifyToken,
+  documentController.getBusinessTeams
+);
+
 // Get paginated documents for the current user
 router.get('/',
   AuthMiddleware.verifyToken,

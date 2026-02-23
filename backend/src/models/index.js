@@ -32,6 +32,7 @@ const TeamExaminationPathology = require('./TeamExaminationPathology');
 const AttachedFile = require('./AttachedFile');
 const ClinicDocument = require('./ClinicDocument');
 const UserClinic = require('./UserClinic');
+const Code = require('./Code');
 
 // Define associations
 User.belongsToMany(Role, {
@@ -425,6 +426,11 @@ Team.hasMany(UserClinic, { foreignKey: 'clinicId', as: 'userClinics' });
 ClinicDocument.belongsTo(UserClinic, { foreignKey: 'appUserClinicId', as: 'userClinic' });
 UserClinic.hasMany(ClinicDocument, { foreignKey: 'appUserClinicId', as: 'documents' });
 
+// Code associations
+Code.belongsTo(User, { foreignKey: 'businessId', as: 'business' });
+UserClinic.belongsTo(Code, { foreignKey: 'idcode', as: 'code' });
+Code.hasMany(UserClinic, { foreignKey: 'idcode', as: 'userClinics' });
+
 module.exports = {
   sequelize,
   User,
@@ -459,5 +465,6 @@ module.exports = {
   TeamExaminationPathology,
   AttachedFile,
   ClinicDocument,
-  UserClinic
+  UserClinic,
+  Code
 };

@@ -16,6 +16,7 @@
   font-size: 14px;
 }
 
+/* Filters row */
 .documents-filters {
   display: flex;
   gap: 12px;
@@ -40,34 +41,64 @@
 .documents-filters .form-control-sm {
   padding: 4px 8px;
   font-size: 13px;
-  min-width: 150px;
+  min-width: 180px;
+  border: 1px solid #d0d8f0;
+  border-radius: 4px;
 }
 
-.documents-filters .btn-primary {
-  background-color: #e42080;
-  border-color: #e42080;
-  color: #fff;
+/* Data table */
+.documents-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
 }
 
-.documents-filters .btn-primary:hover {
-  background-color: #c91b6e;
+.documents-table thead th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #515365;
+  text-align: left;
 }
 
-.my-documents .actions {
+.documents-table tbody tr {
+  border-bottom: 1px solid #eee;
+  transition: background-color 0.15s;
+}
+
+.documents-table tbody tr:hover {
+  background-color: #f5f7fa;
+}
+
+.documents-table tbody td {
+  padding: 10px 12px;
+  font-size: 13px;
+  color: #515365;
+  vertical-align: middle;
+}
+
+.documents-table .bold {
+  font-weight: 600;
+}
+
+.documents-table .actions {
   display: flex;
   gap: 10px;
   justify-content: flex-end;
 }
 
-.my-documents .actions a {
+.documents-table .actions a {
   color: #515365;
   font-size: 14px;
 }
 
-.my-documents .actions a:hover {
+.documents-table .actions a:hover {
   color: #e42080;
 }
 
+/* Pagination */
 .pagination-controls {
   display: flex;
   align-items: center;
