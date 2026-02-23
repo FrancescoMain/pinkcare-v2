@@ -570,6 +570,67 @@ class ExaminationService {
   }
 
   /**
+   * Get total examinations for dashboard homepage
+   * Replicates legacy getTotalExaminations(userVO) from RecommendedExaminationServiceImpl
+   * Combines age-based exams + team-specific unconfirmed exams (excluding pregnancy rules)
+   * @param {number} teamId - Team ID
+   * @param {Date} birthday - User's birthday
+   * @returns {Promise<Array>} Merged array of examination objects
+   */
+  async getTotalExaminations(teamId, birthday) {
+    // 1. Get age-based examinations
+    const ageExams = await this.getAgeExaminations(teamId, birthday);
+
+    // 2. Get team-specific unconfirmed exams where examination=true,
+    //    excluding pregnancy protocol rules (week_inferior_limit IS NOT NULL)
+    const teamExams = await RecommendedExamination.findAll({
+      where: {
+        teamId,
+        confirmed: false
+      },
+      include: [
+        {
+          model: ExaminationPathology,
+          as: 'examination',
+          where: { examination: true },
+          required: true,
+          attributes: ['id', 'label', 'periodicalControlDays']
+        },
+        {
+          model: ProtocolRule,
+          as: 'protocolRule',
+          required: false,
+          attributes: ['id', 'week_inferior_limit', 'week_superior_limit']
+        }
+      ],
+      order: [[sequelize.literal('control_date ASC NULLS LAST')]]
+    });
+
+    // Filter out pregnancy-related exams (protocol rule with week limits set)
+    const filteredTeamExams = teamExams.filter(e => {
+      if (!e.protocolRuleId) return true; // no protocol rule = include
+      if (!e.protocolRule) return true;
+      // Exclude if it's a pregnancy rule (has week limits)
+      return e.protocolRule.week_inferior_limit == null;
+    });
+
+    const results = filteredTeamExams.map(e => this._transformExam(e));
+
+    // 3. Merge age-based exams into the list, avoiding duplicates
+    // Legacy uses equals() which compares by team + examination (not protocolRuleId)
+    for (const ageExam of ageExams) {
+      const isDuplicate = results.some(
+        r => r.examinationId === ageExam.examinationId
+      );
+      if (!isDuplicate) {
+        results.push(ageExam);
+      }
+    }
+
+    return results;
+  }
+
+  /**
    * Get all unconfirmed examinations for the "Suggested Examinations" table
    * Replicates flowScope.examinations in examinations_history.xhtml
    * @param {number} teamId - Team ID
