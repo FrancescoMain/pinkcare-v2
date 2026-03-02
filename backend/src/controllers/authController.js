@@ -1,9 +1,13 @@
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const { sequelize } = require('../config/database');
+const { QueryTypes } = require('sequelize');
 const userService = require('../services/userService');
 const teamService = require('../services/teamService');
 const emailService = require('../services/emailService');
+
+// Map type_id to string labels matching legacy typology constants
+const TYPE_ID_MAP = { 3: 'DOCTOR', 4: 'CLINIC' };
 
 /**
  * Authentication Controller
@@ -280,6 +284,9 @@ class AuthController {
       const tokenExpiry = rememberMe ? '30d' : '7d';
       const token = this.generateToken(user, tokenExpiry);
       
+      // Fetch team data for business users
+      const team = await this.getTeamForUser(user.id);
+
       // Return user data with roles
       const userResponse = {
         id: user.id,
@@ -296,9 +303,10 @@ class AuthController {
           id: role.id,
           nome: role.name,
           descrizione: role.description
-        })) || []
+        })) || [],
+        team: team || null
       };
-      
+
       res.json({
         message: 'Login effettuato con successo',
         user: userResponse,
@@ -501,6 +509,9 @@ class AuthController {
         });
       }
       
+      // Fetch team data for business users
+      const team = await this.getTeamForUser(user.id);
+
       const userResponse = {
         id: user.id,
         name: user.name,
@@ -515,7 +526,8 @@ class AuthController {
           id: role.id,
           nome: role.name,
           descrizione: role.description
-        })) || []
+        })) || [],
+        team: team || null
       };
 
       res.json({
@@ -551,6 +563,37 @@ class AuthController {
     });
   }
   
+  /**
+   * Fetch primary team data for a user (with type and linkshop)
+   * @param {number} userId
+   * @returns {Promise<Object|null>} Team object or null
+   */
+  async getTeamForUser(userId) {
+    const teamsQuery = `
+      SELECT t.id, t.name, t.logo, t.type_id, t.linkshop, t.representative_id
+      FROM app_team t
+      INNER JOIN app_user_app_team ut ON t.id = ut.teams_id
+      WHERE ut.app_user_id = :userId AND t.deleted = 'N'
+      LIMIT 1
+    `;
+    const [team] = await sequelize.query(teamsQuery, {
+      replacements: { userId },
+      type: QueryTypes.SELECT
+    });
+    if (!team) return null;
+    return {
+      id: team.id,
+      name: team.name,
+      logo: team.logo,
+      linkshop: team.linkshop || null,
+      representativeId: team.representative_id,
+      type: {
+        id: TYPE_ID_MAP[team.type_id] || String(team.type_id),
+        numericId: team.type_id
+      }
+    };
+  }
+
   /**
    * Extract JWT token from request
    * @param {Object} req - Express request object

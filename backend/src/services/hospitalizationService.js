@@ -62,7 +62,7 @@ class HospitalizationService {
     }
 
     if (filters.codFisc) {
-      whereClause += ' AND LOWER(c.cod_fisc) LIKE LOWER(:codFisc)';
+      whereClause += ' AND LOWER(c.codfisc) LIKE LOWER(:codFisc)';
       replacements.codFisc = `%${filters.codFisc}%`;
     }
 
@@ -90,7 +90,7 @@ class HospitalizationService {
     const dataQuery = `
       SELECT uc.id as uc_id, uc.user_id, uc.status, uc.datarequest,
              u.name, u.surname, u.email, u.birthday,
-             c.cod_fisc, c.code
+             c.codfisc, c.code
       FROM app_user_clinic uc
       JOIN app_user u ON uc.user_id = u.id
       LEFT JOIN app_codes c ON uc.idcode = c.id
@@ -114,7 +114,7 @@ class HospitalizationService {
         surname: p.surname,
         email: p.email,
         birthday: p.birthday,
-        codFisc: p.cod_fisc,
+        codFisc: p.codfisc,
         code: p.code,
         status: p.status,
         dataRequest: p.datarequest
@@ -350,8 +350,8 @@ class HospitalizationService {
     // Check if code already exists for this business + codFisc
     const existingQuery = `
       SELECT id, code, used FROM app_codes
-      WHERE business_id = :businessUserId AND cod_fisc = :codFisc
-      ORDER BY data_request DESC
+      WHERE businessid = :businessUserId AND codfisc = :codFisc
+      ORDER BY datarequest DESC
       LIMIT 1
     `;
 
@@ -384,7 +384,7 @@ class HospitalizationService {
     const now = new Date();
 
     const insertQuery = `
-      INSERT INTO app_codes (id, business_id, cod_fisc, code, data_request, used, name, surname)
+      INSERT INTO app_codes (id, businessid, codfisc, code, datarequest, used, name, surname)
       VALUES (nextval('app_code_id_seq'), :businessUserId, :codFisc, :code, :dataRequest, 'N', :name, :surname)
       RETURNING *
     `;

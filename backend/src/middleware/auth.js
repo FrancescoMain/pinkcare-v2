@@ -43,7 +43,7 @@ class AuthMiddleware {
 
       // Fetch teams with address using raw SQL to avoid Sequelize's hardcoded "deleted = false" boolean conversion
       const teamsQuery = `
-        SELECT t.id, t.name, t.logo,
+        SELECT t.id, t.name, t.logo, t.type_id, t.linkshop, t.representative_id,
                a.latitude, a.longitude, a.municipality
         FROM app_team t
         INNER JOIN app_user_app_team ut ON t.id = ut.teams_id
@@ -184,7 +184,7 @@ class AuthMiddleware {
       if (user) {
         // Fetch teams with address using raw SQL (same reason as verifyToken)
         const teamsQuery = `
-          SELECT t.id, t.name, t.logo,
+          SELECT t.id, t.name, t.logo, t.type_id, t.linkshop, t.representative_id,
                  a.latitude, a.longitude, a.municipality
           FROM app_team t
           INNER JOIN app_user_app_team ut ON t.id = ut.teams_id

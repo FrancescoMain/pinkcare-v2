@@ -1,0 +1,584 @@
+/* Business / Scheda Personale - Replica fedele business_form.xhtml + Olympus theme */
+
+/* ========================
+   Banner verde (Account gratuito)
+   ======================== */
+.business-banner {
+  background-color: #ccf3be !important;
+}
+
+.business-banner .ui-block-content {
+  padding: 15px 25px;
+}
+
+.business-banner h6 {
+  margin: 0;
+  font-size: 14px;
+  color: #333;
+  display: inline;
+  font-weight: 400;
+}
+
+/* ========================
+   Main form container
+   ======================== */
+.business-form-container {
+  padding: 24px 23px 23px;
+}
+
+/* ========================
+   Typography - match Olympus theme
+   ======================== */
+.business-form-container h2 {
+  font-weight: 300;
+  font-size: 28px;
+  color: #515365;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.business-form-container h2.inline {
+  display: inline;
+  margin-right: 8px;
+}
+
+.business-form-container h4 {
+  font-weight: 600;
+  font-size: 15px;
+  color: #515365;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.business-form-container h4.inline {
+  display: inline;
+  margin-right: 8px;
+}
+
+/* Label style (replica p:outputLabel con styleClass="h6") */
+.business-form-container .field-label,
+.business-form-container .h6-label {
+  font-weight: 700;
+  font-size: 13px;
+  color: #515365;
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* Inline items (prestazioni, patologie elencate) */
+.business-form-container .inline-items-list {
+  display: inline;
+  font-size: 14px;
+  color: #515365;
+  margin-right: 4px;
+}
+
+.business-form-container .inline-items-list span {
+  margin-right: 2px;
+}
+
+/* ========================
+   Editable field pattern
+   ======================== */
+.editable-field {
+  margin-bottom: 12px;
+}
+
+/* Display mode - icons inline right after text */
+.editable-field-display {
+  display: inline;
+  line-height: 1.5;
+}
+
+.editable-field-display .field-value {
+  display: inline;
+}
+
+.editable-field-display .field-value h2 {
+  display: inline;
+  margin: 0;
+}
+
+.editable-field-display .field-value h4 {
+  display: inline;
+  margin: 0;
+}
+
+.editable-field-display .field-value span {
+  font-size: 14px;
+  color: #515365;
+}
+
+.editable-field-display .field-value p {
+  font-size: 14px;
+  color: #515365;
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+/* Editable field icons - inline after value, not in separate container */
+/* IMPORTANT: Override global.css .field-icon that has float:right + margin-top:-35px */
+.editable-field-icons {
+  display: inline;
+  margin-left: 6px;
+  white-space: nowrap;
+}
+
+.business-form-container .field-icon,
+.editable-field-icons .field-icon {
+  float: none !important;
+  margin-top: 0 !important;
+  margin-right: 0 !important;
+  position: static !important;
+  display: inline !important;
+  cursor: pointer;
+  font-size: 14px;
+  color: #515365;
+  background: none;
+  border: none;
+  padding: 2px 3px;
+  vertical-align: middle;
+}
+
+.business-form-container .field-icon:hover,
+.editable-field-icons .field-icon:hover {
+  color: #e42080;
+}
+
+.editable-field-icons .field-icon.status-check {
+  color: #4caf50;
+  cursor: default;
+}
+
+.editable-field-icons .field-icon.status-check:hover {
+  color: #4caf50;
+}
+
+.editable-field-icons .field-icon.status-hourglass {
+  color: #ff9800;
+}
+
+/* ========================
+   Edit mode
+   ======================== */
+.editable-field-edit {
+  margin-bottom: 8px;
+}
+
+.editable-field-edit input[type="text"],
+.editable-field-edit select,
+.editable-field-edit textarea {
+  padding: 1rem 1.1rem 0.5rem;
+  line-height: 1.2;
+  color: #515365;
+  font-size: 14px;
+  display: block;
+  width: 100%;
+  border: 1px solid #c4c7cc;
+  border-radius: 0.25rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  background: #fff;
+  margin-bottom: 0 !important;
+}
+
+.editable-field-edit input[type="text"]:focus,
+.editable-field-edit select:focus,
+.editable-field-edit textarea:focus {
+  border-color: #e42080;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(228, 32, 128, 0.1);
+}
+
+.editable-field-edit .edit-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.editable-field-edit .edit-actions .field-icon {
+  float: none !important;
+  margin-top: 0 !important;
+  margin-right: 0 !important;
+  position: static !important;
+  display: inline-block !important;
+  cursor: pointer;
+  font-size: 16px;
+  background: none;
+  border: none;
+  padding: 2px 5px;
+}
+
+.editable-field-edit .edit-actions .field-icon.cancel {
+  color: #999;
+}
+
+.editable-field-edit .edit-actions .field-icon.cancel:hover {
+  color: #e42080;
+}
+
+.editable-field-edit .edit-actions .field-icon.save {
+  color: #4caf50;
+}
+
+.editable-field-edit .edit-actions .field-icon.save:hover {
+  color: #388e3c;
+}
+
+/* Edit mode label */
+.editable-field-edit label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #515365;
+  margin-bottom: 4px;
+  display: block;
+}
+
+/* ========================
+   Certificate badge
+   ======================== */
+.certificate-badge {
+  text-align: right;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+.certificate-badge img.certificate_doc {
+  max-height: 80px;
+  width: auto;
+}
+
+/* ========================
+   Section divider
+   ======================== */
+.business-separator {
+  border: none;
+  border-top: 1px solid #e6ecf5;
+  margin: 18px 0;
+}
+
+/* ========================
+   Structure section title
+   ======================== */
+.business-section-title {
+  margin-top: 18px;
+  margin-bottom: 12px;
+}
+
+.business-section-title h4 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #515365;
+}
+
+/* ========================
+   Checkbox multi-select (prestazioni/patologie)
+   ======================== */
+.checkbox-multiselect {
+  max-height: 280px;
+  overflow-y: auto;
+  border: 1px solid #c4c7cc;
+  border-radius: 4px;
+  padding: 10px;
+  background: #fff;
+}
+
+.checkbox-multiselect-filter {
+  margin-bottom: 8px;
+}
+
+.checkbox-multiselect-filter input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #c4c7cc;
+  border-radius: 4px;
+  font-size: 13px;
+  color: #515365;
+}
+
+.checkbox-multiselect-filter input:focus {
+  border-color: #e42080;
+  outline: none;
+}
+
+.checkbox-multiselect-item {
+  display: flex;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.checkbox-multiselect-item label {
+  margin-left: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  color: #515365;
+  font-weight: 400;
+}
+
+.checkbox-multiselect-item input[type="checkbox"] {
+  cursor: pointer;
+  accent-color: #e42080;
+}
+
+/* ========================
+   Inline text display (readonly textarea replica)
+   ======================== */
+.inline-text-display {
+  white-space: pre-wrap;
+  border: none;
+  background: transparent;
+  font-size: 14px;
+  color: #515365;
+  line-height: 1.5;
+}
+
+/* ========================
+   Address display + dialog
+   ======================== */
+.address-display {
+  display: inline;
+  font-size: 14px;
+  color: #515365;
+}
+
+.address-display .address-text {
+  font-size: 14px;
+  color: #515365;
+}
+
+.address-display .field-icon {
+  float: none !important;
+  margin-top: 0 !important;
+  margin-right: 0 !important;
+  position: static !important;
+  display: inline !important;
+}
+
+/* Dialog overlay */
+.address-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.address-dialog {
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  padding: 25px;
+  width: 90%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.address-dialog h5 {
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-weight: 700;
+  font-size: 16px;
+  color: #515365;
+}
+
+.address-dialog .form-group {
+  margin-bottom: 12px;
+}
+
+.address-dialog label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: #515365;
+}
+
+.address-dialog input,
+.address-dialog select {
+  width: 100%;
+  padding: 1rem 1.1rem 0.5rem;
+  border: 1px solid #c4c7cc;
+  border-radius: 0.25rem;
+  font-size: 14px;
+  color: #515365;
+  margin-bottom: 0 !important;
+}
+
+.address-dialog input:focus,
+.address-dialog select:focus {
+  border-color: #e42080;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(228, 32, 128, 0.1);
+}
+
+.address-dialog .dialog-actions {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.address-dialog .dialog-actions button {
+  margin: 0 8px;
+  padding: 8px 24px !important;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.address-dialog .dialog-actions .btn-secondary {
+  background: #fff;
+  border: 1px solid #c4c7cc;
+  color: #515365;
+}
+
+.address-dialog .dialog-actions .btn-secondary:hover {
+  background: #f5f6fa;
+}
+
+.address-dialog .dialog-actions .btn-primary {
+  background-color: #e42080;
+  border-color: #e42080;
+  color: #fff;
+}
+
+.address-dialog .dialog-actions .btn-primary:hover:not(:disabled) {
+  background-color: #c01a6d;
+}
+
+.address-dialog .dialog-actions .btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Municipality autocomplete */
+.municipality-autocomplete {
+  position: relative;
+}
+
+.municipality-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #c4c7cc;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.municipality-suggestions li {
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  list-style: none;
+  color: #515365;
+}
+
+.municipality-suggestions li:hover {
+  background: #f0f4f8;
+}
+
+/* ========================
+   Save button section
+   ======================== */
+.business-save-section {
+  margin-top: 25px;
+  padding-top: 15px;
+}
+
+.business-save-section .btn-primary {
+  background-color: #e42080;
+  border-color: #e42080;
+  color: #fff;
+  padding: 8px 30px !important;
+  font-size: 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+}
+
+.business-save-section .btn-primary:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.business-save-section .btn-primary:hover:not(:disabled) {
+  background-color: #c01a6d;
+}
+
+/* ========================
+   Pending changes indicator
+   ======================== */
+.pending-local-indicator {
+  font-size: 13px;
+  color: #ff9800;
+  margin-top: 4px;
+}
+
+.pending-local-indicator i {
+  margin-right: 4px;
+}
+
+/* ========================
+   Loading state
+   ======================== */
+.business-loading {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+}
+
+/* ========================
+   Row spacing within form
+   ======================== */
+.business-form-container > .row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.business-form-container .row + .row {
+  margin-top: 8px;
+}
+
+/* Column padding for fields */
+.business-form-container .col,
+.business-form-container [class*="col-"] {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+/* ========================
+   Responsive
+   ======================== */
+@media (max-width: 768px) {
+  .certificate-badge {
+    text-align: left;
+    justify-content: flex-start;
+    margin-top: 10px;
+  }
+
+  .business-form-container {
+    padding: 15px;
+  }
+
+  .business-form-container h2 {
+    font-size: 22px;
+  }
+
+  .editable-field-edit input[type="text"],
+  .editable-field-edit select,
+  .editable-field-edit textarea {
+    width: 100%;
+  }
+}

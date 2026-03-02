@@ -1,0 +1,252 @@
+.document-shop {
+  padding: 0 25px;
+}
+
+.document-shop .section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #515365;
+  margin-bottom: 15px;
+}
+
+/* Autocomplete */
+.document-shop .autocomplete-wrapper {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.document-shop .autocomplete-wrapper .filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 300px;
+}
+
+.document-shop .autocomplete-wrapper .filter-group label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #515365;
+  text-transform: uppercase;
+}
+
+.document-shop .autocomplete-wrapper .form-control-sm {
+  padding: 4px 8px;
+  font-size: 13px;
+  min-width: 300px;
+  border: 1px solid #d0d8f0;
+  border-radius: 4px;
+}
+
+.document-shop .autocomplete-suggestions {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #d0d8f0;
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  z-index: 100;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.document-shop .autocomplete-suggestions li {
+  padding: 8px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  color: #515365;
+}
+
+.document-shop .autocomplete-suggestions li:hover {
+  background-color: #f0f4ff;
+}
+
+.document-shop .selected-doctor {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  padding: 8px 12px;
+  background-color: #f0f4ff;
+  border: 1px solid #d0d8f0;
+  border-radius: 4px;
+}
+
+.document-shop .selected-doctor span {
+  font-size: 13px;
+  color: #515365;
+}
+
+.document-shop .selected-doctor .btn-clear {
+  background: none;
+  border: none;
+  color: #e42080;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0 4px;
+}
+
+/* Upload link */
+.document-shop .upload-link {
+  display: inline-block;
+  margin-bottom: 15px;
+  color: #28a745;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.document-shop .upload-link:hover {
+  color: #218838;
+}
+
+.document-shop .upload-link i {
+  margin-right: 5px;
+}
+
+/* Action icons */
+.document-shop .actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.document-shop .actions a {
+  color: #515365;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.document-shop .actions a:hover {
+  color: #e42080;
+}
+
+/* Upload modal */
+.document-shop .modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.document-shop .modal-dialog {
+  background: #fff;
+  border-radius: 8px;
+  padding: 25px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.document-shop .modal-dialog h3 {
+  margin: 0 0 20px;
+  font-size: 16px;
+  color: #515365;
+}
+
+.document-shop .modal-dialog .form-group {
+  margin-bottom: 15px;
+}
+
+.document-shop .modal-dialog .form-group label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #515365;
+  margin-bottom: 5px;
+}
+
+.document-shop .modal-dialog .form-group input[type="file"],
+.document-shop .modal-dialog .form-group input[type="text"] {
+  width: 100%;
+  padding: 6px 10px;
+  font-size: 13px;
+  border: 1px solid #d0d8f0;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.document-shop .modal-dialog .modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.document-shop .modal-dialog .btn-upload {
+  background-color: #e42080;
+  border: none;
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.document-shop .modal-dialog .btn-upload:hover {
+  background-color: #c91b6e;
+}
+
+.document-shop .modal-dialog .btn-upload:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.document-shop .modal-dialog .btn-close-modal {
+  background-color: #e6ecf5;
+  border: 1px solid #e6ecf5;
+  color: #515365;
+  padding: 6px 16px;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.document-shop .modal-dialog .btn-close-modal:hover {
+  background-color: #d5dce8;
+}
+
+/* Pagination */
+.document-shop .pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  padding: 15px 0;
+}
+
+.document-shop .pagination-controls .page-info {
+  font-size: 13px;
+  color: #515365;
+}
+
+.document-shop .pagination-controls .btn-default {
+  background-color: #e6ecf5;
+  border: 1px solid #e6ecf5;
+  color: #515365;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.document-shop .pagination-controls .btn-default:hover {
+  background-color: #d5dce8;
+}
+
+.document-shop .pagination-controls .btn-default:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

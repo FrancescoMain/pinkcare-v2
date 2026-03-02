@@ -33,6 +33,7 @@ const AttachedFile = require('./AttachedFile');
 const ClinicDocument = require('./ClinicDocument');
 const UserClinic = require('./UserClinic');
 const Code = require('./Code');
+const DocumentShop = require('./DocumentShop');
 
 // Define associations
 User.belongsToMany(Role, {
@@ -466,5 +467,6 @@ module.exports = {
   AttachedFile,
   ClinicDocument,
   UserClinic,
-  Code
+  Code,
+  DocumentShop
 };

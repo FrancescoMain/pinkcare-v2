@@ -47,6 +47,63 @@
   background-color: #c91b6e;
 }
 
+/* Table-careers - tabella pazienti/documenti */
+.table-careers {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  border: 1px solid #e6ecf5;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.table-careers li {
+  display: flex;
+  align-items: center;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e6ecf5;
+  font-size: 13px;
+  color: #515365;
+}
+
+.table-careers li:last-child {
+  border-bottom: none;
+}
+
+.table-careers li.head {
+  background-color: #f5f6fa;
+  font-weight: 700;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: #515365;
+}
+
+.table-careers li > span {
+  flex: 1;
+  min-width: 0;
+  padding: 0 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table-careers li > span.date {
+  flex: 0 0 110px;
+}
+
+.table-careers li > span.bold {
+  font-weight: 600;
+}
+
+.table-careers li > span.actions-col {
+  flex: 0 0 80px;
+  text-align: right;
+}
+
+.table-careers li:not(.head):hover {
+  background-color: #fafbfd;
+}
+
 /* Action icons */
 .hospitalization .actions {
   display: flex;

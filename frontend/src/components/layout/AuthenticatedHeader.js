@@ -62,12 +62,22 @@ const AuthenticatedHeader = () => {
 
       <div className="header-content-wrapper">
         <div className="search-bar">
-          {/* HOME - Per consumer e business */}
-          {(isConsumer || isBusiness) && (
+          {/* HOME - Solo per consumer (nel legacy: rendered="#{roleService['ROLE_CONSUMER']}") */}
+          {isConsumer && (
             <div className={`nav-item ${location.pathname === '/home' ? 'active' : ''}`}>
               <Link to="/home" className="nav-link">
                 <i className="fas fa-home"></i>
                 <span>{t('resourceBundle.HOME', 'HOME')}</span>
+              </Link>
+            </div>
+          )}
+
+          {/* SCHEDA PERSONALE / IMPOSTAZIONE - Solo per business (prima voce per business nel legacy) */}
+          {isBusiness && (
+            <div className={`nav-item ${isActive('/business') && !location.search.includes('tab=2') ? 'active' : ''}`}>
+              <Link to="/business" className="nav-link">
+                <i className="far fa-id-card"></i>
+                <span>{user?.team?.type?.id === 'CLINIC' ? 'IMPOSTAZIONE' : t('resourceBundle.Personal_form', 'Scheda Personale')}</span>
               </Link>
             </div>
           )}
@@ -82,7 +92,7 @@ const AuthenticatedHeader = () => {
             </div>
           )}
 
-          {/* CENTRI SPECIALISTICI - Per consumer, admin, o doctor */}
+          {/* CENTRI SPECIALISTICI - Per consumer, admin, o business doctor */}
           {(isConsumer || isAdmin || (isBusiness && user?.team?.type?.id === 'DOCTOR')) && (
             <div className={`nav-item ${location.pathname === '/consumer' && location.search.includes('tab=6') && location.search.includes('type=4') ? 'active' : ''}`}>
               <Link to="/consumer?tab=6&type=4" className="nav-link">
@@ -197,16 +207,6 @@ const AuthenticatedHeader = () => {
             </div>
           )}
 
-          {/* IMPOSTAZIONE / Personal form - Solo per business */}
-          {isBusiness && (
-            <div className={`nav-item ${isActive('/business') && !location.search.includes('tab=2') ? 'active' : ''}`}>
-              <Link to="/business" className="nav-link">
-                <i className="far fa-id-card"></i>
-                <span>{user?.team?.type?.id === 'CLINIC' ? 'IMPOSTAZIONE' : t('resourceBundle.Personal_form', 'Scheda Personale')}</span>
-              </Link>
-            </div>
-          )}
-
           {/* PROFILO - Dropdown per tutti */}
           <div className="nav-item more">
             <div className="more-dropdown more-with-triangle">
@@ -272,7 +272,7 @@ const AuthenticatedHeader = () => {
                 </div>
               </div>
               <a href="#" className="nav-link">
-                <i className="fas fa-notes-medical"></i>
+                <i className="fas fa-notes-medical" style={{ color: 'white' }}></i>
                 <span>GESTIONE REFERTI<i className="fas fa-caret-down" style={{ marginLeft: '5px' }}></i></span>
               </a>
             </div>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ApiClient } from '../../../config/api';
+import { useAuth } from '../../../context/AuthContext';
 import ThreeColumnLayout from '../../layout/ThreeColumnLayout';
 import UserProfileSidebar from '../../layout/UserProfileSidebar';
 import AdvertisingSidebar from '../../layout/AdvertisingSidebar';
@@ -10,13 +11,23 @@ import './Dashboard.css';
 /**
  * Dashboard Component
  * Replicates /WEB-INF/flows/home/home.xhtml exactly
+ * Nel legacy, la HOME è solo per consumer. Business vede la Scheda Personale.
  */
 const Dashboard = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { user: authUser } = useAuth();
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [expandedPosts, setExpandedPosts] = useState({});
+
+  // Business users go to /business (Scheda Personale), not the home dashboard
+  useEffect(() => {
+    const isBusiness = authUser?.roles?.some(r => r.nome === 'ROLE_BUSINESS' || r.name === 'ROLE_BUSINESS');
+    if (isBusiness) {
+      navigate('/business', { replace: true });
+    }
+  }, [authUser, navigate]);
 
   useEffect(() => {
     loadDashboardData();

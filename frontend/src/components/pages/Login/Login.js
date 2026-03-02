@@ -342,6 +342,9 @@ const LoginPage = ({ errorHandler }) => {
         if (response?.user?.role === 'ADMIN') {
           console.log('🎯 Redirecting to admin dashboard');
           navigate('/admin/dashboard');
+        } else if (response?.user?.role === 'BUSINESS') {
+          console.log('🎯 Redirecting to business (Scheda Personale)');
+          navigate('/business');
         } else {
           console.log('🎯 Redirecting to home');
           navigate('/home');

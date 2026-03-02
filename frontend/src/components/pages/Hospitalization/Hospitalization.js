@@ -2,6 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import HospitalizationApi from '../../../services/hospitalizationApi';
+import ThreeColumnLayout from '../../layout/ThreeColumnLayout';
+import UserProfileSidebar from '../../layout/UserProfileSidebar';
+import AdvertisingSidebar from '../../layout/AdvertisingSidebar';
 import './hospitalization.css';
 
 const PAGE_SIZE = 15;
@@ -10,11 +13,17 @@ const Hospitalization = () => {
   const [searchParams] = useSearchParams();
   const tab = searchParams.get('tab');
 
-  if (tab === 'generateCode') {
-    return <GenerateCode />;
-  }
-
-  return <PatientList />;
+  return (
+    <ThreeColumnLayout
+      leftSidebar={<UserProfileSidebar />}
+      rightSidebar={<AdvertisingSidebar />}
+      leftColSize={2}
+      centerColSize={8}
+      rightColSize={2}
+    >
+      {tab === 'generateCode' ? <GenerateCode /> : <PatientList />}
+    </ThreeColumnLayout>
+  );
 };
 
 /**
