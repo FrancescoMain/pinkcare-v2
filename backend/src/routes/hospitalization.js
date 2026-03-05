@@ -109,4 +109,28 @@ router.post('/generate-code',
   hospitalizationController.generateCode
 );
 
+// Generate code and download PDF
+router.post('/generate-code-pdf',
+  AuthMiddleware.verifyToken,
+  AuthMiddleware.requireBusiness,
+  [
+    body('name').notEmpty().withMessage('Il nome è obbligatorio'),
+    body('surname').notEmpty().withMessage('Il cognome è obbligatorio'),
+    body('codFisc').notEmpty().withMessage('Il codice fiscale è obbligatorio')
+  ],
+  hospitalizationController.generateCodePdf
+);
+
+// Verify code for consumer authorization
+router.post('/verify-code',
+  AuthMiddleware.verifyToken,
+  AuthMiddleware.requireConsumer,
+  [
+    body('businessId').notEmpty().withMessage('Il business ID è obbligatorio'),
+    body('codice').notEmpty().withMessage('Il codice è obbligatorio'),
+    body('codFisc').notEmpty().withMessage('Il codice fiscale è obbligatorio')
+  ],
+  hospitalizationController.verifyCode
+);
+
 module.exports = router;

@@ -568,6 +568,34 @@ class DoctorsService {
 
     return result;
   }
+  /**
+   * Get UserClinic authorization statuses for a consumer user
+   * @param {number} userId - Consumer user ID
+   * @param {number[]} representativeIds - Representative user IDs (clinic_id in app_user_clinic)
+   * @returns {Promise<Object>} Map of representativeId → status
+   */
+  async getUserClinicStatuses(userId, representativeIds) {
+    if (!representativeIds || representativeIds.length === 0) {
+      return {};
+    }
+
+    const query = `
+      SELECT clinic_id, status
+      FROM app_user_clinic
+      WHERE user_id = :userId AND clinic_id IN (:representativeIds)
+    `;
+
+    const results = await sequelize.query(query, {
+      replacements: { userId, representativeIds },
+      type: QueryTypes.SELECT
+    });
+
+    const statusMap = {};
+    results.forEach(r => {
+      statusMap[r.clinic_id] = r.status;
+    });
+    return statusMap;
+  }
 }
 
 module.exports = new DoctorsService();

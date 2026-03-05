@@ -71,6 +71,30 @@ class HospitalizationApi {
   static async generateCode(data) {
     return ApiService.post('/api/hospitalization/generate-code', data);
   }
+
+  static async generateCodePdf(data) {
+    const headers = getAuthHeaders();
+    const response = await fetch(buildApiUrl('/api/hospitalization/generate-code-pdf'), {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Errore nella generazione del PDF');
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'code_authentication.pdf';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
+  }
 }
 
 export default HospitalizationApi;

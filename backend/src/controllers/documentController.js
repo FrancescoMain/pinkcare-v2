@@ -25,20 +25,24 @@ class DocumentController {
         pageSize = 10
       } = req.query;
 
+      // Frontend sends 0-based page, service expects 1-based
+      const pageNum = Math.max(1, parseInt(page) + 1);
+      const pageSizeNum = parseInt(pageSize);
+
       const result = await documentService.getDocuments(
         userId,
         typology ? parseInt(typology) : null,
         clinicId ? parseInt(clinicId) : null,
         doctorId ? parseInt(doctorId) : null,
-        parseInt(page),
-        parseInt(pageSize)
+        pageNum,
+        pageSizeNum
       );
 
       return res.json({
         documents: result.documents,
         total: result.total,
         page: parseInt(page),
-        pageSize: parseInt(pageSize)
+        pageSize: pageSizeNum
       });
     } catch (error) {
       console.error('[DocumentController] getDocuments error:', error);

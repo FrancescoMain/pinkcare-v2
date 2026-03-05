@@ -33,16 +33,19 @@ class DocumentService {
     }
 
     if (clinicId) {
-      whereClause += ' AND uc.clinic_id = :clinicId';
+      whereClause += ' AND t.id = :clinicId';
       replacements.clinicId = clinicId;
     }
 
     // Count query
+    // clinic_id in app_user_clinic is the business USER id, not the team id
+    // Must join through app_user_app_team to resolve the team
     const countQuery = `
       SELECT COUNT(*) as total
       FROM app_clinic_document cd
       JOIN app_user_clinic uc ON cd.app_user_clinic_id = uc.id
-      JOIN app_team t ON uc.clinic_id = t.id
+      JOIN app_user_app_team uat ON uc.clinic_id = uat.app_user_id
+      JOIN app_team t ON uat.teams_id = t.id AND t.deleted = 'N'
       ${whereClause}
     `;
 
@@ -63,7 +66,8 @@ class DocumentService {
              t.name as denomination, t.id as clinic_id, t.type_id
       FROM app_clinic_document cd
       JOIN app_user_clinic uc ON cd.app_user_clinic_id = uc.id
-      JOIN app_team t ON uc.clinic_id = t.id
+      JOIN app_user_app_team uat ON uc.clinic_id = uat.app_user_id
+      JOIN app_team t ON uat.teams_id = t.id AND t.deleted = 'N'
       ${whereClause}
       ORDER BY cd.data_load DESC
       LIMIT :pageSize OFFSET :offset
@@ -251,7 +255,8 @@ class DocumentService {
       SELECT DISTINCT t.id as clinic_id, t.name as denomination, t.type_id
       FROM app_clinic_document cd
       JOIN app_user_clinic uc ON cd.app_user_clinic_id = uc.id
-      JOIN app_team t ON uc.clinic_id = t.id
+      JOIN app_user_app_team uat ON uc.clinic_id = uat.app_user_id
+      JOIN app_team t ON uat.teams_id = t.id AND t.deleted = 'N'
       WHERE uc.user_id = :userId
       ORDER BY t.name ASC
     `;

@@ -79,6 +79,20 @@ class DoctorsApi {
     const response = await ApiClient.get('/api/doctors/pathologies');
     return response.data;
   }
+  /**
+   * Verify authorization code for a doctor/clinic
+   * @param {number} businessId - Doctor/clinic representative ID
+   * @param {string} codice - 8-char authorization code
+   * @param {string} codFisc - Patient fiscal code
+   * @returns {Promise<Object>} Result
+   */
+  static async verifyCode(businessId, codice, codFisc) {
+    return ApiClient.post('/api/hospitalization/verify-code', {
+      businessId,
+      codice,
+      codFisc
+    });
+  }
 }
 
 export default DoctorsApi;

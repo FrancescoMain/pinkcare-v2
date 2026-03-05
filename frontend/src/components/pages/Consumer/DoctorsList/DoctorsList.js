@@ -70,6 +70,9 @@ const DoctorsList = () => {
     codFisc: '',
     codice: ''
   });
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState(null);
+  const [authSuccess, setAuthSuccess] = useState(null);
 
   // Aggiorna stato quando cambiano i searchParams (navigazione)
   useEffect(() => {
@@ -170,6 +173,8 @@ const DoctorsList = () => {
       codFisc: '',
       codice: ''
     });
+    setAuthError(null);
+    setAuthSuccess(null);
   };
 
   // Close authorization dialog
@@ -180,17 +185,35 @@ const DoctorsList = () => {
       codFisc: '',
       codice: ''
     });
+    setAuthError(null);
+    setAuthSuccess(null);
   };
 
   // Submit authorization
   const handleSubmitAuthorization = async () => {
-    // TODO: Implementare chiamata API per autorizzazione
-    console.log('Authorization submitted:', {
-      doctorId: authorizationDialog.doctor?.id,
-      codFisc: authorizationDialog.codFisc,
-      codice: authorizationDialog.codice
-    });
-    closeAuthorizationDialog();
+    const { doctor, codFisc, codice } = authorizationDialog;
+
+    if (!codFisc || !codice) {
+      setAuthError(t('resourceBundle.Fill_all_fields', 'Compila tutti i campi'));
+      return;
+    }
+
+    setAuthLoading(true);
+    setAuthError(null);
+
+    try {
+      await DoctorsApi.verifyCode(doctor.representative?.id || doctor.id, codice, codFisc);
+      setAuthSuccess(t('resourceBundle.Authorization_success', 'Identificazione avvenuta con successo'));
+      // Refresh list after short delay to show success message
+      setTimeout(() => {
+        closeAuthorizationDialog();
+        fetchDoctors(filters, pagination.page);
+      }, 1500);
+    } catch (error) {
+      setAuthError(error.message || t('resourceBundle.Authorization_error', 'Errore nella verifica del codice'));
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
   // Se è selezionato un medico, mostra il dettaglio
@@ -316,6 +339,18 @@ const DoctorsList = () => {
                 </>
               )}
 
+              {authError && (
+                <div className="auth-message auth-error">
+                  <i className="fas fa-exclamation-circle"></i> {authError}
+                </div>
+              )}
+
+              {authSuccess && (
+                <div className="auth-message auth-success">
+                  <i className="fas fa-check-circle"></i> {authSuccess}
+                </div>
+              )}
+
               <div className="row">
                 <div className="col col-12 col-sm-12">
                   <label>{t('resourceBundle.Tax_code', 'Codice Fiscale')}</label>
@@ -328,6 +363,7 @@ const DoctorsList = () => {
                     }))}
                     style={{ textTransform: 'uppercase' }}
                     className="form-control"
+                    disabled={authLoading || !!authSuccess}
                   />
                 </div>
                 <div className="col col-12 col-sm-12">
@@ -340,28 +376,31 @@ const DoctorsList = () => {
                       codice: e.target.value
                     }))}
                     className="form-control"
+                    disabled={authLoading || !!authSuccess}
                   />
                 </div>
               </div>
             </div>
             <div className="dialog-footer">
-              <div className="row">
-                <div className="col col-12 col-sm-12 col-md-6">
-                  <button
-                    className="btn btn-secondary"
-                    onClick={closeAuthorizationDialog}
-                  >
-                    {t('resourceBundle.CLOSE', 'Chiudi')}
-                  </button>
-                </div>
-                <div className="col col-12 col-sm-12 col-md-6">
-                  <button
-                    className="btn btn-primary"
-                    onClick={handleSubmitAuthorization}
-                  >
-                    {t('resourceBundle.checkCode', 'Verifica codice')}
-                  </button>
-                </div>
+              <div className="dialog-buttons">
+                <button
+                  className="dialog-btn btn-secondary"
+                  onClick={closeAuthorizationDialog}
+                  disabled={authLoading}
+                >
+                  {t('resourceBundle.CLOSE', 'Chiudi')}
+                </button>
+                <button
+                  className="dialog-btn btn-primary"
+                  onClick={handleSubmitAuthorization}
+                  disabled={authLoading || !!authSuccess}
+                >
+                  {authLoading ? (
+                    <><i className="fas fa-spinner fa-spin"></i> {t('resourceBundle.Verifying', 'Verifica in corso...')}</>
+                  ) : (
+                    t('resourceBundle.checkCode', 'Verifica codice')
+                  )}
+                </button>
               </div>
             </div>
           </div>

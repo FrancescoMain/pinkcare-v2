@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../../context/AuthContext';
 
@@ -16,6 +17,7 @@ const DoctorCard = ({
   onAuthorize
 }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
 
   // Estrae i nomi dei ruoli dall'array di oggetti ruolo
@@ -193,8 +195,8 @@ const DoctorCard = ({
               </div>
             )}
 
-            {/* "Hai un codice?" - sempre visibile per consumer autenticati */}
-            {isAuthenticated && isConsumer && (
+            {/* "Hai un codice?" o "I miei referti" - condizionale su stato autorizzazione */}
+            {isAuthenticated && isConsumer && !doctor.userClinicStatus && (
               <div className="info-item has-code-item">
                 <i className="fas fa-external-link-alt"></i>
                 <button
@@ -203,6 +205,22 @@ const DoctorCard = ({
                   onClick={() => onAuthorize && onAuthorize(doctor)}
                 >
                   {t('resourceBundle.hasCode', 'Hai un codice ?')}
+                </button>
+              </div>
+            )}
+
+            {isAuthenticated && isConsumer && doctor.userClinicStatus === 'approved' && (
+              <div className="info-item has-code-item">
+                <i className="fas fa-download"></i>
+                <button
+                  type="button"
+                  className="code-link"
+                  onClick={() => {
+                    const typeParam = doctor.typeId === 3 ? 'doctor' : 'clinic';
+                    navigate(`/consumer?tab=10&type=${typeParam}&doctorId=${doctor.representative?.id || doctor.id}`);
+                  }}
+                >
+                  {t('resourceBundle.my_refert', 'I miei referti')}
                 </button>
               </div>
             )}

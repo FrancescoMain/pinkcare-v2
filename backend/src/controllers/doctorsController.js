@@ -55,6 +55,27 @@ class DoctorsController {
 
       const result = await doctorsService.search(filters, pageNum, pageSize);
 
+      // Attach UserClinic authorization status for consumer users
+      const isConsumer = req.user?.roles?.includes('ROLE_CONSUMER');
+      if (isConsumer && result.doctors?.length > 0) {
+        const representativeIds = result.doctors
+          .map(d => d.representative?.id)
+          .filter(Boolean);
+
+        if (representativeIds.length > 0) {
+          const statuses = await doctorsService.getUserClinicStatuses(
+            req.user.id,
+            representativeIds
+          );
+
+          result.doctors.forEach(d => {
+            if (d.representative?.id) {
+              d.userClinicStatus = statuses[d.representative.id] || null;
+            }
+          });
+        }
+      }
+
       return res.json({
         success: true,
         data: result

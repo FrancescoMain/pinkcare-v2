@@ -385,3 +385,22 @@
   font-size: 13px;
   color: #155724;
 }
+
+.btn-download-pdf {
+  margin-top: 10px;
+  padding: 8px 16px;
+  background: #e42080;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btn-download-pdf:hover {
+  opacity: 0.9;
+}
+
+.btn-download-pdf i {
+  margin-right: 6px;
+}

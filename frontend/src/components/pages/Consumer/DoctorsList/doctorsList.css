@@ -372,30 +372,61 @@
   border-top: 1px solid #e6ecf5;
 }
 
-.dialog-footer .btn {
-  width: 100%;
+.dialog-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.dialog-buttons .dialog-btn {
+  flex: 1;
   padding: 10px 20px !important;
   border-radius: 4px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  margin-bottom: 10px;
+  margin: 0 !important;
 }
 
-.dialog-footer .btn-secondary {
-  background: #6c757d;
-  color: #fff;
-  border: none;
+.dialog-btn.btn-secondary {
+  background: #f7941e !important;
+  color: #fff !important;
+  border: none !important;
 }
 
-.dialog-footer .btn-primary {
-  background: #e42080;
-  color: #fff;
-  border: none;
+.dialog-btn.btn-primary {
+  background: #e42080 !important;
+  color: #fff !important;
+  border: none !important;
 }
 
-.dialog-footer .btn:hover {
+.dialog-btn:hover {
   opacity: 0.9;
+}
+
+.dialog-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-message {
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  font-size: 13px;
+}
+
+.auth-error {
+  background: #ffe0e0;
+  color: #c62828;
+}
+
+.auth-success {
+  background: #e0f5e0;
+  color: #2e7d32;
+}
+
+.auth-message i {
+  margin-right: 6px;
 }
 
 /* ============================================

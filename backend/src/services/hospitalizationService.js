@@ -1,5 +1,9 @@
 const { sequelize } = require('../config/database');
 const { QueryTypes } = require('sequelize');
+const emailService = require('./emailService');
+const { PDFDocument } = require('pdf-lib');
+const fs = require('fs');
+const path = require('path');
 
 const PAGE_SIZE = 15;
 
@@ -408,6 +412,144 @@ class HospitalizationService {
       name,
       surname
     };
+  }
+  /**
+   * Generate PDF for a code authentication document
+   * Replicates legacy BuildGenerateCodePDF.fillPdfGenerateCode()
+   * Uses the original template_consumer_2.pdf and fills form fields
+   * @param {Object} codeData - { code, name, surname, codFisc }
+   * @param {string} businessName - Name of the doctor/clinic
+   * @returns {Promise<Buffer>} PDF buffer
+   */
+  async generateCodePdf(codeData, businessName) {
+    const templatePath = path.join(__dirname, '../templates/template_consumer_2.pdf');
+    const templateBytes = fs.readFileSync(templatePath);
+
+    const pdfDoc = await PDFDocument.load(templateBytes);
+    const form = pdfDoc.getForm();
+
+    // Fill fields exactly like legacy BuildGenerateCodePDF.fillPdfGenerateCode()
+    form.getTextField('row_0').setText(`Gentile ${codeData.name} ${codeData.surname},`);
+    form.getTextField('row_1').setText(`Di seguito il codice fornito da ${businessName}:`);
+    form.getTextField('row_2').setText(`     ${codeData.code}`);
+    form.getTextField('row_3').setText('Per consentire alla clinica/medico di caricare documenti, bisogna registrarsi al sito www.pinkcare.it,');
+    form.getTextField('row_4').setText('e seguire le indicazioni come di seguito:');
+    form.getTextField('row_5').setText('     1.Registrarsi o loggarsi con un account già creato');
+    form.getTextField('row_6').setText('     2.Dalla voce di menù, cliccare su Medici');
+    form.getTextField('row_7').setText('     3.Cercare il medico o la clinica e cliccare su \'Ho un codice\'');
+    form.getTextField('row_8').setText('     4.Inserire il codice fornito insieme al codice fiscale');
+    form.getTextField('row_9').setText('I documenti verranno cancellati definitivamente dopo 6 mesi dalla data di caricamento');
+
+    // Flatten form (convert fields to static text, like legacy setFormFlattening(true))
+    form.flatten();
+
+    const pdfBytes = await pdfDoc.save();
+    return Buffer.from(pdfBytes);
+  }
+
+  /**
+   * Verify a code and create UserClinic authorization
+   * Replicates legacy UserClinicServiceImpl.sendAuthorization()
+   * @param {number} userId - Consumer user ID
+   * @param {number} businessId - Business user ID (clinic_id)
+   * @param {string} codice - 8-char authorization code
+   * @param {string} codFisc - Patient fiscal code
+   * @returns {Promise<Object>} Success result
+   */
+  async verifyCode(userId, businessId, codice, codFisc) {
+    const cfPattern = /^[A-Z]{6}\d{2}[A-Z]\d{2}[A-Z]\d{3}[A-Z]$/;
+    const upperCodFisc = codFisc.toUpperCase();
+
+    if (!cfPattern.test(upperCodFisc)) {
+      throw new Error('Formato codice fiscale non valido');
+    }
+
+    // Look up code by businessId + codFisc + codice
+    const codeQuery = `
+      SELECT id, code, used FROM app_codes
+      WHERE businessid = :businessId AND codfisc = :codFisc AND code = :codice
+      LIMIT 1
+    `;
+
+    const [codeRecord] = await sequelize.query(codeQuery, {
+      replacements: { businessId, codFisc: upperCodFisc, codice },
+      type: QueryTypes.SELECT
+    });
+
+    if (!codeRecord) {
+      throw new Error('Match codice fiscale/codice non trovato');
+    }
+
+    if (codeRecord.used === 'Y') {
+      throw new Error('Codice già utilizzato');
+    }
+
+    // Use transaction for multi-step operation
+    const transaction = await sequelize.transaction();
+    try {
+      // Create UserClinic record with status 'approved'
+      await sequelize.query(`
+        INSERT INTO app_user_clinic (id, user_id, clinic_id, status, datarequest, idcode)
+        VALUES (nextval('app_user_clinic_id_seq'), :userId, :businessId, 'approved', :now, :codeId)
+      `, {
+        replacements: {
+          userId,
+          businessId,
+          now: new Date(),
+          codeId: codeRecord.id
+        },
+        transaction
+      });
+
+      // Mark code as used
+      await sequelize.query(`
+        UPDATE app_codes SET used = 'Y' WHERE id = :codeId
+      `, {
+        replacements: { codeId: codeRecord.id },
+        transaction
+      });
+
+      await transaction.commit();
+    } catch (error) {
+      await transaction.rollback();
+      throw error;
+    }
+
+    // Send confirmation email to consumer (non-blocking)
+    try {
+      const [consumer] = await sequelize.query(
+        'SELECT email, name, surname FROM app_user WHERE id = :userId',
+        { replacements: { userId }, type: QueryTypes.SELECT }
+      );
+
+      const [businessTeam] = await sequelize.query(`
+        SELECT t.name FROM app_team t
+        INNER JOIN app_user_app_team ut ON t.id = ut.teams_id
+        WHERE ut.app_user_id = :businessId AND t.deleted = 'N'
+        LIMIT 1
+      `, { replacements: { businessId }, type: QueryTypes.SELECT });
+
+      if (consumer?.email) {
+        const businessName = businessTeam?.name || 'Medico/Struttura';
+        let testo = '';
+        testo += emailService.getPartTemplateEmail('parte_1');
+        testo += `Gentile <strong>${consumer.name} ${consumer.surname},</strong><br /><br />`;
+        testo += `La sua identificazione con <strong>${businessName}</strong> è avvenuta con successo.<br />`;
+        testo += `Il codice utilizzato è: <strong>${codice}</strong><br /><br />`;
+        testo += `Da questo momento il medico/struttura potrà caricare documenti nel suo profilo.<br />`;
+        testo += emailService.getPartTemplateEmail('parte_2');
+
+        emailService.sendNotification(
+          consumer.email,
+          '[PINKCARE] Identificazione avvenuta con successo',
+          testo
+        );
+      }
+    } catch (emailError) {
+      console.error('[HospitalizationService] Email notification error:', emailError);
+    }
+
+    return { success: true };
   }
 }
 

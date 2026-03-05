@@ -467,7 +467,6 @@ const GenerateCode = () => {
   const [name, setName] = useState('');
   const [surname, setSurname] = useState('');
   const [codFisc, setCodFisc] = useState('');
-  const [generatedCode, setGeneratedCode] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -478,14 +477,13 @@ const GenerateCode = () => {
     }
 
     setLoading(true);
-    setGeneratedCode(null);
     try {
-      const res = await HospitalizationApi.generateCode({
+      // Generate code and download PDF (replicates legacy: just downloads)
+      await HospitalizationApi.generateCodePdf({
         name,
         surname,
         codFisc: codFisc.toUpperCase()
       });
-      setGeneratedCode(res);
       toast.success('Codice generato con successo');
     } catch (err) {
       toast.error(err.message || 'Errore nella generazione del codice');
@@ -537,12 +535,6 @@ const GenerateCode = () => {
         </button>
       </form>
 
-      {generatedCode && (
-        <div className="code-result">
-          <div className="code-value">{generatedCode.code}</div>
-          <p>Codice generato per: {generatedCode.name} {generatedCode.surname} ({generatedCode.codFisc})</p>
-        </div>
-      )}
     </div>
   );
 };

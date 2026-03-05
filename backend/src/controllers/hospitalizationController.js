@@ -250,6 +250,108 @@ class HospitalizationController {
       });
     }
   }
+  /**
+   * Generate code and return PDF
+   * POST /api/hospitalization/generate-code-pdf
+   */
+  async generateCodePdf(req, res) {
+    try {
+      const businessUserId = req.user.id;
+      const { name, surname, codFisc } = req.body;
+
+      if (!name || !surname || !codFisc) {
+        return res.status(400).json({
+          error: 'Nome, cognome e codice fiscale sono obbligatori'
+        });
+      }
+
+      // Generate or retrieve the code
+      const codeData = await hospitalizationService.generateCode(
+        businessUserId,
+        codFisc,
+        name,
+        surname
+      );
+
+      // Get business name for the PDF
+      const { sequelize } = require('../config/database');
+      const { QueryTypes } = require('sequelize');
+      const [team] = await sequelize.query(`
+        SELECT t.name FROM app_team t
+        INNER JOIN app_user_app_team ut ON t.id = ut.teams_id
+        WHERE ut.app_user_id = :userId AND t.deleted = 'N'
+        LIMIT 1
+      `, { replacements: { userId: businessUserId }, type: QueryTypes.SELECT });
+
+      const businessName = team?.name || 'Medico/Struttura';
+
+      // Generate PDF
+      const pdfBuffer = await hospitalizationService.generateCodePdf(codeData, businessName);
+
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'attachment; filename="code_authentication.pdf"');
+      res.setHeader('Content-Length', pdfBuffer.length);
+      return res.send(pdfBuffer);
+    } catch (error) {
+      console.error('[HospitalizationController] generateCodePdf error:', error);
+
+      if (error.message === 'Formato codice fiscale non valido') {
+        return res.status(400).json({ error: error.message });
+      }
+      if (error.message === 'Codice già utilizzato per questo codice fiscale') {
+        return res.status(409).json({ error: error.message });
+      }
+
+      return res.status(500).json({
+        error: 'Errore nella generazione del PDF'
+      });
+    }
+  }
+
+  /**
+   * Verify a code for consumer authorization
+   * POST /api/hospitalization/verify-code
+   */
+  async verifyCode(req, res) {
+    try {
+      const userId = req.user.id;
+      const { businessId, codice, codFisc } = req.body;
+
+      if (!businessId || !codice || !codFisc) {
+        return res.status(400).json({
+          error: 'Business ID, codice e codice fiscale sono obbligatori'
+        });
+      }
+
+      const result = await hospitalizationService.verifyCode(
+        userId,
+        parseInt(businessId),
+        codice,
+        codFisc
+      );
+
+      return res.json({
+        message: 'Identificazione avvenuta con successo',
+        ...result
+      });
+    } catch (error) {
+      console.error('[HospitalizationController] verifyCode error:', error);
+
+      if (error.message === 'Formato codice fiscale non valido') {
+        return res.status(400).json({ error: error.message });
+      }
+      if (error.message === 'Match codice fiscale/codice non trovato') {
+        return res.status(404).json({ error: error.message });
+      }
+      if (error.message === 'Codice già utilizzato') {
+        return res.status(409).json({ error: error.message });
+      }
+
+      return res.status(500).json({
+        error: 'Errore nella verifica del codice'
+      });
+    }
+  }
 }
 
 module.exports = new HospitalizationController();
