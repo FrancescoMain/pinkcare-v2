@@ -35,8 +35,14 @@ export const AuthProvider = ({ children }) => {
       try {
         const token = AuthService.getToken();
         if (token) {
-          // Verify token is still valid
-          const response = await AuthService.verifyToken();
+          // Verify token with timeout to avoid hanging
+          const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Token verify timeout')), 5000)
+          );
+          const response = await Promise.race([
+            AuthService.verifyToken(),
+            timeoutPromise,
+          ]);
           if (response?.user) {
             // Normalize user data on automatic login too
             const normalizedUser = {

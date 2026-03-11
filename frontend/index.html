@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#e42080" />
+    <meta name="description" content="PinkCare - La tua salute al centro" />
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" href="/logo192.png" />
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- FontAwesome 5 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" integrity="sha512-1ycn6IcaQQ40/MKBW2W4Rhis/DbILU74C1vSrLJxCq57o941Ym01SwNsOMqvEBFlcgUa6xLiPY/NS5R+E6ztJQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <!-- Bootstrap CSS (legacy compatibility) -->
+    <link rel="stylesheet" href="/styles/public/css/bootstrap.min.css" />
+
+    <title>PinkCare - La tua salute al centro</title>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+
+    <!-- jQuery JS (use existing jquery.min.js) -->
+    <script src="/styles/public/js/jquery.min.js"></script>
+    <!-- Bootstrap JS (same as JSF version) -->
+    <script src="/styles/public/js/bootstrap.min.js"></script>
+    <script type="text/javascript">
+      // Initialize jQuery with noConflict (same as JSF version)
+      jQuery(document).ready(function(){
+        var tpj = jQuery;
+        tpj.noConflict();
+
+        // Initialize Bootstrap carousel
+        if (jQuery('#myCarousel').length) {
+          jQuery('#myCarousel').carousel();
+        }
+      });
+    </script>
+
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

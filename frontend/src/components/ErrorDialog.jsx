@@ -40,7 +40,7 @@ const ErrorDialog = ({ isOpen, onClose, error }) => {
             </a>
           </p>
           
-          {error && process.env.NODE_ENV === 'development' && (
+          {error && import.meta.env.DEV && (
             <details className="error-details">
               <summary>Dettagli tecnici (solo in sviluppo)</summary>
               <pre>{error.message || JSON.stringify(error, null, 2)}</pre>

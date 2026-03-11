@@ -4,20 +4,20 @@
  */
 
 // Determina l'ambiente
-const isDevelopment = process.env.NODE_ENV === 'development';
-const isProduction = process.env.NODE_ENV === 'production';
+const isDevelopment = import.meta.env.DEV;
+const isProduction = import.meta.env.PROD;
 
 // Base URLs per diversi ambienti
 const API_BASE_URLS = {
-  development: 'http://localhost:3002',
-  production: process.env.REACT_APP_API_URL || 'https://api.pinkcare.it', // Da configurare in production
-  staging: process.env.REACT_APP_API_URL || 'https://staging-api.pinkcare.it'
+  development: '',  // Usa il proxy Vite — le chiamate /api/* vengono inoltrate a localhost:3002
+  production: import.meta.env.VITE_API_URL || 'https://api.pinkcare.it',
+  staging: import.meta.env.VITE_API_URL || 'https://staging-api.pinkcare.it'
 };
 
 // Ottieni base URL basato sull'ambiente
 const getApiBaseUrl = () => {
   if (isDevelopment) return API_BASE_URLS.development;
-  if (process.env.REACT_APP_STAGE === 'staging') return API_BASE_URLS.staging;
+  if (import.meta.env.VITE_STAGE === 'staging') return API_BASE_URLS.staging;
   return API_BASE_URLS.production;
 };
 

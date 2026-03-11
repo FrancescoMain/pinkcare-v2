@@ -1,14 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, lazy, Suspense } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import About from "./components/pages/About";
-import Home from "./components/pages/Home/Home";
-import Disclosure from "./components/pages/Disclosure";
-import Accreditation from "./components/pages/Accreditation";
-import Forum from "./components/pages/Forum/Forum";
-import Blog from "./components/pages/Blog/Blog";
+
+// Componenti sempre caricati (layout + globali)
 import ErrorDialog from "./components/ErrorDialog";
 import LoadingDialog from "./components/LoadingDialog";
 import Header from "./components/layout/Header";
@@ -16,18 +12,28 @@ import AuthenticatedLayout from "./components/layout/AuthenticatedLayout";
 import MainContainer from "./components/layout/MainContainer";
 import Footer from "./components/layout/Footer";
 import CookieBanner from "./components/CookieBanner";
-import LoginPage from "./components/pages/Login/Login";
-import Profile from "./components/pages/Profile/Profile";
-import Dashboard from "./components/pages/Dashboard/Dashboard";
-import PasswordRecovery from "./components/pages/PasswordRecovery";
-import PasswordRecoveryTest from "./components/pages/PasswordRecoveryTest";
 import ProtectedRoute from "./components/common/ProtectedRoute";
-import Consumer from "./components/pages/Consumer/Consumer";
-import Hospitalization from "./components/pages/Hospitalization/Hospitalization";
-import DocumentShop from "./components/pages/DocumentShop/DocumentShop";
-import Business from "./components/pages/Business/Business";
+import PageLoader from "./components/PageLoader";
 import { AuthProvider } from "./context/AuthContext";
 import { useErrorHandler } from "./hooks/useErrorHandler";
+
+// Lazy-loaded page components
+const Home = lazy(() => import("./components/pages/Home/Home"));
+const About = lazy(() => import("./components/pages/About"));
+const Disclosure = lazy(() => import("./components/pages/Disclosure"));
+const Accreditation = lazy(() => import("./components/pages/Accreditation"));
+const Forum = lazy(() => import("./components/pages/Forum/Forum"));
+const Blog = lazy(() => import("./components/pages/Blog/Blog"));
+const LoginPage = lazy(() => import("./components/pages/Login/Login"));
+const Profile = lazy(() => import("./components/pages/Profile/Profile"));
+const Dashboard = lazy(() => import("./components/pages/Dashboard/Dashboard"));
+const PasswordRecovery = lazy(() => import("./components/pages/PasswordRecovery"));
+const PasswordRecoveryTest = lazy(() => import("./components/pages/PasswordRecoveryTest"));
+const Consumer = lazy(() => import("./components/pages/Consumer/Consumer"));
+const Hospitalization = lazy(() => import("./components/pages/Hospitalization/Hospitalization"));
+const DocumentShop = lazy(() => import("./components/pages/DocumentShop/DocumentShop"));
+const Business = lazy(() => import("./components/pages/Business/Business"));
+
 // Importa stili globali PinkCare - DEVE essere caricato per ultimo
 import "./styles/global.css";
 
@@ -48,6 +54,7 @@ function App() {
     <AuthProvider>
       <Router>
         <div className="App">
+        <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* Route standalone senza layout */}
           <Route path="/disclosure" element={<Disclosure />} />
@@ -151,6 +158,7 @@ function App() {
             </>
           } />
         </Routes>
+        </Suspense>
 
         {/* Componenti globali sempre presenti */}
         <ToastContainer

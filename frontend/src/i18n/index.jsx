@@ -19,7 +19,7 @@ i18n
     },
 
     // Configurazioni aggiuntive
-    debug: process.env.NODE_ENV === 'development', // Debug solo in sviluppo
+    debug: import.meta.env.DEV, // Debug solo in sviluppo
     
     // Namespace di default
     defaultNS: 'translation',
@@ -29,7 +29,7 @@ i18n
     nsSeparator: ':',
     
     // Configurazione per le chiavi mancanti
-    saveMissing: process.env.NODE_ENV === 'development',
+    saveMissing: import.meta.env.DEV,
     saveMissingTo: 'current',
     
     // Configurazione del plurale (italiano)
