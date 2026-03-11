@@ -10,8 +10,8 @@ const isProduction = import.meta.env.PROD;
 // Base URLs per diversi ambienti
 const API_BASE_URLS = {
   development: '',  // Usa il proxy Vite — le chiamate /api/* vengono inoltrate a localhost:3002
-  production: import.meta.env.VITE_API_URL || 'https://api.pinkcare.it',
-  staging: import.meta.env.VITE_API_URL || 'https://staging-api.pinkcare.it'
+  production: import.meta.env.VITE_API_URL || 'https://pinkcare-v2-back.vercel.app',
+  staging: import.meta.env.VITE_API_URL || 'https://pinkcare-v2-back.vercel.app'
 };
 
 // Ottieni base URL basato sull'ambiente
