@@ -35,6 +35,7 @@ const pregnancyRoutes = require('./src/routes/pregnancy');
 const hospitalizationRoutes = require('./src/routes/hospitalization');
 const documentShopRoutes = require('./src/routes/documentShop');
 const businessRoutes = require('./src/routes/business');
+const notificationRoutes = require('./src/routes/notifications');
 const { testConnection } = require('./src/config/database');
 
 const app = express();
@@ -76,6 +77,7 @@ app.use('/api/pregnancy', pregnancyRoutes);
 app.use('/api/hospitalization', hospitalizationRoutes);
 app.use('/api/document-shop', documentShopRoutes);
 app.use('/api/business', businessRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

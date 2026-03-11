@@ -219,5 +219,24 @@
     "error_downloading": "Errore nel download del documento",
     "error_deleting": "Errore nell'eliminazione del documento",
     "error_attaching": "Errore nell'associazione del referto"
+  },
+  "notifications": {
+    "notifications": "Notifiche",
+    "notification_list": "Lista Notifiche",
+    "show_all": "Mostra tutte",
+    "no_notifications": "Nessuna notifica da leggere",
+    "mark_as_read": "Segna come letto",
+    "mark_all_as_read": "Segna tutte come lette",
+    "insertion_date": "Data Inserimento",
+    "type": "Tipo",
+    "message": "Messaggio",
+    "not_read": "Non letta",
+    "delete": "Elimina",
+    "confirm_delete": "Eliminare?",
+    "empty_message": "Nessuna notifica",
+    "page": "Pagina",
+    "of": "di",
+    "error_loading": "Errore nel caricamento delle notifiche",
+    "error_deleting": "Errore nell'eliminazione della notifica"
   }
 }

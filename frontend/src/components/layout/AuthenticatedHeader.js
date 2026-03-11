@@ -1,9 +1,10 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 import { AuthService } from '../../services/authService';
 import { downloadClinicalHistoryPDF } from '../../services/clinicalHistoryApi';
+import NotificationApi from '../../services/notificationApi';
 import './AuthenticatedHeader.css';
 
 /**
@@ -13,7 +14,76 @@ import './AuthenticatedHeader.css';
 const AuthenticatedHeader = () => {
   const { t } = useTranslation();
   const location = useLocation();
+  const navigate = useNavigate();
   const { user } = useAuth();
+
+  const [unreadNotifications, setUnreadNotifications] = useState([]);
+  const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
+  const notifDropdownRef = useRef(null);
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (notifDropdownRef.current && !notifDropdownRef.current.contains(e.target)) {
+        setNotifDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const loadUnreadNotifications = useCallback(async () => {
+    try {
+      const result = await NotificationApi.getUnread();
+      setUnreadNotifications(result.notifications || []);
+    } catch (error) {
+      console.error('Error loading notifications:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadUnreadNotifications();
+  }, [loadUnreadNotifications]);
+
+  const handleNotificationClick = async (e, notificationId) => {
+    e.preventDefault();
+    setNotifDropdownOpen(false);
+    try {
+      const result = await NotificationApi.getLink(notificationId);
+      loadUnreadNotifications();
+      if (result.link) {
+        navigate(result.link);
+      }
+    } catch (error) {
+      console.error('Error opening notification:', error);
+    }
+  };
+
+  const handleMarkAsRead = async (e, notificationId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      await NotificationApi.markAsRead(notificationId);
+      loadUnreadNotifications();
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  };
+
+  const handleMarkAllAsRead = async (e) => {
+    e.preventDefault();
+    try {
+      await NotificationApi.markAllAsRead();
+      setUnreadNotifications([]);
+    } catch (error) {
+      console.error('Error marking all as read:', error);
+    }
+  };
+
+  const toggleNotifDropdown = (e) => {
+    e.stopPropagation();
+    setNotifDropdownOpen(prev => !prev);
+  };
 
   const isActive = (path) => {
     return location.pathname === path ? 'active' : '';
@@ -315,24 +385,62 @@ const AuthenticatedHeader = () => {
 
         {/* Control Block - come nel legacy */}
         <div className="control-block">
-          {/* Notifiche con dropdown */}
-          <div className="control-icon more has-items">
-            <i className="fas fa-bell" style={{color: '#fff'}}></i>
-            <div className="more-dropdown more-with-triangle triangle-top-center">
-              <div className="ui-block-title ui-block-title-small">
-                <h6 className="title">Notifiche</h6>
+          {/* Notifiche con dropdown on click */}
+          <div className="notif-bell-wrapper" ref={notifDropdownRef}>
+            <button className="notif-bell-btn" onClick={toggleNotifDropdown} title={t('notifications.notifications', 'Notifiche')}>
+              <i className="fas fa-bell"></i>
+              {unreadNotifications.length > 0 && (
+                <span className="notif-badge">{unreadNotifications.length}</span>
+              )}
+            </button>
+
+            {notifDropdownOpen && (
+              <div className="notif-dropdown">
+                <div className="notif-dropdown-header">
+                  <h6>{t('notifications.notifications', 'Notifiche')}</h6>
+                  {unreadNotifications.length > 0 && (
+                    <a href="#" onClick={handleMarkAllAsRead}>
+                      {t('notifications.mark_all_as_read', 'Segna tutte come lette')}
+                    </a>
+                  )}
+                </div>
+
+                <div className="notif-dropdown-body">
+                  {unreadNotifications.length === 0 ? (
+                    <div className="notif-empty">
+                      <i className="far fa-bell-slash"></i>
+                      <p>{t('notifications.no_notifications', 'Nessuna notifica da leggere')}</p>
+                    </div>
+                  ) : (
+                    <ul className="notif-list">
+                      {unreadNotifications.map((n) => (
+                        <li key={n.id} className="notif-item">
+                          <span className="notif-item-icon">
+                            {n.typology?.id == 10 && <i className="fas fa-key"></i>}
+                            {n.typology?.id == 12 && <i className="fas fa-file-signature"></i>}
+                            {n.typology?.id == 11 && <i className="fas fa-clipboard-check"></i>}
+                            {n.typology?.id == 13 && <i className="fas fa-stethoscope"></i>}
+                          </span>
+                          <a href="#" className="notif-item-content" onClick={(e) => handleNotificationClick(e, n.id)}>
+                            <span className="notif-item-title">{n.title}</span>
+                            <span className="notif-item-date">
+                              {n.insertionDate ? new Date(n.insertionDate).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' }) : ''}
+                            </span>
+                          </a>
+                          <button className="notif-item-dismiss" onClick={(e) => handleMarkAsRead(e, n.id)} title={t('notifications.mark_as_read', 'Segna come letto')}>
+                            <i className="fas fa-times"></i>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <Link to="/profile?tab=2" className="notif-dropdown-footer" onClick={() => setNotifDropdownOpen(false)}>
+                  {t('notifications.show_all', 'Mostra tutte')}
+                </Link>
               </div>
-              <div className="mCustomScrollbar">
-                <ul className="notification-list">
-                  <li>
-                    <p>Nessuna notifiche da leggere</p>
-                  </li>
-                </ul>
-              </div>
-              <Link to="/profile?tab=2" className="view-all bg-primary">
-                Mostra tutte
-              </Link>
-            </div>
+            )}
           </div>
 
           {/* Pulsante Logout */}

@@ -34,6 +34,7 @@ const ClinicDocument = require('./ClinicDocument');
 const UserClinic = require('./UserClinic');
 const Code = require('./Code');
 const DocumentShop = require('./DocumentShop');
+const Notification = require('./Notification');
 
 // Define associations
 User.belongsToMany(Role, {
@@ -432,6 +433,32 @@ Code.belongsTo(User, { foreignKey: 'businessId', as: 'business' });
 UserClinic.belongsTo(Code, { foreignKey: 'idcode', as: 'code' });
 Code.hasMany(UserClinic, { foreignKey: 'idcode', as: 'userClinics' });
 
+// Notification associations
+Notification.belongsTo(Typology, {
+  foreignKey: 'typologyId',
+  as: 'typology'
+});
+
+Notification.belongsTo(User, {
+  foreignKey: 'userId',
+  as: 'user'
+});
+
+Notification.belongsTo(Team, {
+  foreignKey: 'teamId',
+  as: 'team'
+});
+
+Notification.belongsTo(User, {
+  foreignKey: 'notifyById',
+  as: 'notifyBy'
+});
+
+User.hasMany(Notification, {
+  foreignKey: 'userId',
+  as: 'notifications'
+});
+
 module.exports = {
   sequelize,
   User,
@@ -468,5 +495,6 @@ module.exports = {
   ClinicDocument,
   UserClinic,
   Code,
-  DocumentShop
+  DocumentShop,
+  Notification
 };
