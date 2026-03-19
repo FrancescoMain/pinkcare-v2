@@ -472,6 +472,12 @@ button#signin.btn-login {
     padding: 18px 0;
   }
 
+  .business-vertical-tab span {
+    writing-mode: horizontal-tb;
+    text-orientation: initial;
+    transform: none;
+  }
+
   .business-vertical-tab:last-child {
     border-right: none;
   }
@@ -552,5 +558,11 @@ button#signin.btn-login {
 
   .remember {
     align-items: flex-start;
+  }
+
+  /* Fix small input fields on mobile (CAP, Civico) */
+  .business-form-wrapper .content [class*="col-"] {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
   }
 }

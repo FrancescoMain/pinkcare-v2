@@ -171,6 +171,7 @@ const MedicalHistoryForm = () => {
       console.log('[StoriaClinica] Saving formData:', JSON.stringify(formData, null, 2));
       await updateConsumerForm(formData);
       showSuccessMessage('Operazione eseguita con successo');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       await loadConsumerData(); // Reload data
     } catch (error) {
       console.error('[StoriaClinica] Error saving:', error);

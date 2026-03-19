@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find C:Userscesardevelopmentrepospinckarepinkcare-v2frontend -maxdepth 2 -type f -name *.config.js -o -name *.config.ts -o -name vite.config.ts -o -name vite.config.js)",
+      "Bash(find C:Userscesardevelopmentrepospinckarepinkcare-v2frontend -name *.test.* -o -name *.spec.*)",
+      "Bash(git checkout:*)",
+      "Bash(npm install:*)",
+      "Bash(npx playwright:*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(npm --version)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000)"
+    ]
+  }
+}

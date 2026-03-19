@@ -798,27 +798,48 @@
 }
 
 @media (max-width: 768px) {
-  .schedule-title {
+  .schedule-container .calendar-title {
     font-size: 1.3rem;
-    min-width: 180px;
+    min-width: auto;
+  }
+
+  .schedule-container .calendar-header {
+    gap: 8px;
+    padding: 15px 0;
+    flex-wrap: wrap;
   }
 
   .schedule-grid {
     gap: 2px;
   }
 
+  /* Month view: scrollable on mobile */
+  .schedule-month-view {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .schedule-month-view .schedule-grid {
+    min-width: 500px;
+  }
+
   .schedule-month-view .day-cell {
-    min-height: 80px;
-    padding: 4px;
+    min-height: 50px;
+    padding: 3px;
   }
 
   .schedule-month-view .day-number {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
+  }
+
+  .schedule-month-view .weekday-header {
+    font-size: 0.7rem;
+    padding: 6px 0;
   }
 
   .event-item {
-    font-size: 9px;
-    padding: 1px 3px;
+    font-size: 8px;
+    padding: 1px 2px;
   }
 
   .schedule-legend .legend-items {
@@ -836,6 +857,23 @@
 
   .schedule-legend-inline {
     justify-content: center;
+  }
+
+  /* View tabs compact on mobile */
+  .schedule-view-tabs .view-tab {
+    padding: 8px 16px;
+    font-size: 12px;
+    min-width: 80px;
+  }
+
+  /* Week view: scrollable horizontally */
+  .schedule-week-view {
+    overflow-x: auto;
+  }
+
+  .week-header,
+  .week-body .time-row {
+    min-width: 600px;
   }
 }
 

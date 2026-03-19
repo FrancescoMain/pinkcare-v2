@@ -880,7 +880,7 @@ const LoginPage = ({ errorHandler }) => {
             </div>
           </div>
 
-          <div className="col col-6 col-xl-2 col-lg-2 col-md-2 col-sm-6">
+          <div className="col col-6 col-xl-2 col-lg-2 col-md-3 col-sm-6">
             <div className="form-group label-floating is-empty">
               <label className="control-label" htmlFor="doctor-street-number">
                 {t('authentication.street_number', 'Civico')}
@@ -896,7 +896,7 @@ const LoginPage = ({ errorHandler }) => {
             </div>
           </div>
 
-          <div className="col col-6 col-xl-2 col-lg-2 col-md-2 col-sm-6">
+          <div className="col col-6 col-xl-2 col-lg-2 col-md-3 col-sm-6">
             <div className="form-group label-floating is-empty">
               <label className="control-label" htmlFor="doctor-postcode">CAP</label>
               <input

@@ -239,22 +239,20 @@ const QuestionnaireForm = () => {
                     className="ui-block-title"
                     role="tab"
                     id={`heading-${taIndex}`}
+                    onClick={() => setSelectedTaIndex(prev => prev === taIndex ? -1 : taIndex)}
+                    style={{ cursor: 'pointer' }}
                   >
                     <div className="h6">
-                      <a
-                        data-toggle="collapse"
-                        data-parent="#accordion"
-                        href={`#collapse-${taIndex}`}
+                      <span
                         aria-expanded={selectedTaIndex === taIndex}
                         aria-controls={`collapse-${taIndex}`}
                         className={selectedTaIndex !== taIndex ? 'collapsed' : ''}
-                        onClick={() => setSelectedTaIndex(taIndex)}
                       >
                         {ta.label}
                         <span className="icons-wrap">
                           <i className="fas fa-angle-down" />
                         </span>
-                      </a>
+                      </span>
                     </div>
                   </div>
 

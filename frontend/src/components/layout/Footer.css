@@ -92,6 +92,9 @@
     word-wrap: break-word;
     display: inline-block;
     max-width: 100%;
+    min-height: 44px;
+    line-height: 44px;
+    padding: 0 8px;
   }
   
   .foot .col-md-6 {

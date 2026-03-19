@@ -90,7 +90,9 @@ class AuthController {
       });
 
     } catch (error) {
-      await transaction.rollback();
+      if (!transaction.finished) {
+        await transaction.rollback();
+      }
       console.error('Registration error:', error);
 
       // Handle unique constraint errors

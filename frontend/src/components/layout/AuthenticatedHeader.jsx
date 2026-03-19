@@ -19,7 +19,18 @@ const AuthenticatedHeader = () => {
 
   const [unreadNotifications, setUnreadNotifications] = useState([]);
   const [notifDropdownOpen, setNotifDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [openMobileDropdown, setOpenMobileDropdown] = useState(null);
   const notifDropdownRef = useRef(null);
+
+  const toggleMobileDropdown = (name) => {
+    setOpenMobileDropdown(prev => prev === name ? null : name);
+  };
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [location]);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -130,9 +141,20 @@ const AuthenticatedHeader = () => {
         </Link>
       </div>
 
+      {/* Hamburger button - mobile only */}
+      <button
+        className={`hamburger-btn ${mobileMenuOpen ? 'open' : ''}`}
+        onClick={() => setMobileMenuOpen(prev => !prev)}
+        aria-label="Menu"
+      >
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
       <div className="header-content-wrapper">
-        <div className="search-bar">
-          {/* HOME - Solo per consumer (nel legacy: rendered="#{roleService['ROLE_CONSUMER']}") */}
+        <div className={`search-bar ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+          {/* HOME - Solo per consumer */}
           {isConsumer && (
             <div className={`nav-item ${location.pathname === '/home' ? 'active' : ''}`}>
               <Link to="/home" className="nav-link">
@@ -142,7 +164,52 @@ const AuthenticatedHeader = () => {
             </div>
           )}
 
-          {/* SCHEDA PERSONALE / IMPOSTAZIONE - Solo per business (prima voce per business nel legacy) */}
+          {/* PROFILO - Dropdown per tutti - POSIZIONATO IN ALTO */}
+          <div className={`nav-item more ${openMobileDropdown === 'profilo' ? 'mobile-dropdown-open' : ''}`}>
+            <div className="more-dropdown more-with-triangle">
+              <div className="mCustomScrollbar">
+                <ul className="account-settings">
+                  {isConsumer && (
+                    <>
+                      <li>
+                        <Link to="/consumer?tab=3">
+                          <span>{t('resourceBundle.Advanced_Screening', 'Screening Avanzato')}</span>
+                        </Link>
+                      </li>
+                      <li>
+                        <Link to="/consumer?tab=0">
+                          <span>{t('resourceBundle.Medical_history', 'Storia Clinica')}</span>
+                        </Link>
+                      </li>
+                      <li>
+                        <Link to="/consumer?tab=5">
+                          <span>{t('resourceBundle.Menses_calendar', 'Calendario Mestruale')}</span>
+                        </Link>
+                      </li>
+                    </>
+                  )}
+                  <li>
+                    <Link to="/profile?tab=0">
+                      <span>{t('resourceBundle.Change_password', 'Cambia Password')}</span>
+                    </Link>
+                  </li>
+                  {isConsumer && (
+                    <li>
+                      <Link to="/consumer?tab=10">
+                        <span>I miei referti</span>
+                      </Link>
+                    </li>
+                  )}
+                </ul>
+              </div>
+            </div>
+            <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); toggleMobileDropdown('profilo'); }}>
+              <i className="fas fa-user" style={{color: '#fff'}}></i>
+              <span style={{color: '#fff'}}>{user?.team?.type?.id === 'CLINIC' ? 'GESTIONE ACCOUNT' : t('resourceBundle.PROFILE', 'PROFILO')}<i className="fas fa-caret-down" style={{ marginLeft: '5px' }}></i></span>
+            </a>
+          </div>
+
+          {/* SCHEDA PERSONALE / IMPOSTAZIONE - Solo per business */}
           {isBusiness && (
             <div className={`nav-item ${isActive('/business') && !location.search.includes('tab=2') ? 'active' : ''}`}>
               <Link to="/business" className="nav-link">
@@ -227,7 +294,7 @@ const AuthenticatedHeader = () => {
 
           {/* SETTINGS - Dropdown per admin */}
           {isAdmin && (
-            <div className="nav-item more">
+            <div className={`nav-item more ${openMobileDropdown === 'settings' ? 'mobile-dropdown-open' : ''}`}>
               <div className="more-dropdown more-with-triangle">
                 <div className="mCustomScrollbar">
                   <ul className="account-settings">
@@ -244,7 +311,7 @@ const AuthenticatedHeader = () => {
                   </ul>
                 </div>
               </div>
-              <a href="#" className="nav-link">
+              <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); toggleMobileDropdown('settings'); }}>
                 <i className="fas fa-cogs"></i>
                 <span>{t('resourceBundle.SETTINGS', 'IMPOSTAZIONI')}<i className="fas fa-caret-down" style={{ marginLeft: '5px' }}></i></span>
               </a>
@@ -253,7 +320,7 @@ const AuthenticatedHeader = () => {
 
           {/* ESAMI - Dropdown per consumer */}
           {isConsumer && (
-            <div className="nav-item more">
+            <div className={`nav-item more ${openMobileDropdown === 'esami' ? 'mobile-dropdown-open' : ''}`}>
               <div className="more-dropdown more-with-triangle">
                 <div className="mCustomScrollbar">
                   <ul className="account-settings">
@@ -270,61 +337,16 @@ const AuthenticatedHeader = () => {
                   </ul>
                 </div>
               </div>
-              <a href="#" className="nav-link">
+              <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); toggleMobileDropdown('esami'); }}>
                 <i className="fas fa-clipboard-list" style={{ color: 'white' }}></i>
                 <span>{t('resourceBundle.EXAMS', 'ESAMI')}<i className="fas fa-caret-down" style={{ marginLeft: '5px' }}></i></span>
               </a>
             </div>
           )}
 
-          {/* PROFILO - Dropdown per tutti */}
-          <div className="nav-item more">
-            <div className="more-dropdown more-with-triangle">
-              <div className="mCustomScrollbar">
-                <ul className="account-settings">
-                  {isConsumer && (
-                    <>
-                      <li>
-                        <Link to="/consumer?tab=3">
-                          <span>{t('resourceBundle.Advanced_Screening', 'Screening Avanzato')}</span>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link to="/consumer?tab=0">
-                          <span>{t('resourceBundle.Medical_history', 'Storia Clinica')}</span>
-                        </Link>
-                      </li>
-                      <li>
-                        <Link to="/consumer?tab=5">
-                          <span>{t('resourceBundle.Menses_calendar', 'Calendario Mestruale')}</span>
-                        </Link>
-                      </li>
-                    </>
-                  )}
-                  <li>
-                    <Link to="/profile?tab=0">
-                      <span>{t('resourceBundle.Change_password', 'Cambia Password')}</span>
-                    </Link>
-                  </li>
-                  {isConsumer && (
-                    <li>
-                      <Link to="/consumer?tab=10">
-                        <span>I miei referti</span>
-                      </Link>
-                    </li>
-                  )}
-                </ul>
-              </div>
-            </div>
-            <Link to="/profile?tab=0" className="nav-link">
-              <i className="fas fa-user" style={{color: '#fff'}}></i>
-              <span style={{color: '#fff'}}>{user?.team?.type?.id === 'CLINIC' ? 'GESTIONE ACCOUNT' : t('resourceBundle.PROFILE', 'PROFILO')}<i className="fas fa-caret-down" style={{ marginLeft: '5px' }}></i></span>
-            </Link>
-          </div>
-
           {/* GESTIONE REFERTI - Solo per business */}
           {isBusiness && (
-            <div className="nav-item more">
+            <div className={`nav-item more ${openMobileDropdown === 'referti' ? 'mobile-dropdown-open' : ''}`}>
               <div className="more-dropdown more-with-triangle">
                 <div className="mCustomScrollbar">
                   <ul className="account-settings">
@@ -341,7 +363,7 @@ const AuthenticatedHeader = () => {
                   </ul>
                 </div>
               </div>
-              <a href="#" className="nav-link">
+              <a href="#" className="nav-link" onClick={(e) => { e.preventDefault(); toggleMobileDropdown('referti'); }}>
                 <i className="fas fa-notes-medical" style={{ color: 'white' }}></i>
                 <span>GESTIONE REFERTI<i className="fas fa-caret-down" style={{ marginLeft: '5px' }}></i></span>
               </a>

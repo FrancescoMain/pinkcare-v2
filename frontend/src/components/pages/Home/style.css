@@ -1,7 +1,7 @@
 /* Stili specifici per la pagina Home - identici a standard_public.xhtml */
 
 .home-page {
-  /* No padding - managed by main-container */
+  overflow-x: hidden;
 }
 
 .home-page > .row {
@@ -43,17 +43,43 @@
   }
 }
 
+/* Mobile: reset nested row negative margins to prevent overflow */
+@media (max-width: 767px) {
+  .home-page .row {
+    margin-left: 0;
+    margin-right: 0;
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .home-page .content .row {
+    margin-left: -5px;
+    margin-right: -5px;
+  }
+  .home-page .content .row > [class*="col-"] {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}
+
 /* Tab buttons - compact height styling */
 .tab-button {
   padding: 5px 15px !important;
   text-align: center !important;
   border: none !important;
   margin-bottom: 0 !important;
-  min-height: auto !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  min-height: 44px !important;
   height: auto !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
+  flex: 1 1 45% !important;
+  width: auto !important;
+  max-width: 50% !important;
+  box-sizing: border-box !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
 }
 
 .tab-button h5 {
