@@ -1,203 +1,300 @@
+/* Administration.css - Allineato al design system PinkCare */
+
 .admin-page {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+  padding: 0 25px 25px;
 }
 
+/* Tab navigation - stile coerente con il resto dell'app */
 .admin-tabs {
   display: flex;
   gap: 0;
-  border-bottom: 2px solid #e0e0e0;
   margin-bottom: 20px;
+  background: #fff;
+  border-radius: 5px 5px 0 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
 }
 
 .admin-tab {
-  padding: 12px 24px;
+  padding: 14px 28px;
   border: none;
-  background: none;
+  background: #fff;
   cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-  color: #666;
-  border-bottom: 2px solid transparent;
-  margin-bottom: -2px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #515365;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
   display: flex;
   align-items: center;
   gap: 8px;
-  transition: color 0.2s, border-color 0.2s;
+  transition: background 0.2s, color 0.2s;
+  border-bottom: 3px solid transparent;
+  position: relative;
 }
 
 .admin-tab:hover {
-  color: #e91e63;
+  background: #fcedf5;
+  color: #e42080;
 }
 
 .admin-tab.active {
-  color: #e91e63;
-  border-bottom-color: #e91e63;
+  color: #e42080;
+  border-bottom-color: #e42080;
+  background: #fff;
 }
 
-/* Search form */
+.admin-tab i {
+  font-size: 14px;
+}
+
+/* Search form - stile documents-filters */
 .admin-search-form {
-  background: #f8f9fa;
-  padding: 16px;
-  border-radius: 8px;
-  margin-bottom: 20px;
+  background: #fff;
+  padding: 18px 20px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .admin-search-fields {
   display: flex;
   gap: 12px;
   flex-wrap: wrap;
-  margin-bottom: 12px;
+  margin-bottom: 14px;
+  align-items: flex-end;
 }
 
 .admin-search-fields input,
 .admin-search-fields select {
   padding: 8px 12px;
-  border: 1px solid #ddd;
+  font-size: 13px;
+  min-width: 180px;
+  border: 1px solid #d0d8f0;
   border-radius: 4px;
-  font-size: 14px;
+  color: #515365;
+  background: #fff;
   flex: 1;
-  min-width: 150px;
+  transition: border-color 0.15s ease-in-out;
+  margin-bottom: 0 !important;
+}
+
+.admin-search-fields input:focus,
+.admin-search-fields select:focus {
+  border-color: #e42080;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(228, 32, 128, 0.1);
+}
+
+.admin-search-fields input::placeholder {
+  color: #9a9fbf;
 }
 
 .admin-search-actions {
   display: flex;
   gap: 8px;
+  align-items: center;
 }
 
 .admin-search-actions .btn {
-  padding: 8px 16px;
+  padding: 8px 18px !important;
   border: none;
   border-radius: 4px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 13px;
+  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 6px;
+  transition: background 0.2s, opacity 0.2s;
+  white-space: nowrap;
 }
 
-.btn-primary {
-  background: #e91e63;
-  color: white;
+.admin-search-actions .btn-primary {
+  background: linear-gradient(135deg, #e42080 0%, #c71868 100%);
+  color: #fff;
 }
 
-.btn-primary:hover {
-  background: #c2185b;
+.admin-search-actions .btn-primary:hover {
+  background: linear-gradient(135deg, #c71868 0%, #a61356 100%);
 }
 
-.btn-secondary {
-  background: #e0e0e0;
-  color: #333;
+.admin-search-actions .btn-secondary {
+  background: #e6ecf5;
+  color: #515365;
+  border: 1px solid #e6ecf5;
 }
 
-.btn-secondary:hover {
-  background: #bdbdbd;
+.admin-search-actions .btn-secondary:hover {
+  background: #d5dce8;
 }
 
-.btn-secondary:disabled {
+.admin-search-actions .btn-export {
+  background: #38a169;
+  color: #fff;
+}
+
+.admin-search-actions .btn-export:hover {
+  background: #2f855a;
+}
+
+/* Data table - stile documents-table */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 5px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.admin-table thead th {
+  background: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #515365;
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.admin-table tbody tr {
+  border-bottom: 1px solid #eee;
+  transition: background-color 0.15s;
+}
+
+.admin-table tbody tr:hover {
+  background-color: #f5f7fa;
+}
+
+.admin-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.admin-table tbody td {
+  padding: 11px 16px;
+  font-size: 13px;
+  color: #515365;
+  vertical-align: middle;
+}
+
+/* Toggle buttons - pill style */
+.toggle-btn {
+  padding: 5px 16px;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s;
+  min-width: 44px;
+  text-align: center;
+}
+
+.toggle-btn.active {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+.toggle-btn.active:hover {
+  background: #9ae6b4;
+}
+
+.toggle-btn.inactive {
+  background: #fed7d7;
+  color: #9b2c2c;
+}
+
+.toggle-btn.inactive:hover {
+  background: #feb2b2;
+}
+
+/* Pagination - stile pagination-controls */
+.admin-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  padding: 18px 0;
+}
+
+.admin-pagination span {
+  font-size: 13px;
+  color: #515365;
+}
+
+.admin-pagination .btn {
+  background-color: #e6ecf5;
+  border: 1px solid #e6ecf5;
+  color: #515365;
+  padding: 8px 18px !important;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.admin-pagination .btn:hover:not(:disabled) {
+  background-color: #d5dce8;
+}
+
+.admin-pagination .btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
-.btn-export {
-  background: #4caf50;
-  color: white;
-}
-
-.btn-export:hover {
-  background: #388e3c;
-}
-
-/* Table */
-.admin-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.admin-table thead {
-  background: #f5f5f5;
-}
-
-.admin-table th {
-  padding: 12px 16px;
-  text-align: left;
-  font-weight: 600;
-  font-size: 13px;
-  color: #555;
-  border-bottom: 2px solid #e0e0e0;
-}
-
-.admin-table td {
-  padding: 10px 16px;
-  border-bottom: 1px solid #f0f0f0;
-  font-size: 14px;
-}
-
-.admin-table tr:hover {
-  background: #fafafa;
-}
-
-/* Toggle button */
-.toggle-btn {
-  padding: 4px 12px;
-  border: none;
-  border-radius: 12px;
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 500;
-  transition: background 0.2s;
-}
-
-.toggle-btn.active {
-  background: #c8e6c9;
-  color: #2e7d32;
-}
-
-.toggle-btn.inactive {
-  background: #ffcdd2;
-  color: #c62828;
-}
-
-.toggle-btn:hover {
-  opacity: 0.8;
-}
-
-/* Pagination */
-.admin-pagination {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 16px;
-  margin-top: 20px;
-  padding: 12px;
-}
-
-.admin-pagination span {
-  font-size: 14px;
-  color: #666;
-}
-
-/* Loading & empty */
+/* Loading spinner */
 .loading-container {
   display: flex;
   justify-content: center;
-  padding: 40px;
+  align-items: center;
+  padding: 60px;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
+.loading-container .spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid #fcedf5;
+  border-top-color: #e42080;
+  border-radius: 50%;
+  animation: admin-spin 0.7s linear infinite;
+}
+
+@keyframes admin-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Empty state */
 .admin-empty {
   text-align: center;
-  padding: 40px;
-  color: #999;
-  font-size: 16px;
+  padding: 60px 20px;
+  color: #9a9fbf;
+  font-size: 15px;
+  background: #fff;
+  border-radius: 5px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive */
 @media (max-width: 768px) {
+  .admin-page {
+    padding: 0 10px 15px;
+  }
+
+  .admin-tabs {
+    flex-direction: column;
+  }
+
+  .admin-tab {
+    justify-content: center;
+  }
+
   .admin-search-fields {
     flex-direction: column;
   }
@@ -207,12 +304,23 @@
     min-width: 100%;
   }
 
+  .admin-search-actions {
+    flex-wrap: wrap;
+  }
+
   .admin-table {
-    font-size: 12px;
+    display: block;
+    overflow-x: auto;
   }
 
   .admin-table th,
   .admin-table td {
-    padding: 8px;
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .toggle-btn {
+    padding: 4px 10px;
+    font-size: 11px;
   }
 }
