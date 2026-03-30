@@ -10,7 +10,7 @@ const determineUserRole = (roles) => {
   // Priority order: ADMIN > BUSINESS > USER
   const roleNames = roles.map(role => role.nome || role.name);
 
-  if (roleNames.includes('ROLE_ADMIN')) return 'ADMIN';
+  if (roleNames.includes('ROLE_ADMIN') || roleNames.includes('ROLE_PINKCARE') || roleNames.includes('ROLE_ADMINISTRATION_SECTION')) return 'ADMIN';
   if (roleNames.includes('ROLE_BUSINESS')) return 'BUSINESS';
   if (roleNames.includes('ROLE_USER')) return 'USER';
 

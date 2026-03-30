@@ -33,6 +33,7 @@ const Consumer = lazy(() => import("./components/pages/Consumer/Consumer"));
 const Hospitalization = lazy(() => import("./components/pages/Hospitalization/Hospitalization"));
 const DocumentShop = lazy(() => import("./components/pages/DocumentShop/DocumentShop"));
 const Business = lazy(() => import("./components/pages/Business/Business"));
+const Administration = lazy(() => import("./components/pages/Admin/Administration"));
 
 // Importa stili globali PinkCare - DEVE essere caricato per ultimo
 import "./styles/global.css";
@@ -123,6 +124,14 @@ function App() {
             <ProtectedRoute>
               <AuthenticatedLayout>
                 <Business />
+              </AuthenticatedLayout>
+            </ProtectedRoute>
+          } />
+
+          <Route path="/administration" element={
+            <ProtectedRoute requiredRole="ADMIN">
+              <AuthenticatedLayout>
+                <Administration />
               </AuthenticatedLayout>
             </ProtectedRoute>
           } />
