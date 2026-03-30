@@ -71,7 +71,7 @@ const Header = ({ userVO = null }) => {
       // Redirect based on user role
       setTimeout(() => {
         if (response?.user?.role === "ADMIN") {
-          navigate("/admin/dashboard");
+          navigate("/administration?tab=0");
         } else {
           navigate("/home");
         }

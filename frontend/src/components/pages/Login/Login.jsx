@@ -340,8 +340,8 @@ const LoginPage = ({ errorHandler }) => {
       setTimeout(() => {
         console.log('⏰ Redirect timeout triggered, navigating...');
         if (response?.user?.role === 'ADMIN') {
-          console.log('🎯 Redirecting to admin dashboard');
-          navigate('/admin/dashboard');
+          console.log('🎯 Redirecting to admin - consumer list');
+          navigate('/administration?tab=0');
         } else if (response?.user?.role === 'BUSINESS') {
           console.log('🎯 Redirecting to business (Scheda Personale)');
           navigate('/business');
