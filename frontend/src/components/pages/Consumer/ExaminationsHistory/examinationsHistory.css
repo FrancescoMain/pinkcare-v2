@@ -324,6 +324,17 @@
   color: #2d3748;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
   box-sizing: border-box;
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 42px;
+  line-height: 1.4;
+}
+
+/* Safari datetime-local fix — prevent text clipping */
+.eh-calendar-panel input[type="datetime-local"] {
+  min-height: 44px;
+  line-height: normal;
+  overflow: visible;
 }
 
 .eh-calendar-panel .form-control:focus {

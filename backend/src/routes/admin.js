@@ -21,6 +21,11 @@ router.put('/businesses/:userId/toggle-access', adminController.toggleAccess);
 router.put('/businesses/:userId/toggle-marketing', adminController.toggleMarketing);
 router.put('/businesses/:userId/toggle-newsletter', adminController.toggleNewsletter);
 router.put('/businesses/:teamId/toggle-searchable', adminController.toggleSearchable);
+router.get('/businesses/:teamId/profile', adminController.getBusinessProfile);
+router.put('/businesses/:teamId/approve-field', adminController.approveField);
+router.put('/businesses/:teamId/reject-field', adminController.rejectField);
+router.put('/businesses/:teamId/validate-exam-pathology/:tepId', adminController.validateExamPathology);
+router.put('/businesses/:teamId/reject-exam-pathology/:tepId', adminController.rejectExamPathology);
 
 // Reference data
 router.get('/typologies', adminController.getTypologies);

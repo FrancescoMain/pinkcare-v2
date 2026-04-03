@@ -10,7 +10,7 @@ import './recommendedExamList.css';
  * 3 sezioni: età, routine, screening
  * Struttura HTML: ui-block available-widget con dropdown more
  */
-const RecommendedExamList = () => {
+const RecommendedExamList = ({ onDataChange } = {}) => {
   const { t } = useTranslation();
   const [, setSearchParams] = useSearchParams();
 
@@ -88,6 +88,7 @@ const RecommendedExamList = () => {
       toast.success(t('examinations.date_saved'));
       closeDatePicker();
       loadData();
+      onDataChange?.();
     } catch (err) {
       toast.error(t('examinations.error_saving'));
     }
@@ -108,6 +109,7 @@ const RecommendedExamList = () => {
       toast.success(t('examinations.exam_confirmed'));
       closeDatePicker();
       loadData();
+      onDataChange?.();
     } catch (err) {
       toast.error(t('examinations.error_confirming'));
     }
@@ -120,6 +122,7 @@ const RecommendedExamList = () => {
       toast.success(t('examinations.date_removed'));
       closeDatePicker();
       loadData();
+      onDataChange?.();
     } catch (err) {
       toast.error(t('examinations.error_removing'));
     }

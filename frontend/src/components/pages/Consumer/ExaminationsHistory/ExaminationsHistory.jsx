@@ -13,7 +13,7 @@ import './examinationsHistory.css';
  * 3. Esami suggeriti (unconfirmed) - tabella con calendar inline + allegati
  * 4. Storico esami (confirmed) - tabella con paperclip allegati
  */
-const ExaminationsHistory = () => {
+const ExaminationsHistory = ({ onDataChange } = {}) => {
   const { t } = useTranslation();
   const [, setSearchParams] = useSearchParams();
   const fileInputRef = useRef(null);
@@ -122,6 +122,7 @@ const ExaminationsHistory = () => {
       toast.success(t('examinations.date_saved'));
       closeDatePicker();
       loadData();
+      onDataChange?.();
     } catch (err) {
       toast.error(t('examinations.error_saving'));
     }
@@ -142,6 +143,7 @@ const ExaminationsHistory = () => {
       toast.success(t('examinations.exam_confirmed'));
       closeDatePicker();
       loadData();
+      onDataChange?.();
     } catch (err) {
       toast.error(t('examinations.error_confirming'));
     }
@@ -154,6 +156,7 @@ const ExaminationsHistory = () => {
       toast.success(t('examinations.date_removed'));
       closeDatePicker();
       loadData();
+      onDataChange?.();
     } catch (err) {
       toast.error(t('examinations.error_removing'));
     }

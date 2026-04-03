@@ -35,6 +35,11 @@ const Consumer = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState(0);
+  const [sidebarRefreshKey, setSidebarRefreshKey] = useState(0);
+
+  const handleDataChange = () => {
+    setSidebarRefreshKey(prev => prev + 1);
+  };
 
   useEffect(() => {
     const tab = searchParams.get('tab');
@@ -63,11 +68,11 @@ const Consumer = () => {
 
       case 1:
         // Recommended Examination List (Esami consigliati)
-        return <RecommendedExamList />;
+        return <RecommendedExamList onDataChange={handleDataChange} />;
 
       case 2:
         // Examinations History (Controlli)
-        return <ExaminationsHistory />;
+        return <ExaminationsHistory onDataChange={handleDataChange} />;
 
       case 3:
         // Advanced Screening (Questionnaire)
@@ -103,7 +108,7 @@ const Consumer = () => {
 
   return (
     <ThreeColumnLayout
-      leftSidebar={<UserProfileSidebar key={activeTab} />}
+      leftSidebar={<UserProfileSidebar key={`${activeTab}-${sidebarRefreshKey}`} />}
       rightSidebar={<AdvertisingSidebar />}
       leftColSize={2}
       centerColSize={8}

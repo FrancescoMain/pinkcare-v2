@@ -158,6 +158,50 @@
   color: #ff9800;
 }
 
+.editable-field-icons .field-icon.status-approve {
+  color: #4caf50;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.editable-field-icons .field-icon.status-approve:hover {
+  color: #2e7d32;
+}
+
+.editable-field-icons .field-icon.status-reject {
+  color: #f44336;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.editable-field-icons .field-icon.status-reject:hover {
+  color: #c62828;
+}
+
+.field-icon.status-approve,
+.field-icon.status-reject {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+
+.field-icon.status-approve {
+  color: #4caf50;
+}
+
+.field-icon.status-approve:hover {
+  color: #2e7d32;
+}
+
+.field-icon.status-reject {
+  color: #f44336;
+}
+
+.field-icon.status-reject:hover {
+  color: #c62828;
+}
+
 /* ========================
    Edit mode
    ======================== */

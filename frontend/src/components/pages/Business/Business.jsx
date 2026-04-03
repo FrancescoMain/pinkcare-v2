@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../../context/AuthContext';
 import BusinessApi from '../../../services/businessApi';
@@ -19,7 +20,7 @@ const STREET_TYPES = [
  * Display mode: value + edit icon + status icon (check or hourglass)
  * Edit mode: input + cancel + save
  */
-const EditableField = ({ fieldKey, value, pendingValue, onRequestChange, renderDisplay, renderEdit }) => {
+const EditableField = ({ fieldKey, value, pendingValue, onRequestChange, onApprove, onReject, isAdminMode, renderDisplay, renderEdit }) => {
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
 
@@ -41,7 +42,7 @@ const EditableField = ({ fieldKey, value, pendingValue, onRequestChange, renderD
     }
   };
 
-  if (editing) {
+  if (!isAdminMode && editing) {
     return (
       <div className="editable-field-edit">
         {renderEdit ? renderEdit(editValue, setEditValue) : (
@@ -69,14 +70,37 @@ const EditableField = ({ fieldKey, value, pendingValue, onRequestChange, renderD
       <span className="field-value">
         {renderDisplay ? renderDisplay(value) : <span>{value}</span>}
       </span>
+      {hasPending && (
+        <span className="pending-value-label" title="Valore proposto">
+          <i className="fas fa-arrow-right" style={{ margin: '0 6px', color: '#888', fontSize: 11 }} />
+          <em style={{ color: '#e42080' }}>{pendingValue}</em>
+        </span>
+      )}
       <span className="editable-field-icons">
-        <button className="field-icon" onClick={handleEdit} title="Modifica">
-          <i className="fas fa-edit" />
-        </button>
-        {hasPending ? (
-          <span className="field-icon status-hourglass" title="In attesa di validazione">
-            <i className="fas fa-hourglass" />
-          </span>
+        {isAdminMode && hasPending ? (
+          <>
+            <button className="field-icon status-approve" onClick={() => onApprove(fieldKey)} title="Approva modifica">
+              <i className="fas fa-check-circle" />
+            </button>
+            <button className="field-icon status-reject" onClick={() => onReject(fieldKey)} title="Rifiuta modifica">
+              <i className="fas fa-ban" />
+            </button>
+          </>
+        ) : !isAdminMode ? (
+          <>
+            <button className="field-icon" onClick={handleEdit} title="Modifica">
+              <i className="fas fa-edit" />
+            </button>
+            {hasPending ? (
+              <span className="field-icon status-hourglass" title="In attesa di validazione">
+                <i className="fas fa-hourglass" />
+              </span>
+            ) : (
+              <span className="field-icon status-check" title="Online">
+                <i className="fas fa-check" />
+              </span>
+            )}
+          </>
         ) : (
           <span className="field-icon status-check" title="Online">
             <i className="fas fa-check" />
@@ -278,10 +302,16 @@ const AddressDialog = ({ address, onSave, onClose }) => {
  * Faithful replica of business_form.xhtml
  */
 const Business = () => {
-  useAuth(); // Ensure authenticated
+  const { user } = useAuth();
+  const [searchParams] = useSearchParams();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  // Admin mode: when admin navigates via notification with ?business_id=X
+  const businessIdParam = searchParams.get('business_id');
+  const isAdmin = user?.role === 'ADMIN' || user?.roles?.some(r => (r.nome || r.name || r) === 'ROLE_PINKCARE');
+  const isAdminMode = isAdmin && businessIdParam;
 
   // Pending changes collected by EditableField
   const [pendingChanges, setPendingChanges] = useState({});
@@ -298,7 +328,9 @@ const Business = () => {
   const loadProfile = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await BusinessApi.getProfile();
+      const data = isAdminMode
+        ? await BusinessApi.getProfileByTeamId(businessIdParam)
+        : await BusinessApi.getProfile();
       setProfile(data);
       // Initialize selected exam/path IDs from current data
       setSelectedExamIds(data.teamExaminations.map(e => e.examinationPathology.id));
@@ -309,7 +341,7 @@ const Business = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [isAdminMode, businessIdParam]);
 
   useEffect(() => {
     loadProfile();
@@ -323,6 +355,65 @@ const Business = () => {
   // Handle field change request from EditableField
   const handleRequestChange = (fieldKey, value) => {
     setPendingChanges(prev => ({ ...prev, [fieldKey]: value }));
+  };
+
+  // Admin: approve a pending field
+  const handleApproveField = async (fieldKey) => {
+    if (!isAdminMode || !profile?.team?.id) return;
+    const fieldMap = {
+      complete_name_first: 'rep_name', complete_name_last: 'rep_surname',
+      name: 'name', medical_title: 'medical_title', description: 'description',
+      medical_publications: 'medical_publications', structure_dimension: 'structure_dimension',
+      instrumentation: 'instrumentation', linkshop: 'linkshop'
+    };
+    const apiField = fieldMap[fieldKey];
+    if (!apiField) return;
+    try {
+      await BusinessApi.approveField(profile.team.id, apiField);
+      toast.success(`Campo "${fieldKey}" approvato`);
+      await loadProfile();
+    } catch (err) {
+      toast.error('Errore nell\'approvazione');
+    }
+  };
+
+  // Admin: reject a pending field
+  const handleRejectField = async (fieldKey) => {
+    if (!isAdminMode || !profile?.team?.id) return;
+    const fieldMap = {
+      complete_name_first: 'rep_name', complete_name_last: 'rep_surname',
+      name: 'name', medical_title: 'medical_title', description: 'description',
+      medical_publications: 'medical_publications', structure_dimension: 'structure_dimension',
+      instrumentation: 'instrumentation', linkshop: 'linkshop'
+    };
+    const apiField = fieldMap[fieldKey];
+    if (!apiField) return;
+    try {
+      await BusinessApi.rejectField(profile.team.id, apiField);
+      toast.success(`Campo "${fieldKey}" rifiutato`);
+      await loadProfile();
+    } catch (err) {
+      toast.error('Errore nel rifiuto');
+    }
+  };
+
+  // Admin: approve/reject a team exam or pathology
+  const handleValidateExamPath = async (tepId) => {
+    if (!isAdminMode || !profile?.team?.id) return;
+    try {
+      await BusinessApi.validateExamPathology(profile.team.id, tepId);
+      toast.success('Prestazione/patologia approvata');
+      await loadProfile();
+    } catch (err) { toast.error('Errore'); }
+  };
+
+  const handleRejectExamPath = async (tepId) => {
+    if (!isAdminMode || !profile?.team?.id) return;
+    try {
+      await BusinessApi.rejectExamPathology(profile.team.id, tepId);
+      toast.success('Prestazione/patologia rifiutata');
+      await loadProfile();
+    } catch (err) { toast.error('Errore'); }
   };
 
   // Handle examinations edit
@@ -509,6 +600,9 @@ const Business = () => {
                   value={team.name}
                   pendingValue={team.nameToValidate}
                   onRequestChange={handleRequestChange}
+                  onApprove={handleApproveField}
+                  onReject={handleRejectField}
+                  isAdminMode={isAdminMode}
                   renderDisplay={(val) => <h2 className="inline">{val}</h2>}
                 />
               </div>
@@ -527,6 +621,9 @@ const Business = () => {
                   value={team.medicalTitle}
                   pendingValue={team.medicalTitleToValidate}
                   onRequestChange={handleRequestChange}
+                  onApprove={handleApproveField}
+                  onReject={handleRejectField}
+                  isAdminMode={isAdminMode}
                   renderDisplay={(val) => (
                     <h4 className="inline">Specializzato in: {val || '---'}</h4>
                   )}
@@ -558,25 +655,41 @@ const Business = () => {
                   <span className="inline-items-list">
                     {teamExaminations.map((e, i) => (
                       <span key={e.id}>
-                        {e.examinationPathology.label}{i < teamExaminations.length - 1 ? ', ' : ''}
+                        {e.examinationPathology.label}
+                        {!e.validated && isAdminMode && (
+                          <span style={{ marginLeft: 4 }}>
+                            <button className="field-icon status-approve" onClick={() => handleValidateExamPath(e.id)} title="Approva">
+                              <i className="fas fa-check-circle" />
+                            </button>
+                            <button className="field-icon status-reject" onClick={() => handleRejectExamPath(e.id)} title="Rifiuta">
+                              <i className="fas fa-ban" />
+                            </button>
+                          </span>
+                        )}
+                        {!e.validated && !isAdminMode && (
+                          <i className="fas fa-hourglass" style={{ marginLeft: 4, color: '#e18a17', fontSize: 11 }} title="In attesa" />
+                        )}
+                        {i < teamExaminations.length - 1 ? ', ' : ''}
                       </span>
                     ))}
                     {teamExaminations.length === 0 && <span style={{ color: '#999' }}>Nessuna</span>}
                   </span>
-                  <span className="editable-field-icons">
-                    <button className="field-icon" onClick={handleStartEditExaminations} title="Modifica">
-                      <i className="fas fa-edit" />
-                    </button>
-                    {hasExamsPending || examsPending ? (
-                      <span className="field-icon status-hourglass" title="In attesa di validazione">
-                        <i className="fas fa-hourglass" />
-                      </span>
-                    ) : (
-                      <span className="field-icon status-check" title="Online">
-                        <i className="fas fa-check" />
-                      </span>
-                    )}
-                  </span>
+                  {!isAdminMode && (
+                    <span className="editable-field-icons">
+                      <button className="field-icon" onClick={handleStartEditExaminations} title="Modifica">
+                        <i className="fas fa-edit" />
+                      </button>
+                      {hasExamsPending || examsPending ? (
+                        <span className="field-icon status-hourglass" title="In attesa di validazione">
+                          <i className="fas fa-hourglass" />
+                        </span>
+                      ) : (
+                        <span className="field-icon status-check" title="Online">
+                          <i className="fas fa-check" />
+                        </span>
+                      )}
+                    </span>
+                  )}
                 </div>
               ) : (
                 <div className="editable-field">
@@ -608,25 +721,41 @@ const Business = () => {
                   <span className="inline-items-list">
                     {teamPathologies.map((p, i) => (
                       <span key={p.id}>
-                        {p.examinationPathology.label}{i < teamPathologies.length - 1 ? ', ' : ''}
+                        {p.examinationPathology.label}
+                        {!p.validated && isAdminMode && (
+                          <span style={{ marginLeft: 4 }}>
+                            <button className="field-icon status-approve" onClick={() => handleValidateExamPath(p.id)} title="Approva">
+                              <i className="fas fa-check-circle" />
+                            </button>
+                            <button className="field-icon status-reject" onClick={() => handleRejectExamPath(p.id)} title="Rifiuta">
+                              <i className="fas fa-ban" />
+                            </button>
+                          </span>
+                        )}
+                        {!p.validated && !isAdminMode && (
+                          <i className="fas fa-hourglass" style={{ marginLeft: 4, color: '#e18a17', fontSize: 11 }} title="In attesa" />
+                        )}
+                        {i < teamPathologies.length - 1 ? ', ' : ''}
                       </span>
                     ))}
                     {teamPathologies.length === 0 && <span style={{ color: '#999' }}>Nessuna</span>}
                   </span>
-                  <span className="editable-field-icons">
-                    <button className="field-icon" onClick={handleStartEditPathologies} title="Modifica">
-                      <i className="fas fa-edit" />
-                    </button>
-                    {hasPathsPending || pathsPending ? (
-                      <span className="field-icon status-hourglass" title="In attesa di validazione">
-                        <i className="fas fa-hourglass" />
-                      </span>
-                    ) : (
-                      <span className="field-icon status-check" title="Online">
-                        <i className="fas fa-check" />
-                      </span>
-                    )}
-                  </span>
+                  {!isAdminMode && (
+                    <span className="editable-field-icons">
+                      <button className="field-icon" onClick={handleStartEditPathologies} title="Modifica">
+                        <i className="fas fa-edit" />
+                      </button>
+                      {hasPathsPending || pathsPending ? (
+                        <span className="field-icon status-hourglass" title="In attesa di validazione">
+                          <i className="fas fa-hourglass" />
+                        </span>
+                      ) : (
+                        <span className="field-icon status-check" title="Online">
+                          <i className="fas fa-check" />
+                        </span>
+                      )}
+                    </span>
+                  )}
                 </div>
               ) : (
                 <div className="editable-field">
@@ -666,6 +795,9 @@ const Business = () => {
                   value={team.name}
                   pendingValue={team.nameToValidate}
                   onRequestChange={handleRequestChange}
+                  onApprove={handleApproveField}
+                  onReject={handleRejectField}
+                  isAdminMode={isAdminMode}
                   renderDisplay={(val) => <span className="inline-text-display">{val}</span>}
                 />
               </div>
@@ -680,6 +812,9 @@ const Business = () => {
                   value={team.linkshop}
                   pendingValue={team.linkshopToValidate}
                   onRequestChange={handleRequestChange}
+                  onApprove={handleApproveField}
+                  onReject={handleRejectField}
+                  isAdminMode={isAdminMode}
                   renderDisplay={(val) => <span className="inline-text-display">{val || '---'}</span>}
                 />
               </div>
@@ -760,6 +895,9 @@ const Business = () => {
                   value={team.medicalPublications}
                   pendingValue={team.medicalPublicationsToValidate}
                   onRequestChange={handleRequestChange}
+                  onApprove={handleApproveField}
+                  onReject={handleRejectField}
+                  isAdminMode={isAdminMode}
                   renderDisplay={(val) => <p className="inline-text-display">{val || '---'}</p>}
                 />
               </div>
@@ -784,16 +922,18 @@ const Business = () => {
             </div>
           )}
 
-          {/* Pulsante Salva */}
-          <div className="business-save-section">
-            <button
-              className="btn btn-primary"
-              disabled={!hasPendingChanges || saving}
-              onClick={handleSave}
-            >
-              {saving ? 'Salvataggio...' : 'Salva'}
-            </button>
-          </div>
+          {/* Pulsante Salva - solo per business, non per admin */}
+          {!isAdminMode && (
+            <div className="business-save-section">
+              <button
+                className="btn btn-primary"
+                disabled={!hasPendingChanges || saving}
+                onClick={handleSave}
+              >
+                {saving ? 'Salvataggio...' : 'Salva'}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

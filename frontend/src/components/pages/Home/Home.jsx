@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useTranslation } from 'react-i18next';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import "./style.css";
 import PageHead from "../../layout/PageHead";
 import { getPageConfig } from "../../../config/pageConfig";
@@ -8,6 +8,7 @@ import { MainCarousel } from "../../Carousel";
 import DateInput from '../../DateInput';
 import { ApiError } from '../../../config/api';
 import { AuthService } from '../../../services/authService';
+import { useAuth } from '../../../context/AuthContext';
 import About from '../About';
 import Accreditation from '../Accreditation';
 import BlogList from '../BlogList';
@@ -17,6 +18,8 @@ const Home = ({ userVO = null, errorHandler }) => {
   const { t } = useTranslation();
   const { showSuccessMessage, showErrorMessage } = errorHandler || {};
   const location = useLocation();
+  const navigate = useNavigate();
+  const { login, logout } = useAuth();
   const pageData = getPageConfig("home");
 
   // Stato per gestire il tab attivo
@@ -120,7 +123,14 @@ const Home = ({ userVO = null, errorHandler }) => {
       
       // Registrazione riuscita
       showSuccessMessage('Registrazione', result.message || 'Registrazione completata con successo!');
-      
+
+      // Logout sessione precedente (se era loggato come business/altro)
+      logout();
+
+      // Login automatico con le credenziali appena registrate
+      const savedEmail = newUser.email;
+      const savedPassword = newUser.password;
+
       // Reset form
       setNewUser({
         name: '',
@@ -134,10 +144,19 @@ const Home = ({ userVO = null, errorHandler }) => {
         agreeMarketing: false,
         agreeNewsletter: false
       });
-      
-      // Salva il token per login automatico
-      if (result.token) {
-        AuthService.setToken(result.token);
+
+      // Login e redirect automatico come consumer
+      try {
+        await login(savedEmail, savedPassword);
+        setTimeout(() => {
+          navigate('/home');
+        }, 1500);
+      } catch (loginErr) {
+        console.error('Auto-login after registration failed:', loginErr);
+        // Se auto-login fallisce, reindirizza a login manuale
+        setTimeout(() => {
+          navigate('/login?page=authentication');
+        }, 2000);
       }
       
     } catch (error) {

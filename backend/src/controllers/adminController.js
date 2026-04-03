@@ -1,4 +1,6 @@
 const adminService = require('../services/adminService');
+const businessService = require('../services/businessService');
+const notificationService = require('../services/notificationService');
 
 class AdminController {
   /**
@@ -557,6 +559,117 @@ class AdminController {
       res.json({ success: true });
     } catch (error) {
       console.error('Error deleting pathology:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+  /**
+   * GET /api/admin/businesses/:teamId/profile
+   * Get a business profile by team ID (for admin viewing/approval)
+   */
+  async getBusinessProfile(req, res) {
+    try {
+      const teamId = parseInt(req.params.teamId);
+      const profile = await businessService.getBusinessProfileByTeamId(teamId);
+      res.json(profile);
+    } catch (error) {
+      console.error('Error getting business profile:', error);
+      res.status(error.message === 'Team non trovato' ? 404 : 500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * PUT /api/admin/businesses/:teamId/approve-field
+   * Approve a pending field change (copy _to_validate to base, clear _to_validate)
+   */
+  async approveField(req, res) {
+    try {
+      const teamId = parseInt(req.params.teamId);
+      const { field } = req.body;
+      if (!field) return res.status(400).json({ error: 'field is required' });
+
+      await businessService.approveField(teamId, field);
+
+      // Get team representative to send notification
+      const { sequelize: sq } = require('../config/database');
+      const { QueryTypes } = require('sequelize');
+      const [team] = await sq.query(
+        'SELECT representative_id FROM app_team WHERE id = :teamId',
+        { replacements: { teamId }, type: QueryTypes.SELECT }
+      );
+      if (team?.representative_id) {
+        try {
+          await notificationService.sendBusinessChangesNotification(
+            team.representative_id, teamId, null, `- ${field}`, null
+          );
+        } catch (e) { console.error('Notification error:', e); }
+      }
+
+      res.json({ success: true, field });
+    } catch (error) {
+      console.error('Error approving field:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * PUT /api/admin/businesses/:teamId/reject-field
+   * Reject a pending field change (clear _to_validate without copying)
+   */
+  async rejectField(req, res) {
+    try {
+      const teamId = parseInt(req.params.teamId);
+      const { field } = req.body;
+      if (!field) return res.status(400).json({ error: 'field is required' });
+
+      await businessService.rejectField(teamId, field);
+
+      const { sequelize: sq } = require('../config/database');
+      const { QueryTypes } = require('sequelize');
+      const [team] = await sq.query(
+        'SELECT representative_id FROM app_team WHERE id = :teamId',
+        { replacements: { teamId }, type: QueryTypes.SELECT }
+      );
+      if (team?.representative_id) {
+        try {
+          await notificationService.sendBusinessChangesNotification(
+            team.representative_id, teamId, null, null, `- ${field}`
+          );
+        } catch (e) { console.error('Notification error:', e); }
+      }
+
+      res.json({ success: true, field });
+    } catch (error) {
+      console.error('Error rejecting field:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * PUT /api/admin/businesses/:teamId/validate-exam-pathology/:tepId
+   * Approve a pending team examination/pathology
+   */
+  async validateExamPathology(req, res) {
+    try {
+      const tepId = parseInt(req.params.tepId);
+      await businessService.validateTeamExamPathology(tepId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error validating exam/pathology:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * PUT /api/admin/businesses/:teamId/reject-exam-pathology/:tepId
+   * Reject a pending team examination/pathology
+   */
+  async rejectExamPathology(req, res) {
+    try {
+      const tepId = parseInt(req.params.tepId);
+      await businessService.rejectTeamExamPathology(tepId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error rejecting exam/pathology:', error);
       res.status(500).json({ error: error.message });
     }
   }

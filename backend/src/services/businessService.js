@@ -1,5 +1,6 @@
 const { sequelize } = require('../config/database');
 const { QueryTypes } = require('sequelize');
+const notificationService = require('./notificationService');
 
 /**
  * Business Service
@@ -257,10 +258,233 @@ class BusinessService {
       }
 
       await transaction.commit();
+
+      // Build description of requested changes for notification
+      const fieldLabels = {
+        nameToValidate: 'Denominazione',
+        medicalTitleToValidate: 'Titolo medico',
+        descriptionToValidate: 'Descrizione',
+        medicalPublicationsToValidate: 'Pubblicazioni mediche',
+        structureDimensionToValidate: 'Dimensione struttura',
+        instrumentationToValidate: 'Strumentazione',
+        linkshopToValidate: 'Link shop',
+        repNameToValidate: 'Nome rappresentante',
+        repSurnameToValidate: 'Cognome rappresentante'
+      };
+      const changedFields = Object.keys(updates)
+        .filter(k => updates[k] !== undefined && fieldLabels[k])
+        .map(k => `- ${fieldLabels[k]}: ${updates[k]}`)
+        .join('\n');
+
+      if (changedFields) {
+        try {
+          await notificationService.sendBusinessChangesNotification(
+            userId, team.id, changedFields, null, null
+          );
+        } catch (notifErr) {
+          console.error('Failed to send business changes notification:', notifErr);
+        }
+      }
     } catch (error) {
       await transaction.rollback();
       throw error;
     }
+  }
+
+  /**
+   * Approve a pending field for a team (admin action)
+   * Copies *_to_validate value to base field, then clears *_to_validate
+   */
+  async approveField(teamId, field) {
+    const fieldMap = {
+      name: { table: 'app_team', base: 'name', validate: 'name_to_validate', idCol: 'id' },
+      medical_title: { table: 'app_team', base: 'medical_title_id', validate: 'medical_title_to_validate', idCol: 'id' },
+      description: { table: 'app_team', base: 'description', validate: 'description_to_validate', idCol: 'id' },
+      medical_publications: { table: 'app_team', base: 'medical_publications', validate: 'medical_publications_to_validate', idCol: 'id' },
+      structure_dimension: { table: 'app_team', base: 'structure_dimension', validate: 'structure_dimension_to_validate', idCol: 'id' },
+      instrumentation: { table: 'app_team', base: 'instrumentation', validate: 'instrumentation_to_validate', idCol: 'id' },
+      linkshop: { table: 'app_team', base: 'linkshop', validate: 'linkshop_to_validate', idCol: 'id' },
+    };
+    const repFieldMap = {
+      rep_name: { table: 'app_user', base: 'name', validate: 'name_to_validate' },
+      rep_surname: { table: 'app_user', base: 'surname', validate: 'surname_to_validate' },
+    };
+
+    // Get team info for representative
+    const [team] = await sequelize.query(
+      'SELECT id, representative_id FROM app_team WHERE id = :teamId',
+      { replacements: { teamId }, type: QueryTypes.SELECT }
+    );
+    if (!team) throw new Error('Team non trovato');
+
+    if (fieldMap[field]) {
+      const f = fieldMap[field];
+      await sequelize.query(
+        `UPDATE ${f.table} SET ${f.base} = ${f.validate}, ${f.validate} = NULL WHERE ${f.idCol} = :id`,
+        { replacements: { id: teamId } }
+      );
+      return f.validate.replace(/_to_validate$/, '');
+    } else if (repFieldMap[field]) {
+      const f = repFieldMap[field];
+      await sequelize.query(
+        `UPDATE ${f.table} SET ${f.base} = ${f.validate}, ${f.validate} = NULL WHERE id = :id`,
+        { replacements: { id: team.representative_id } }
+      );
+      return f.base;
+    }
+    throw new Error('Campo non valido: ' + field);
+  }
+
+  /**
+   * Reject a pending field for a team (admin action)
+   * Clears *_to_validate without copying to base field
+   */
+  async rejectField(teamId, field) {
+    const fieldMap = {
+      name: { table: 'app_team', validate: 'name_to_validate', idCol: 'id' },
+      medical_title: { table: 'app_team', validate: 'medical_title_to_validate', idCol: 'id' },
+      description: { table: 'app_team', validate: 'description_to_validate', idCol: 'id' },
+      medical_publications: { table: 'app_team', validate: 'medical_publications_to_validate', idCol: 'id' },
+      structure_dimension: { table: 'app_team', validate: 'structure_dimension_to_validate', idCol: 'id' },
+      instrumentation: { table: 'app_team', validate: 'instrumentation_to_validate', idCol: 'id' },
+      linkshop: { table: 'app_team', validate: 'linkshop_to_validate', idCol: 'id' },
+    };
+    const repFieldMap = {
+      rep_name: { table: 'app_user', validate: 'name_to_validate' },
+      rep_surname: { table: 'app_user', validate: 'surname_to_validate' },
+    };
+
+    const [team] = await sequelize.query(
+      'SELECT id, representative_id FROM app_team WHERE id = :teamId',
+      { replacements: { teamId }, type: QueryTypes.SELECT }
+    );
+    if (!team) throw new Error('Team non trovato');
+
+    if (fieldMap[field]) {
+      const f = fieldMap[field];
+      await sequelize.query(
+        `UPDATE ${f.table} SET ${f.validate} = NULL WHERE ${f.idCol} = :id`,
+        { replacements: { id: teamId } }
+      );
+    } else if (repFieldMap[field]) {
+      const f = repFieldMap[field];
+      await sequelize.query(
+        `UPDATE ${f.table} SET ${f.validate} = NULL WHERE id = :id`,
+        { replacements: { id: team.representative_id } }
+      );
+    } else {
+      throw new Error('Campo non valido: ' + field);
+    }
+  }
+
+  /**
+   * Validate (approve) a team examination or pathology
+   */
+  async validateTeamExamPathology(teamExamPathologyId) {
+    await sequelize.query(
+      'UPDATE app_team_examination_pathology SET validated = true WHERE id = :id',
+      { replacements: { id: teamExamPathologyId } }
+    );
+  }
+
+  /**
+   * Reject (delete) a team examination or pathology
+   */
+  async rejectTeamExamPathology(teamExamPathologyId) {
+    await sequelize.query(
+      `UPDATE app_team_examination_pathology SET deleted = 'Y' WHERE id = :id`,
+      { replacements: { id: teamExamPathologyId } }
+    );
+  }
+
+  /**
+   * Get business profile by team ID (for admin viewing)
+   */
+  async getBusinessProfileByTeamId(teamId) {
+    // Same query as getBusinessProfile but filtered by team.id instead of user_id
+    const teamQuery = `
+      SELECT t.id, t.name, t.name_to_validate, t.logo, t.email, t.email_to_validate,
+             t.description, t.description_to_validate,
+             t.medical_publications, t.medical_publications_to_validate,
+             t.structure_dimension, t.structure_dimension_to_validate,
+             t.instrumentation, t.instrumentation_to_validate,
+             t.linkshop, t.linkshop_to_validate,
+             t.medical_title, t.medical_title_to_validate,
+             t.searchable, t.representative_id, t.address_id,
+             ty.id as type_id, ty.label as type_label,
+             a.id as address_id, a.street_type, a.street, a.street_number,
+             a.municipality, a.province, a.post_code, a.latitude, a.longitude,
+             a.region, a.nation,
+             u.id as rep_id, u.name as rep_name, u.surname as rep_surname,
+             u.name_to_validate as rep_name_to_validate,
+             u.surname_to_validate as rep_surname_to_validate,
+             u.email as rep_email,
+             CONCAT(COALESCE(u.name, ''), ' ', COALESCE(u.surname, '')) as rep_complete_name,
+             CONCAT(
+               COALESCE(u.name_to_validate, u.name, ''), ' ',
+               COALESCE(u.surname_to_validate, u.surname, '')
+             ) as rep_complete_name_to_validate
+      FROM app_team t
+      LEFT JOIN app_typology ty ON t.type_id = ty.id
+      LEFT JOIN app_address a ON t.address_id = a.id
+      LEFT JOIN app_user u ON t.representative_id = u.id
+      WHERE t.id = :teamId AND t.deleted = 'N'
+      LIMIT 1
+    `;
+    const [team] = await sequelize.query(teamQuery, {
+      replacements: { teamId },
+      type: QueryTypes.SELECT
+    });
+    if (!team) throw new Error('Team non trovato');
+
+    // Reuse same exam/pathology/reference queries
+    const [teamExaminations, teamPathologies, allExaminations, allPathologies, medicalTitles] = await Promise.all([
+      sequelize.query(`
+        SELECT tep.id as tep_id, tep.validated, ep.id as ep_id, ep.label
+        FROM app_team_examination_pathology tep
+        INNER JOIN app_examination_pathology ep ON tep.examination_pathology_id = ep.id
+        WHERE tep.team_id = :teamId AND tep.deleted = false AND ep.examination = true ORDER BY ep.label
+      `, { replacements: { teamId }, type: QueryTypes.SELECT }),
+      sequelize.query(`
+        SELECT tep.id as tep_id, tep.validated, ep.id as ep_id, ep.label
+        FROM app_team_examination_pathology tep
+        INNER JOIN app_examination_pathology ep ON tep.examination_pathology_id = ep.id
+        WHERE tep.team_id = :teamId AND tep.deleted = false AND ep.examination = false ORDER BY ep.label
+      `, { replacements: { teamId }, type: QueryTypes.SELECT }),
+      sequelize.query('SELECT id, label FROM app_examination_pathology WHERE examination = true ORDER BY label', { type: QueryTypes.SELECT }),
+      sequelize.query('SELECT id, label FROM app_examination_pathology WHERE examination = false ORDER BY label', { type: QueryTypes.SELECT }),
+      sequelize.query("SELECT id, label FROM app_typology WHERE pertinence = 'medical_title' ORDER BY label", { type: QueryTypes.SELECT }),
+    ]);
+
+    return {
+      team: {
+        id: team.id,
+        name: team.name, nameToValidate: team.name_to_validate,
+        logo: team.logo, email: team.email, emailToValidate: team.email_to_validate,
+        description: team.description, descriptionToValidate: team.description_to_validate,
+        medicalPublications: team.medical_publications, medicalPublicationsToValidate: team.medical_publications_to_validate,
+        structureDimension: team.structure_dimension, structureDimensionToValidate: team.structure_dimension_to_validate,
+        instrumentation: team.instrumentation, instrumentationToValidate: team.instrumentation_to_validate,
+        linkshop: team.linkshop, linkshopToValidate: team.linkshop_to_validate,
+        medicalTitle: team.medical_title, medicalTitleToValidate: team.medical_title_to_validate,
+        searchable: team.searchable,
+        type: { id: team.type_id, label: team.type_label },
+        address: team.address_id ? {
+          streetType: team.street_type, street: team.street, streetNumber: team.street_number,
+          municipality: team.municipality, province: team.province, postCode: team.post_code,
+          latitude: team.latitude, longitude: team.longitude
+        } : null,
+        representative: {
+          id: team.rep_id, name: team.rep_name, surname: team.rep_surname,
+          nameToValidate: team.rep_name_to_validate, surnameToValidate: team.rep_surname_to_validate,
+          email: team.rep_email, completeName: team.rep_complete_name,
+          completeNameToValidate: team.rep_complete_name_to_validate
+        }
+      },
+      teamExaminations: teamExaminations.map(e => ({ id: e.tep_id, validated: e.validated, examinationPathology: { id: e.ep_id, label: e.label } })),
+      teamPathologies: teamPathologies.map(p => ({ id: p.tep_id, validated: p.validated, examinationPathology: { id: p.ep_id, label: p.label } })),
+      allExaminations, allPathologies, medicalTitles
+    };
   }
 
   /**

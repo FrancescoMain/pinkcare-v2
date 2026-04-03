@@ -1,5 +1,7 @@
 const { Op } = require('sequelize');
-const { Notification, Typology, User, Team } = require('../models');
+const { Notification, Typology, User, Team, Role } = require('../models');
+const { sequelize } = require('../config/database');
+const { QueryTypes } = require('sequelize');
 
 /**
  * Notification Service
@@ -185,6 +187,64 @@ class NotificationService {
       return '/consumer?tab=2';
     }
     return '/profile?tab=2';
+  }
+
+  /**
+   * Send BUSINESS_CHANGES notification to all admin users
+   * Replicates legacy DataServiceImpl.sendBusinessChangesNotification()
+   * @param {number} businessUserId - The business user who made changes
+   * @param {number} teamId - The team being modified
+   * @param {string} requestedChanges - Description of requested changes
+   * @param {string} approvedChanges - Description of approved changes (for feedback to business)
+   * @param {string} deniedChanges - Description of denied changes (for feedback to business)
+   */
+  async sendBusinessChangesNotification(businessUserId, teamId, requestedChanges, approvedChanges, deniedChanges) {
+    // Find all admin users (ROLE_PINKCARE or ROLE_ADMINISTRATION_SECTION)
+    const adminUsers = await sequelize.query(`
+      SELECT DISTINCT u.id FROM app_user u
+      INNER JOIN app_user_app_role ur ON u.id = ur.user_id
+      INNER JOIN app_role r ON ur.role_id = r.id
+      WHERE r.name IN ('ROLE_PINKCARE', 'ROLE_ADMINISTRATION_SECTION', 'ROLE_BUSINESS_CHANGE_NOTIFICATION')
+    `, { type: QueryTypes.SELECT });
+
+    const businessUser = await User.findByPk(businessUserId);
+    const businessName = businessUser ? `${businessUser.name || ''} ${businessUser.surname || ''}`.trim() : '';
+
+    if (requestedChanges) {
+      // Notify admins about requested changes
+      const message = `Modifiche richieste da ${businessName}:\n${requestedChanges}`;
+      for (const admin of adminUsers) {
+        if (admin.id === businessUserId) continue;
+        await Notification.create({
+          message,
+          title: 'Modifiche profilo business',
+          active: true,
+          deleted: false,
+          typologyId: Notification.TYPOLOGY.BUSINESS_CHANGES,
+          userId: admin.id,
+          notifyById: businessUserId,
+          teamId,
+          insertionDate: new Date()
+        });
+      }
+    }
+
+    if (approvedChanges || deniedChanges) {
+      // Notify business user about approval/rejection
+      let message = '';
+      if (approvedChanges) message += `Modifiche approvate:\n${approvedChanges}\n`;
+      if (deniedChanges) message += `Modifiche rifiutate:\n${deniedChanges}`;
+      await Notification.create({
+        message: message.trim(),
+        title: 'Esito modifiche profilo',
+        active: true,
+        deleted: false,
+        typologyId: Notification.TYPOLOGY.BUSINESS_CHANGES,
+        userId: businessUserId,
+        teamId,
+        insertionDate: new Date()
+      });
+    }
   }
 
   /**
