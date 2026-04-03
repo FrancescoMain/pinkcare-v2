@@ -7,6 +7,9 @@ import Growl from '../../Growl';
 import BlogPostEditor from './BlogPostEditor';
 import BlogPostFilters from './BlogPostFilters';
 import BlogPostList from './BlogPostList';
+import ThreeColumnLayout from '../../layout/ThreeColumnLayout';
+import UserProfileSidebar from '../../layout/UserProfileSidebar';
+import AdvertisingSidebar from '../../layout/AdvertisingSidebar';
 import './Blog.css';
 
 const Blog = () => {
@@ -133,59 +136,67 @@ const Blog = () => {
   };
 
   return (
-    <div className="blog-page">
-      {/* Growl notifications */}
-      <Growl messages={messages} onRemove={removeMessage} />
+    <ThreeColumnLayout
+      leftSidebar={<UserProfileSidebar />}
+      rightSidebar={<AdvertisingSidebar />}
+      leftColSize={2}
+      centerColSize={8}
+      rightColSize={2}
+    >
+      <div className="blog-page">
+        {/* Growl notifications */}
+        <Growl messages={messages} onRemove={removeMessage} />
 
-      {/* Post Editor - only for PINKCARE and BUSINESS */}
-      {canCreatePosts && (
-        <BlogPostEditor
-          post={selectedPost}
+        {/* Post Editor - only for PINKCARE and BUSINESS */}
+        {canCreatePosts && (
+          <BlogPostEditor
+            post={selectedPost}
+            filterOptions={filterOptions}
+            onPublish={handlePostPublish}
+            onCancel={() => setSelectedPost(null)}
+          />
+        )}
+
+        {/* Filters */}
+        <BlogPostFilters
+          filters={filters}
           filterOptions={filterOptions}
-          onPublish={handlePostPublish}
-          onCancel={() => setSelectedPost(null)}
+          onFilterChange={handleFilterChange}
         />
-      )}
 
-      {/* Filters */}
-      <BlogPostFilters
-        filters={filters}
-        filterOptions={filterOptions}
-        onFilterChange={handleFilterChange}
-      />
+        {/* Posts List */}
+        <BlogPostList
+          posts={posts}
+          loading={loading}
+          canEdit={canCreatePosts}
+          onEdit={handlePostEdit}
+          onDelete={handlePostDelete}
+        />
 
-      {/* Posts List */}
-      <BlogPostList
-        posts={posts}
-        loading={loading}
-        canEdit={canCreatePosts}
-        onEdit={handlePostEdit}
-        onDelete={handlePostDelete}
-      />
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="pagination">
-          <button
-            onClick={() => setPage(p => Math.max(0, p - 1))}
-            disabled={page === 0}
-            className="btn btn-secondary"
-          >
-            {t('resourceBundle.Previous', 'Precedente')}
-          </button>
-          <span className="page-info">
-            {t('resourceBundle.Page', 'Pagina')} {page + 1} {t('resourceBundle.of', 'di')} {totalPages}
-          </span>
-          <button
-            onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
-            disabled={page >= totalPages - 1}
-            className="btn btn-secondary"
-          >
-            {t('resourceBundle.Next', 'Successivo')}
-          </button>
-        </div>
-      )}
-    </div>
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="pagination">
+            <button
+              onClick={() => setPage(p => Math.max(0, p - 1))}
+              disabled={page === 0}
+              className="btn btn-secondary"
+            >
+              {t('resourceBundle.Previous', 'Precedente')}
+            </button>
+            <span className="page-info">
+              {t('resourceBundle.Page', 'Pagina')} {page + 1} {t('resourceBundle.of', 'di')} {totalPages}
+            </span>
+            <button
+              onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+              disabled={page >= totalPages - 1}
+              className="btn btn-secondary"
+            >
+              {t('resourceBundle.Next', 'Successivo')}
+            </button>
+          </div>
+        )}
+      </div>
+    </ThreeColumnLayout>
   );
 };
 

@@ -7,13 +7,15 @@ class AdminController {
    */
   async getConsumers(req, res) {
     try {
-      const { name, surname, page = 0, size = 20 } = req.query;
+      const { name, surname, page = 1, size = 20 } = req.query;
+      const pageInt = Math.max(0, parseInt(page) - 1); // frontend sends 1-based, service uses 0-based
       const data = await adminService.findConsumers({
         name,
         surname,
-        page: parseInt(page),
+        page: pageInt,
         size: parseInt(size)
       });
+      data.page = data.page + 1; // convert back to 1-based for frontend
       res.json(data);
     } catch (error) {
       console.error('Error getting consumers:', error);
@@ -27,15 +29,17 @@ class AdminController {
    */
   async getBusinesses(req, res) {
     try {
-      const { name, surname, denomination, typeId, page = 0, size = 20 } = req.query;
+      const { name, surname, denomination, typeId, page = 1, size = 20 } = req.query;
+      const pageInt = Math.max(0, parseInt(page) - 1); // frontend sends 1-based, service uses 0-based
       const data = await adminService.findBusinesses({
         name,
         surname,
         denomination,
         typeId: typeId ? parseInt(typeId) : undefined,
-        page: parseInt(page),
+        page: pageInt,
         size: parseInt(size)
       });
+      data.page = data.page + 1; // convert back to 1-based for frontend
       res.json(data);
     } catch (error) {
       console.error('Error getting businesses:', error);
@@ -190,6 +194,369 @@ class AdminController {
       res.json(data);
     } catch (error) {
       console.error('Error getting typologies:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * GET /api/admin/collaborators
+   * Get paginated list of collaborator users (admin/pinkcare roles)
+   */
+  async getCollaborators(req, res) {
+    try {
+      const { page = 1, size = 15 } = req.query;
+      const pageInt = Math.max(0, parseInt(page) - 1);
+      const data = await adminService.findCollaborators({
+        page: pageInt,
+        size: parseInt(size)
+      });
+      data.page = data.page + 1;
+      res.json(data);
+    } catch (error) {
+      console.error('Error getting collaborators:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * POST /api/admin/collaborators
+   * Create a new collaborator
+   */
+  async createCollaborator(req, res) {
+    try {
+      const { name, surname, email, password } = req.body;
+      if (!name || !surname || !email || !password) {
+        return res.status(400).json({ error: 'Nome, Cognome, Email e Password sono obbligatori' });
+      }
+      const data = await adminService.createCollaborator({ name, surname, email, password });
+      res.status(201).json(data);
+    } catch (error) {
+      console.error('Error creating collaborator:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * PUT /api/admin/collaborators/:userId
+   * Update a collaborator
+   */
+  async updateCollaborator(req, res) {
+    try {
+      const userId = parseInt(req.params.userId);
+      const { name, surname, email } = req.body;
+      const data = await adminService.updateCollaborator(userId, { name, surname, email });
+      res.json(data);
+    } catch (error) {
+      console.error('Error updating collaborator:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * DELETE /api/admin/collaborators/:userId
+   * Delete a collaborator user
+   */
+  async deleteCollaborator(req, res) {
+    try {
+      const userId = parseInt(req.params.userId);
+      await adminService.deleteCollaborator(userId);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting collaborator:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * GET /api/admin/collaborators/:userId/roles
+   * Get roles assigned to a collaborator
+   */
+  async getCollaboratorRoles(req, res) {
+    try {
+      const userId = parseInt(req.params.userId);
+      const data = await adminService.getCollaboratorRoles(userId);
+      res.json(data);
+    } catch (error) {
+      console.error('Error getting collaborator roles:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * GET /api/admin/collaborators/:userId/assignable-roles
+   * Get roles that can be assigned to a collaborator
+   */
+  async getAssignableRoles(req, res) {
+    try {
+      const userId = parseInt(req.params.userId);
+      const data = await adminService.getAssignableRoles(userId);
+      res.json(data);
+    } catch (error) {
+      console.error('Error getting assignable roles:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * POST /api/admin/collaborators/:userId/roles
+   * Add a role to a collaborator
+   */
+  async addRoleToUser(req, res) {
+    try {
+      const userId = parseInt(req.params.userId);
+      const { roleId } = req.body;
+      if (!roleId) {
+        return res.status(400).json({ error: 'roleId is required' });
+      }
+      const data = await adminService.addRoleToUser(userId, parseInt(roleId));
+      res.status(201).json(data);
+    } catch (error) {
+      console.error('Error adding role to user:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * PUT /api/admin/collaborators/:userId/roles/:roleId
+   * Update permissions for a user-role assignment
+   */
+  async updateUserRolePermissions(req, res) {
+    try {
+      const userId = parseInt(req.params.userId);
+      const roleId = parseInt(req.params.roleId);
+      const { insertion, modification, cancellation } = req.body;
+      const data = await adminService.updateUserRolePermissions(userId, roleId, {
+        insertion, modification, cancellation
+      });
+      res.json(data);
+    } catch (error) {
+      console.error('Error updating user role permissions:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * DELETE /api/admin/collaborators/:userId/roles/:roleId
+   * Remove a role from a collaborator
+   */
+  async removeRoleFromUser(req, res) {
+    try {
+      const userId = parseInt(req.params.userId);
+      const roleId = parseInt(req.params.roleId);
+      const data = await adminService.removeRoleFromUser(userId, roleId);
+      res.json(data);
+    } catch (error) {
+      console.error('Error removing role from user:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * GET /api/admin/blog-categories
+   * Get all blog categories
+   */
+  async getBlogCategories(req, res) {
+    try {
+      const data = await adminService.findBlogCategories();
+      res.json(data);
+    } catch (error) {
+      console.error('Error getting blog categories:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * POST /api/admin/blog-categories
+   * Create a new blog category
+   */
+  async createBlogCategory(req, res) {
+    try {
+      const { label } = req.body;
+      if (!label) {
+        return res.status(400).json({ error: 'Label is required' });
+      }
+      const data = await adminService.createBlogCategory(label);
+      res.status(201).json(data);
+    } catch (error) {
+      console.error('Error creating blog category:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * PUT /api/admin/blog-categories/:id
+   * Update a blog category
+   */
+  async updateBlogCategory(req, res) {
+    try {
+      const id = parseInt(req.params.id);
+      const { label } = req.body;
+      if (!label) {
+        return res.status(400).json({ error: 'Label is required' });
+      }
+      const data = await adminService.updateBlogCategory(id, label);
+      res.json(data);
+    } catch (error) {
+      console.error('Error updating blog category:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * DELETE /api/admin/blog-categories/:id
+   * Delete a blog category (soft delete)
+   */
+  async deleteBlogCategory(req, res) {
+    try {
+      const id = parseInt(req.params.id);
+      await adminService.deleteBlogCategory(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting blog category:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * GET /api/admin/examinations
+   * Get paginated list of examinations
+   */
+  async getExaminations(req, res) {
+    try {
+      const { page = 1, size = 15 } = req.query;
+      const pageInt = Math.max(0, parseInt(page) - 1);
+      const data = await adminService.findExaminations({
+        page: pageInt,
+        size: parseInt(size)
+      });
+      data.page = data.page + 1;
+      res.json(data);
+    } catch (error) {
+      console.error('Error getting examinations:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * POST /api/admin/examinations
+   * Create a new examination
+   */
+  async createExamination(req, res) {
+    try {
+      const { label, periodicalControlDays } = req.body;
+      if (!label) {
+        return res.status(400).json({ error: 'Label is required' });
+      }
+      const data = await adminService.createExamination(label, periodicalControlDays);
+      res.status(201).json(data);
+    } catch (error) {
+      console.error('Error creating examination:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * PUT /api/admin/examinations/:id
+   * Update an examination
+   */
+  async updateExamination(req, res) {
+    try {
+      const id = parseInt(req.params.id);
+      const { label, periodicalControlDays } = req.body;
+      if (!label) {
+        return res.status(400).json({ error: 'Label is required' });
+      }
+      const data = await adminService.updateExamination(id, label, periodicalControlDays);
+      res.json(data);
+    } catch (error) {
+      console.error('Error updating examination:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * DELETE /api/admin/examinations/:id
+   * Soft delete an examination
+   */
+  async deleteExamination(req, res) {
+    try {
+      const id = parseInt(req.params.id);
+      await adminService.deleteExamPathology(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting examination:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * GET /api/admin/pathologies
+   * Get paginated list of pathologies
+   */
+  async getPathologies(req, res) {
+    try {
+      const { page = 1, size = 15 } = req.query;
+      const pageInt = Math.max(0, parseInt(page) - 1);
+      const data = await adminService.findPathologies({
+        page: pageInt,
+        size: parseInt(size)
+      });
+      data.page = data.page + 1;
+      res.json(data);
+    } catch (error) {
+      console.error('Error getting pathologies:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * POST /api/admin/pathologies
+   * Create a new pathology
+   */
+  async createPathology(req, res) {
+    try {
+      const { label } = req.body;
+      if (!label) {
+        return res.status(400).json({ error: 'Label is required' });
+      }
+      const data = await adminService.createPathology(label);
+      res.status(201).json(data);
+    } catch (error) {
+      console.error('Error creating pathology:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * PUT /api/admin/pathologies/:id
+   * Update a pathology
+   */
+  async updatePathology(req, res) {
+    try {
+      const id = parseInt(req.params.id);
+      const { label } = req.body;
+      if (!label) {
+        return res.status(400).json({ error: 'Label is required' });
+      }
+      const data = await adminService.updatePathology(id, label);
+      res.json(data);
+    } catch (error) {
+      console.error('Error updating pathology:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  /**
+   * DELETE /api/admin/pathologies/:id
+   * Soft delete a pathology
+   */
+  async deletePathology(req, res) {
+    try {
+      const id = parseInt(req.params.id);
+      await adminService.deleteExamPathology(id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error('Error deleting pathology:', error);
       res.status(500).json({ error: error.message });
     }
   }

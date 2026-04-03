@@ -44,11 +44,6 @@ const ConsumerList = () => {
     setAppliedFilters({ ...filters });
   };
 
-  const handleReset = () => {
-    setFilters({ name: '', surname: '' });
-    setAppliedFilters({ name: '', surname: '' });
-  };
-
   const handleToggleAccess = async (userId) => {
     try {
       await AdminApi.toggleAccess('consumer', userId);
@@ -79,29 +74,31 @@ const ConsumerList = () => {
     }
   };
 
-  const handleExport = async () => {
-    try {
-      const blob = await AdminApi.exportConsumers(appliedFilters);
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `consumatori_${new Date().toISOString().slice(0, 10)}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      toast.error(t('admin.export_error'));
-    }
-  };
-
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
-    return new Date(dateStr).toLocaleDateString('it-IT');
+    const d = new Date(dateStr);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = String(d.getFullYear()).slice(-2);
+    return `${day}/${month}/${year}`;
+  };
+
+  const calculateAge = (birthday) => {
+    if (!birthday) return '';
+    const today = new Date();
+    const birth = new Date(birthday);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--;
+    }
+    return age;
   };
 
   return (
     <div className="admin-list">
+      <h5 className="admin-title">{t('admin.consumer_list_title')}</h5>
+
       {/* Search form */}
       <form className="admin-search-form" onSubmit={handleSearch}>
         <div className="admin-search-fields">
@@ -120,10 +117,6 @@ const ConsumerList = () => {
         </div>
         <div className="admin-search-actions">
           <button type="submit" className="btn btn-primary">{t('admin.find')}</button>
-          <button type="button" className="btn btn-secondary" onClick={handleReset}>{t('admin.reset')}</button>
-          <button type="button" className="btn btn-export" onClick={handleExport}>
-            <i className="fas fa-file-export"></i> {t('admin.export')}
-          </button>
         </div>
       </form>
 
@@ -142,6 +135,7 @@ const ConsumerList = () => {
                 <th>{t('admin.insertion_date')}</th>
                 <th>{t('admin.name')}</th>
                 <th>{t('admin.surname')}</th>
+                <th>{t('admin.age')}</th>
                 <th>{t('admin.access')}</th>
                 <th>{t('admin.marketing')}</th>
                 <th>{t('admin.newsletter')}</th>
@@ -156,28 +150,29 @@ const ConsumerList = () => {
                     <td>{formatDate(user.insertionDate)}</td>
                     <td>{user.name}</td>
                     <td>{user.surname}</td>
+                    <td>{calculateAge(user.birthday)}</td>
                     <td>
                       <button
-                        className={`toggle-btn ${user.enabled ? 'active' : 'inactive'}`}
+                        className="toggle-btn"
                         onClick={() => handleToggleAccess(user.id)}
                       >
-                        {user.enabled ? 'Sì' : 'No'}
+                        <i className={`fas ${user.enabled ? 'fa-check toggle-check' : 'fa-times toggle-times'}`}></i>
                       </button>
                     </td>
                     <td>
                       <button
-                        className={`toggle-btn ${user.agreeMarketing ? 'active' : 'inactive'}`}
+                        className="toggle-btn"
                         onClick={() => handleToggleMarketing(user.id)}
                       >
-                        {user.agreeMarketing ? 'Sì' : 'No'}
+                        <i className={`fas ${user.agreeMarketing ? 'fa-check toggle-check' : 'fa-times toggle-times'}`}></i>
                       </button>
                     </td>
                     <td>
                       <button
-                        className={`toggle-btn ${user.agreeNewsletter ? 'active' : 'inactive'}`}
+                        className="toggle-btn"
                         onClick={() => handleToggleNewsletter(user.id)}
                       >
-                        {user.agreeNewsletter ? 'Sì' : 'No'}
+                        <i className={`fas ${user.agreeNewsletter ? 'fa-check toggle-check' : 'fa-times toggle-times'}`}></i>
                       </button>
                     </td>
                   </tr>
@@ -188,21 +183,23 @@ const ConsumerList = () => {
 
           {/* Pagination */}
           <div className="admin-pagination">
-            <button
-              className="btn btn-secondary"
-              disabled={!pagination.hasPrevious}
-              onClick={() => fetchData(appliedFilters, pagination.page - 1)}
-            >
-              {t('admin.previous')}
-            </button>
-            <span>{t('admin.page')} {pagination.page} {t('admin.of')} {pagination.totalPages}</span>
-            <button
-              className="btn btn-secondary"
-              disabled={!pagination.hasNext}
-              onClick={() => fetchData(appliedFilters, pagination.page + 1)}
-            >
-              {t('admin.next')}
-            </button>
+            {pagination.hasPrevious && (
+              <button
+                className="btn btn-pagination"
+                onClick={() => fetchData(appliedFilters, pagination.page - 1)}
+              >
+                &lt;
+              </button>
+            )}
+            <span>{t('admin.pag')} {pagination.page} {t('admin.di')} {pagination.totalPages}</span>
+            {pagination.hasNext && (
+              <button
+                className="btn btn-pagination"
+                onClick={() => fetchData(appliedFilters, pagination.page + 1)}
+              >
+                &gt;
+              </button>
+            )}
           </div>
         </>
       )}

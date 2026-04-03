@@ -167,6 +167,8 @@ const UserProfileSidebar = () => {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
   };
 
+  const isAdmin = user?.roles?.some(r => r.nome === 'ROLE_PINKCARE') || false;
+
   const userAge = user?.birthday ? calculateAge(user.birthday) : null;
   // Arrotondiamo a 2 decimali per coerenza tra display e classificazione
   const rawBMI = calculateBMI(user?.weight, user?.height);
@@ -211,101 +213,106 @@ const UserProfileSidebar = () => {
           <span className="h4 name">
             {capitalize(user?.name) || ''} {capitalize(user?.surname) || ''}
           </span>
-          {userAge && (
+          {!isAdmin && userAge && (
             <p>ETA: <strong>{userAge} ANNI</strong></p>
           )}
         </div>
       </div>
 
-      {/* Pulsante Modifica Storia Clinica - REPLICA ESATTA del legacy edit_anagraphic */}
-      <div className="edit_anagraphic" onClick={handleModificaStoriaClinica}>
-        <span>Modifica storia clinica</span>
-      </div>
+      {/* Elementi consumer-only: nascosti per admin (nel legacy non ci sono) */}
+      {!isAdmin && (
+        <>
+          {/* Pulsante Modifica Storia Clinica */}
+          <div className="edit_anagraphic" onClick={handleModificaStoriaClinica}>
+            <span>Modifica storia clinica</span>
+          </div>
 
-      {/* Eventi del mese - REPLICA ESATTA del legacy */}
-      <div className="widget w-build-fav btn-wid">
-        <div className="widget-thumb sched_list">
-          <h6 style={{ borderBottom: '1px solid #ddd' }}>Eventi del mese</h6>
-          {eventsLoading ? (
-            <div className="events-loading">
-              <span>Caricamento...</span>
-            </div>
-          ) : monthlyEvents.length === 0 ? (
-            <div className="nothing-found">
-              <span>No records found.</span>
-            </div>
-          ) : (
-            <ul className="monthly-events-list">
-              {monthlyEvents.slice(0, 5).map((event, index) => (
-                <li key={event.id || index} className="monthly-event-item">
-                  <span className="event-date">
-                    {new Date(event.start).toLocaleDateString('it-IT', {
-                      day: '2-digit',
-                      month: 'short'
-                    })}
-                    <span className="event-time">
-                      {new Date(event.start).toLocaleTimeString('it-IT', {
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </span>
-                  </span>
-                  <span className="event-title" title={event.title}>
-                    {event.title}
-                  </span>
-                  <span
-                    className="event-color-dot"
-                    style={{
-                      backgroundColor: event.color?.includes('red') ? '#E12417' :
-                        event.color?.includes('orange') ? '#E18A17' :
-                        event.color?.includes('yellow') ? '#E1D817' :
-                        event.color?.includes('green') ? '#21CD24' :
-                        event.color?.includes('aquamarine') ? '#17E19E' :
-                        event.color?.includes('turquoise') ? '#17D7E1' :
-                        event.color?.includes('purple') ? (event.color?.includes('red-purple') ? '#8e24aa' : '#E117D4') :
-                        event.color?.includes('lavander') ? '#7986cb' :
-                        '#176FE1'
-                    }}
-                  ></span>
-                </li>
-              ))}
-              {monthlyEvents.length > 5 && (
-                <li className="monthly-event-more">
-                  +{monthlyEvents.length - 5} altri eventi
-                </li>
+          {/* Eventi del mese */}
+          <div className="widget w-build-fav btn-wid">
+            <div className="widget-thumb sched_list">
+              <h6 style={{ borderBottom: '1px solid #ddd' }}>Eventi del mese</h6>
+              {eventsLoading ? (
+                <div className="events-loading">
+                  <span>Caricamento...</span>
+                </div>
+              ) : monthlyEvents.length === 0 ? (
+                <div className="nothing-found">
+                  <span>No records found.</span>
+                </div>
+              ) : (
+                <ul className="monthly-events-list">
+                  {monthlyEvents.slice(0, 5).map((event, index) => (
+                    <li key={event.id || index} className="monthly-event-item">
+                      <span className="event-date">
+                        {new Date(event.start).toLocaleDateString('it-IT', {
+                          day: '2-digit',
+                          month: 'short'
+                        })}
+                        <span className="event-time">
+                          {new Date(event.start).toLocaleTimeString('it-IT', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </span>
+                      </span>
+                      <span className="event-title" title={event.title}>
+                        {event.title}
+                      </span>
+                      <span
+                        className="event-color-dot"
+                        style={{
+                          backgroundColor: event.color?.includes('red') ? '#E12417' :
+                            event.color?.includes('orange') ? '#E18A17' :
+                            event.color?.includes('yellow') ? '#E1D817' :
+                            event.color?.includes('green') ? '#21CD24' :
+                            event.color?.includes('aquamarine') ? '#17E19E' :
+                            event.color?.includes('turquoise') ? '#17D7E1' :
+                            event.color?.includes('purple') ? (event.color?.includes('red-purple') ? '#8e24aa' : '#E117D4') :
+                            event.color?.includes('lavander') ? '#7986cb' :
+                            '#176FE1'
+                        }}
+                      ></span>
+                    </li>
+                  ))}
+                  {monthlyEvents.length > 5 && (
+                    <li className="monthly-event-more">
+                      +{monthlyEvents.length - 5} altri eventi
+                    </li>
+                  )}
+                </ul>
               )}
-            </ul>
-          )}
-        </div>
-      </div>
-
-      {/* IBM (BMI) - REPLICA ESATTA del legacy: mostrato solo se peso e altezza sono presenti */}
-      {userBMI && userBMI > 0 && (
-        <div className="ui-block">
-          <div className="widget w-build-fav bmi-widget">
-            <div className="ibm">
-              <h4>{t('resourceBundle.Your_bmi_label', 'Il tuo indice di massa corporea è')}:</h4>
-              <div className="bmi-value-container">
-                <h3 className="bmi-value">{userBMI.toFixed(2)}</h3>
-                <i className="fas fa-info-circle bmi-info-icon"></i>
-                <span className="bmi-tooltip">
-                  {t('resourceBundle.bmi_info', 'È un indice che ti aiuta a capire se il tuo peso è nella norma')}
-                </span>
-              </div>
-              <h3 className="bmi-description">{getBMIDescription(userBMI)}</h3>
-              <button
-                className="btn btn-xs bg-outline-w"
-                onClick={handleModificaStoriaClinica}
-              >
-                {t('resourceBundle.Recalculate', 'Ricalcola')}
-              </button>
             </div>
           </div>
-        </div>
-      )}
 
-      {/* Calcola Data Parto - Widget con dialoghi integrati */}
-      <PregnancyWidget />
+          {/* IBM (BMI) */}
+          {userBMI && userBMI > 0 && (
+            <div className="ui-block">
+              <div className="widget w-build-fav bmi-widget">
+                <div className="ibm">
+                  <h4>{t('resourceBundle.Your_bmi_label', 'Il tuo indice di massa corporea è')}:</h4>
+                  <div className="bmi-value-container">
+                    <h3 className="bmi-value">{userBMI.toFixed(2)}</h3>
+                    <i className="fas fa-info-circle bmi-info-icon"></i>
+                    <span className="bmi-tooltip">
+                      {t('resourceBundle.bmi_info', 'È un indice che ti aiuta a capire se il tuo peso è nella norma')}
+                    </span>
+                  </div>
+                  <h3 className="bmi-description">{getBMIDescription(userBMI)}</h3>
+                  <button
+                    className="btn btn-xs bg-outline-w"
+                    onClick={handleModificaStoriaClinica}
+                  >
+                    {t('resourceBundle.Recalculate', 'Ricalcola')}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Calcola Data Parto */}
+          <PregnancyWidget />
+        </>
+      )}
     </div>
   );
 };

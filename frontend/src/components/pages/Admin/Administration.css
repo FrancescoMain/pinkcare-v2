@@ -1,7 +1,8 @@
 /* Administration.css - Allineato al design system PinkCare */
 
 .admin-page {
-  padding: 0 25px 25px;
+  padding: 0;
+  overflow-x: auto;
 }
 
 /* Tab navigation - stile coerente con il resto dell'app */
@@ -180,35 +181,35 @@
   vertical-align: middle;
 }
 
-/* Toggle buttons - pill style */
-.toggle-btn {
-  padding: 5px 16px;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-  font-size: 12px;
+/* Section title */
+.admin-title {
+  font-size: 16px;
   font-weight: 600;
-  transition: all 0.2s;
-  min-width: 44px;
-  text-align: center;
+  color: #515365;
+  margin: 0 0 15px 0;
+  padding: 0;
 }
 
-.toggle-btn.active {
-  background: #c6f6d5;
-  color: #22543d;
+/* Toggle buttons - icon style (legacy fa-check / fa-times) */
+.toggle-btn {
+  padding: 5px 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  transition: opacity 0.2s;
 }
 
-.toggle-btn.active:hover {
-  background: #9ae6b4;
+.toggle-btn:hover {
+  opacity: 0.7;
 }
 
-.toggle-btn.inactive {
-  background: #fed7d7;
-  color: #9b2c2c;
+.toggle-check {
+  color: #2da54e;
 }
 
-.toggle-btn.inactive:hover {
-  background: #feb2b2;
+.toggle-times {
+  color: #d20000;
 }
 
 /* Pagination - stile pagination-controls */
@@ -225,25 +226,20 @@
   color: #515365;
 }
 
-.admin-pagination .btn {
+.admin-pagination .btn-pagination {
   background-color: #e6ecf5;
   border: 1px solid #e6ecf5;
   color: #515365;
-  padding: 8px 18px !important;
+  padding: 6px 14px !important;
   border-radius: 4px;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
   cursor: pointer;
   transition: background 0.2s;
 }
 
-.admin-pagination .btn:hover:not(:disabled) {
+.admin-pagination .btn-pagination:hover {
   background-color: #d5dce8;
-}
-
-.admin-pagination .btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 /* Loading spinner */

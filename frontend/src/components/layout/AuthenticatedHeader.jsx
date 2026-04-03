@@ -257,7 +257,7 @@ const AuthenticatedHeader = () => {
             <div className={`nav-item ${isActive('/administration') && location.search.includes('tab=1') ? 'active' : ''}`}>
               <Link to="/administration?tab=1" className="nav-link">
                 <i className="fas fa-code-branch"></i>
-                <span>{t('resourceBundle.NETWORK', 'NETWORK')}</span>
+                <span>{t('resourceBundle.NETWORK', 'RETE')}</span>
               </Link>
             </div>
           )}
@@ -267,7 +267,7 @@ const AuthenticatedHeader = () => {
             <div className={`nav-item ${isActive('/profile') && location.search.includes('tab=1') ? 'active' : ''}`}>
               <Link to="/profile?tab=1" className="nav-link">
                 <i className="fas fa-handshake"></i>
-                <span>{t('resourceBundle.PARTNERS', 'PARTNERS')}</span>
+                <span>{t('resourceBundle.PARTNERS', 'COLLABORATORI')}</span>
               </Link>
             </div>
           )}

@@ -57,35 +57,9 @@ const BusinessList = () => {
     setAppliedFilters({ ...filters });
   };
 
-  const handleReset = () => {
-    const empty = { name: '', surname: '', denomination: '', typeId: '' };
-    setFilters(empty);
-    setAppliedFilters(empty);
-  };
-
   const handleToggleAccess = async (userId) => {
     try {
       await AdminApi.toggleAccess('business', userId);
-      toast.success(t('admin.toggle_success'));
-      fetchData(appliedFilters, pagination.page);
-    } catch (error) {
-      toast.error(t('admin.toggle_error'));
-    }
-  };
-
-  const handleToggleMarketing = async (userId) => {
-    try {
-      await AdminApi.toggleMarketing('business', userId);
-      toast.success(t('admin.toggle_success'));
-      fetchData(appliedFilters, pagination.page);
-    } catch (error) {
-      toast.error(t('admin.toggle_error'));
-    }
-  };
-
-  const handleToggleNewsletter = async (userId) => {
-    try {
-      await AdminApi.toggleNewsletter('business', userId);
       toast.success(t('admin.toggle_success'));
       fetchData(appliedFilters, pagination.page);
     } catch (error) {
@@ -103,29 +77,19 @@ const BusinessList = () => {
     }
   };
 
-  const handleExport = async () => {
-    try {
-      const blob = await AdminApi.exportBusinesses(appliedFilters);
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `attivita_${new Date().toISOString().slice(0, 10)}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      link.parentNode.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      toast.error(t('admin.export_error'));
-    }
-  };
-
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
-    return new Date(dateStr).toLocaleDateString('it-IT');
+    const d = new Date(dateStr);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = String(d.getFullYear()).slice(-2);
+    return `${day}/${month}/${year}`;
   };
 
   return (
     <div className="admin-list">
+      <h5 className="admin-title">{t('admin.business_list_title')}</h5>
+
       {/* Search form */}
       <form className="admin-search-form" onSubmit={handleSearch}>
         <div className="admin-search-fields">
@@ -159,10 +123,6 @@ const BusinessList = () => {
         </div>
         <div className="admin-search-actions">
           <button type="submit" className="btn btn-primary">{t('admin.find')}</button>
-          <button type="button" className="btn btn-secondary" onClick={handleReset}>{t('admin.reset')}</button>
-          <button type="button" className="btn btn-export" onClick={handleExport}>
-            <i className="fas fa-file-export"></i> {t('admin.export')}
-          </button>
         </div>
       </form>
 
@@ -195,18 +155,18 @@ const BusinessList = () => {
                     <td>{team.name || ''}</td>
                     <td>
                       <button
-                        className={`toggle-btn ${user?.enabled ? 'active' : 'inactive'}`}
+                        className="toggle-btn"
                         onClick={() => user && handleToggleAccess(user.id)}
                       >
-                        {user?.enabled ? 'Sì' : 'No'}
+                        <i className={`fas ${user?.enabled ? 'fa-check toggle-check' : 'fa-times toggle-times'}`}></i>
                       </button>
                     </td>
                     <td>
                       <button
-                        className={`toggle-btn ${team.searchable ? 'active' : 'inactive'}`}
+                        className="toggle-btn"
                         onClick={() => handleToggleSearchable(team.id)}
                       >
-                        {team.searchable ? 'Sì' : 'No'}
+                        <i className={`fas ${team.searchable ? 'fa-check toggle-check' : 'fa-times toggle-times'}`}></i>
                       </button>
                     </td>
                   </tr>
@@ -217,21 +177,23 @@ const BusinessList = () => {
 
           {/* Pagination */}
           <div className="admin-pagination">
-            <button
-              className="btn btn-secondary"
-              disabled={!pagination.hasPrevious}
-              onClick={() => fetchData(appliedFilters, pagination.page - 1)}
-            >
-              {t('admin.previous')}
-            </button>
-            <span>{t('admin.page')} {pagination.page} {t('admin.of')} {pagination.totalPages}</span>
-            <button
-              className="btn btn-secondary"
-              disabled={!pagination.hasNext}
-              onClick={() => fetchData(appliedFilters, pagination.page + 1)}
-            >
-              {t('admin.next')}
-            </button>
+            {pagination.hasPrevious && (
+              <button
+                className="btn btn-pagination"
+                onClick={() => fetchData(appliedFilters, pagination.page - 1)}
+              >
+                &lt;
+              </button>
+            )}
+            <span>{t('admin.pag')} {pagination.page} {t('admin.di')} {pagination.totalPages}</span>
+            {pagination.hasNext && (
+              <button
+                className="btn btn-pagination"
+                onClick={() => fetchData(appliedFilters, pagination.page + 1)}
+              >
+                &gt;
+              </button>
+            )}
           </div>
         </>
       )}

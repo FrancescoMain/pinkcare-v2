@@ -175,6 +175,17 @@ const User = sequelize.define('User', {
     type: DataTypes.TEXT
   },
 
+  // Access control
+  enabled: {
+    type: DataTypes.CHAR(1),
+    defaultValue: 'Y',
+    field: 'enabled',
+    get() {
+      const val = this.getDataValue('enabled');
+      return val === 'Y';
+    }
+  },
+
   // Birth place (foreign key to Municipality)
   birthPlaceId: {
     type: DataTypes.BIGINT,
