@@ -239,8 +239,8 @@ class HospitalizationService {
     const now = new Date();
 
     const insertQuery = `
-      INSERT INTO app_clinic_document (id, app_user_clinic_id, name_file, doc, data_load, details)
-      VALUES (nextval('app_clinic_document_id_seq'), :ucId, :nameFile, :doc, :dataLoad, :details)
+      INSERT INTO app_clinic_document (id, app_user_clinic_id, name_file, doc, data_load, details, file_data)
+      VALUES (nextval('app_clinic_document_id_seq'), :ucId, :nameFile, :doc, :dataLoad, :details, :fileData)
       RETURNING *
     `;
 
@@ -248,9 +248,10 @@ class HospitalizationService {
       replacements: {
         ucId: userClinic.id,
         nameFile: fileInfo.originalName,
-        doc: fileInfo.storedName,
+        doc: fileInfo.originalName,
         dataLoad: now,
-        details: fileInfo.details || null
+        details: fileInfo.details || null,
+        fileData: fileInfo.buffer
       },
       type: QueryTypes.INSERT
     });
@@ -272,6 +273,7 @@ class HospitalizationService {
   async downloadDocument(businessUserId, documentId) {
     const query = `
       SELECT cd.id, cd.name_file, cd.doc, cd.details, cd.data_load,
+             cd.file_data,
              uc.clinic_id, uc.user_id
       FROM app_clinic_document cd
       JOIN app_user_clinic uc ON cd.app_user_clinic_id = uc.id
@@ -295,7 +297,8 @@ class HospitalizationService {
       id: document.id,
       nameFile: document.name_file,
       doc: document.doc,
-      clinicId: document.clinic_id
+      clinicId: document.clinic_id,
+      fileData: document.file_data || null
     };
   }
 

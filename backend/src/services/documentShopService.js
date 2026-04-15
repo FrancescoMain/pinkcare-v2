@@ -102,8 +102,8 @@ class DocumentShopService {
     const now = new Date();
 
     const insertQuery = `
-      INSERT INTO app_documents_shop (id, clinic_id, doctor_id, dataload, doc, name_file, name_patient, surname_patient, notes)
-      VALUES (nextval('app_documents_shop_id_seq'), :clinicId, :doctorId, :dataLoad, :doc, :nameFile, :namePatient, :surnamePatient, :notes)
+      INSERT INTO app_documents_shop (id, clinic_id, doctor_id, dataload, doc, name_file, name_patient, surname_patient, notes, file_data)
+      VALUES (nextval('app_documents_shop_id_seq'), :clinicId, :doctorId, :dataLoad, :doc, :nameFile, :namePatient, :surnamePatient, :notes, :fileData)
       RETURNING *
     `;
 
@@ -112,11 +112,12 @@ class DocumentShopService {
         clinicId: data.clinicId,
         doctorId: data.doctorId || null,
         dataLoad: now,
-        doc: data.storedName,
+        doc: data.originalName,
         nameFile: data.originalName,
         namePatient: data.namePatient,
         surnamePatient: data.surnamePatient,
-        notes: data.notes || null
+        notes: data.notes || null,
+        fileData: data.buffer
       },
       type: QueryTypes.INSERT
     });
@@ -171,7 +172,7 @@ class DocumentShopService {
    */
   async downloadDocument(documentId, userRepId) {
     const query = `
-      SELECT id, doc, name_file, clinic_id, doctor_id FROM app_documents_shop WHERE id = :documentId
+      SELECT id, doc, name_file, clinic_id, doctor_id, file_data FROM app_documents_shop WHERE id = :documentId
     `;
     const [document] = await sequelize.query(query, {
       replacements: { documentId },
@@ -191,7 +192,8 @@ class DocumentShopService {
       id: document.id,
       nameFile: document.name_file,
       doc: document.doc,
-      clinicId: document.clinic_id
+      clinicId: document.clinic_id,
+      fileData: document.file_data || null
     };
   }
 
@@ -209,7 +211,7 @@ class DocumentShopService {
     const searchQuery = `
       SELECT DISTINCT u.id, u.name, u.surname, u.email
       FROM app_user u
-      INNER JOIN app_user_role ur ON u.id = ur.user_id
+      INNER JOIN app_user_app_role ur ON u.id = ur.user_id
       INNER JOIN app_role r ON ur.role_id = r.id
       INNER JOIN app_user_app_team ut ON u.id = ut.app_user_id
       INNER JOIN app_team t ON ut.teams_id = t.id

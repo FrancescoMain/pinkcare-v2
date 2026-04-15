@@ -1,5 +1,3 @@
-const path = require('path');
-const fs = require('fs');
 const documentShopService = require('../services/documentShopService');
 
 /**
@@ -76,23 +74,6 @@ class DocumentShopController {
         return res.status(400).json({ error: 'Clinica non trovata' });
       }
 
-      // Move file to clinic-specific directory
-      const clinicDir = path.join(
-        process.env.UPLOAD_DIR || path.join(__dirname, '../../uploads'),
-        'my_docs',
-        `shop_clinic_${clinicId}`
-      );
-
-      if (!fs.existsSync(clinicDir)) {
-        fs.mkdirSync(clinicDir, { recursive: true });
-      }
-
-      const storedName = req.file.filename;
-      const destPath = path.join(clinicDir, storedName);
-
-      // Move from temp upload dir to clinic dir
-      fs.renameSync(req.file.path, destPath);
-
       const result = await documentShopService.addDocumentShop({
         clinicId,
         doctorId: doctorId ? parseInt(doctorId) : null,
@@ -100,7 +81,7 @@ class DocumentShopController {
         surnamePatient: surname_patient,
         notes: notes || null,
         originalName: req.file.originalname,
-        storedName
+        buffer: req.file.buffer
       });
 
       return res.json({
@@ -132,20 +113,13 @@ class DocumentShopController {
       const clinicId = await documentShopService.getClinicIdForUser(userId);
       const document = await documentShopService.downloadDocument(documentId, clinicId);
 
-      const filePath = path.join(
-        process.env.UPLOAD_DIR || path.join(__dirname, '../../uploads'),
-        'my_docs',
-        `shop_clinic_${document.clinicId}`,
-        document.doc
-      );
-
-      if (!fs.existsSync(filePath)) {
+      if (!document.fileData) {
         return res.status(404).json({ error: 'File non trovato sul server' });
       }
 
       res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(document.nameFile)}"`);
-      res.setHeader('Content-Type', 'application/octet-stream');
-      fs.createReadStream(filePath).pipe(res);
+      res.setHeader('Content-Type', 'application/pdf');
+      return res.send(document.fileData);
     } catch (error) {
       console.error('[DocumentShopController] downloadDocument error:', error);
 
@@ -172,22 +146,7 @@ class DocumentShopController {
       const documentId = parseInt(req.params.id);
 
       const clinicId = await documentShopService.getClinicIdForUser(userId);
-      const deletedDoc = await documentShopService.removeDocument(documentId, clinicId);
-
-      // Try to delete file from disk
-      try {
-        const filePath = path.join(
-          process.env.UPLOAD_DIR || path.join(__dirname, '../../uploads'),
-          'my_docs',
-          `shop_clinic_${deletedDoc.clinicId}`,
-          deletedDoc.doc
-        );
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-        }
-      } catch (fileErr) {
-        console.warn('[DocumentShopController] Could not delete file from disk:', fileErr.message);
-      }
+      await documentShopService.removeDocument(documentId, clinicId);
 
       return res.json({ message: 'Documento eliminato con successo' });
     } catch (error) {

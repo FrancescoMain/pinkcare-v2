@@ -1,33 +1,14 @@
 const express = require('express');
 const { param, body } = require('express-validator');
 const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
 const router = express.Router();
 const hospitalizationController = require('../controllers/hospitalizationController');
 const AuthMiddleware = require('../middleware/auth');
 
-// Multer config for file uploads — use /tmp on Vercel (read-only filesystem)
-const isVercel = !!process.env.VERCEL;
-const uploadDir = isVercel
-  ? '/tmp/uploads/hospitalization'
-  : path.join(__dirname, '../../uploads/hospitalization');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const timestamp = Date.now();
-    const safeName = file.originalname.trim().replace(/ /g, '_');
-    cb(null, `${timestamp}_${safeName}`);
-  }
-});
-
+// Multer config: memory storage — files stored in DB, no filesystem needed on Vercel
 const upload = multer({
-  storage,
-  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 4 * 1024 * 1024 }, // 4MB (Vercel serverless body limit)
   fileFilter: (req, file, cb) => {
     if (file.mimetype === 'application/pdf') {
       cb(null, true);

@@ -1,5 +1,3 @@
-const path = require('path');
-const fs = require('fs');
 const hospitalizationService = require('../services/hospitalizationService');
 
 /**
@@ -96,29 +94,12 @@ class HospitalizationController {
         return res.status(400).json({ error: 'Nessun file caricato' });
       }
 
-      // Move file to the clinic-specific directory
-      const clinicDir = path.join(
-        process.env.UPLOAD_DIR || path.join(__dirname, '../../uploads'),
-        'my_docs',
-        `clinic_${businessUserId}`
-      );
-
-      if (!fs.existsSync(clinicDir)) {
-        fs.mkdirSync(clinicDir, { recursive: true });
-      }
-
-      const storedName = req.file.filename;
-      const destPath = path.join(clinicDir, storedName);
-
-      // Move from temp upload dir to clinic dir
-      fs.renameSync(req.file.path, destPath);
-
       const result = await hospitalizationService.uploadDocument(
         businessUserId,
         patientId,
         {
           originalName: req.file.originalname,
-          storedName,
+          buffer: req.file.buffer,
           details: req.body.details || null
         }
       );
@@ -151,20 +132,13 @@ class HospitalizationController {
 
       const document = await hospitalizationService.downloadDocument(businessUserId, documentId);
 
-      const filePath = path.join(
-        process.env.UPLOAD_DIR || path.join(__dirname, '../../uploads'),
-        'my_docs',
-        `clinic_${document.clinicId}`,
-        document.doc
-      );
-
-      if (!fs.existsSync(filePath)) {
+      if (!document.fileData) {
         return res.status(404).json({ error: 'File non trovato sul server' });
       }
 
       res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(document.nameFile)}"`);
-      res.setHeader('Content-Type', 'application/octet-stream');
-      fs.createReadStream(filePath).pipe(res);
+      res.setHeader('Content-Type', 'application/pdf');
+      return res.send(document.fileData);
     } catch (error) {
       console.error('[HospitalizationController] downloadDocument error:', error);
 
