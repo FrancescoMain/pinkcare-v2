@@ -39,6 +39,16 @@ const notificationRoutes = require('./src/routes/notifications');
 const adminRoutes = require('./src/routes/admin');
 const { testConnection, sequelize } = require('./src/config/database');
 
+// Run DB migrations on module load (idempotent — safe to run on every cold start)
+Promise.all([
+  sequelize.query('ALTER TABLE app_clinic_document ADD COLUMN IF NOT EXISTS file_data bytea'),
+  sequelize.query('ALTER TABLE app_documents_shop ADD COLUMN IF NOT EXISTS file_data bytea')
+]).then(() => {
+  console.log('✓ DB migrations applied (file_data columns).');
+}).catch((err) => {
+  console.warn('⚠️  Migration warning (non-fatal):', err.message);
+});
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -114,15 +124,6 @@ async function startServer() {
   try {
     // Test database connection with retry logic
     await testConnection();
-
-    // Run lightweight migrations (idempotent — safe to run on every startup)
-    try {
-      await sequelize.query('ALTER TABLE app_clinic_document ADD COLUMN IF NOT EXISTS file_data bytea');
-      await sequelize.query('ALTER TABLE app_documents_shop ADD COLUMN IF NOT EXISTS file_data bytea');
-      console.log('✓ DB migrations applied.');
-    } catch (migErr) {
-      console.warn('⚠️  Migration warning (non-fatal):', migErr.message);
-    }
 
     // Skip model sync to use existing database structure
     console.log('✓ Using existing database structure.');
