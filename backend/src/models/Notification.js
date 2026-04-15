@@ -1,11 +1,11 @@
-const { DataTypes } = require('sequelize');
+const { DataTypes, QueryTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 
 const Notification = sequelize.define('Notification', {
   id: {
     type: DataTypes.BIGINT,
     primaryKey: true,
-    autoIncrement: true
+    autoIncrement: false
   },
   insertionDate: {
     type: DataTypes.DATE,
@@ -78,6 +78,15 @@ const Notification = sequelize.define('Notification', {
   defaultScope: {
     where: { deleted: false }
   }
+});
+
+// Auto-assign ID since app_notice has no DB sequence
+Notification.addHook('beforeCreate', async (notification) => {
+  const [result] = await sequelize.query(
+    'SELECT COALESCE(MAX(id), 0) + 1 AS next_id FROM app_notice',
+    { type: QueryTypes.SELECT }
+  );
+  notification.id = result.next_id;
 });
 
 // Typology IDs for notifications (from legacy Typology.java)

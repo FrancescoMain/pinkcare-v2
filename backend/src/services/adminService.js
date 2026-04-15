@@ -334,10 +334,10 @@ class AdminService {
     }
 
     // Assign ROLE_PINKCARE
-    const pinkRole = await db.Role.findOne({ where: { nome: 'ROLE_PINKCARE' } });
+    const pinkRole = await db.Role.findOne({ where: { name: 'ROLE_PINKCARE' } });
     if (pinkRole) {
       await db.sequelize.query(
-        `INSERT INTO app_user_role (user_id, role_id) VALUES (:userId, :roleId)`,
+        `INSERT INTO app_user_app_role (user_id, role_id) VALUES (:userId, :roleId)`,
         { replacements: { userId: user.id, roleId: pinkRole.id } }
       );
     }
