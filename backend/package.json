@@ -23,6 +23,7 @@
   "author": "PinkCare Team",
   "license": "ISC",
   "dependencies": {
+    "@supabase/supabase-js": "^2.103.2",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",

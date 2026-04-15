@@ -239,8 +239,8 @@ class HospitalizationService {
     const now = new Date();
 
     const insertQuery = `
-      INSERT INTO app_clinic_document (id, app_user_clinic_id, name_file, doc, data_load, details, file_data)
-      VALUES (nextval('app_clinic_document_id_seq'), :ucId, :nameFile, :doc, :dataLoad, :details, :fileData)
+      INSERT INTO app_clinic_document (id, app_user_clinic_id, name_file, doc, data_load, details)
+      VALUES (nextval('app_clinic_document_id_seq'), :ucId, :nameFile, :doc, :dataLoad, :details)
       RETURNING *
     `;
 
@@ -248,10 +248,9 @@ class HospitalizationService {
       replacements: {
         ucId: userClinic.id,
         nameFile: fileInfo.originalName,
-        doc: fileInfo.originalName,
+        doc: fileInfo.storagePath,
         dataLoad: now,
-        details: fileInfo.details || null,
-        fileData: fileInfo.buffer
+        details: fileInfo.details || null
       },
       type: QueryTypes.INSERT
     });
@@ -273,7 +272,6 @@ class HospitalizationService {
   async downloadDocument(businessUserId, documentId) {
     const query = `
       SELECT cd.id, cd.name_file, cd.doc, cd.details, cd.data_load,
-             cd.file_data,
              uc.clinic_id, uc.user_id
       FROM app_clinic_document cd
       JOIN app_user_clinic uc ON cd.app_user_clinic_id = uc.id
@@ -296,9 +294,8 @@ class HospitalizationService {
     return {
       id: document.id,
       nameFile: document.name_file,
-      doc: document.doc,
-      clinicId: document.clinic_id,
-      fileData: document.file_data || null
+      doc: document.doc, // Supabase storage path
+      clinicId: document.clinic_id
     };
   }
 
@@ -334,6 +331,8 @@ class HospitalizationService {
       replacements: { documentId },
       type: QueryTypes.DELETE
     });
+
+    return document.doc; // Return storage path so controller can delete from Supabase
   }
 
   /**

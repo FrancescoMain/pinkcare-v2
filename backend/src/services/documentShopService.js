@@ -102,8 +102,8 @@ class DocumentShopService {
     const now = new Date();
 
     const insertQuery = `
-      INSERT INTO app_documents_shop (id, clinic_id, doctor_id, dataload, doc, name_file, name_patient, surname_patient, notes, file_data)
-      VALUES (nextval('app_documents_shop_id_seq'), :clinicId, :doctorId, :dataLoad, :doc, :nameFile, :namePatient, :surnamePatient, :notes, :fileData)
+      INSERT INTO app_documents_shop (id, clinic_id, doctor_id, dataload, doc, name_file, name_patient, surname_patient, notes)
+      VALUES (nextval('app_documents_shop_id_seq'), :clinicId, :doctorId, :dataLoad, :doc, :nameFile, :namePatient, :surnamePatient, :notes)
       RETURNING *
     `;
 
@@ -112,12 +112,11 @@ class DocumentShopService {
         clinicId: data.clinicId,
         doctorId: data.doctorId || null,
         dataLoad: now,
-        doc: data.originalName,
+        doc: data.storagePath,
         nameFile: data.originalName,
         namePatient: data.namePatient,
         surnamePatient: data.surnamePatient,
-        notes: data.notes || null,
-        fileData: data.buffer
+        notes: data.notes || null
       },
       type: QueryTypes.INSERT
     });
@@ -161,7 +160,7 @@ class DocumentShopService {
       type: QueryTypes.DELETE
     });
 
-    return { doc: document.doc, clinicId: document.clinic_id };
+    return { doc: document.doc, clinicId: document.clinic_id }; // doc = Supabase storage path
   }
 
   /**
@@ -172,7 +171,7 @@ class DocumentShopService {
    */
   async downloadDocument(documentId, userRepId) {
     const query = `
-      SELECT id, doc, name_file, clinic_id, doctor_id, file_data FROM app_documents_shop WHERE id = :documentId
+      SELECT id, doc, name_file, clinic_id, doctor_id FROM app_documents_shop WHERE id = :documentId
     `;
     const [document] = await sequelize.query(query, {
       replacements: { documentId },
@@ -191,9 +190,8 @@ class DocumentShopService {
     return {
       id: document.id,
       nameFile: document.name_file,
-      doc: document.doc,
-      clinicId: document.clinic_id,
-      fileData: document.file_data || null
+      doc: document.doc, // Supabase storage path
+      clinicId: document.clinic_id
     };
   }
 

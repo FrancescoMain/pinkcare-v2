@@ -22,33 +22,36 @@ class HospitalizationApi {
   }
 
   static async uploadDocument(patientId, file, details) {
-    const formData = new FormData();
-    formData.append('file', file);
-    if (details) formData.append('details', details);
+    // Step 1: get a presigned upload URL from backend
+    const { signedUrl, storagePath } = await ApiService.get(
+      `/api/hospitalization/patients/${patientId}/upload-url?fileName=${encodeURIComponent(file.name)}`
+    );
 
-    const headers = getAuthHeaders();
-    // Remove Content-Type so browser sets multipart boundary
-    delete headers['Content-Type'];
-
-    const response = await fetch(buildApiUrl(`/api/hospitalization/patients/${patientId}/documents`), {
-      method: 'POST',
-      headers,
-      body: formData
+    // Step 2: upload directly to Supabase (bypasses Vercel — no size limit)
+    const uploadRes = await fetch(signedUrl, {
+      method: 'PUT',
+      body: file,
+      headers: { 'Content-Type': 'application/pdf' }
     });
-
-    if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.error || 'Errore nel caricamento');
+    if (!uploadRes.ok) {
+      throw new Error('Errore nel caricamento del file su storage');
     }
 
-    return response.json();
+    // Step 3: save metadata to backend
+    return ApiService.post(`/api/hospitalization/patients/${patientId}/documents`, {
+      storagePath,
+      fileName: file.name,
+      details: details || null
+    });
   }
 
   static async downloadDocument(documentId, fileName) {
+    // Backend redirects to a signed Supabase URL — follow the redirect
     const headers = getAuthHeaders();
     const response = await fetch(buildApiUrl(`/api/hospitalization/documents/${documentId}/download`), {
       method: 'GET',
-      headers
+      headers,
+      redirect: 'follow'
     });
     if (!response.ok) {
       throw new Error('Download failed');
@@ -57,7 +60,7 @@ class HospitalizationApi {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = fileName || 'download';
+    a.download = fileName || 'download.pdf';
     document.body.appendChild(a);
     a.click();
     a.remove();

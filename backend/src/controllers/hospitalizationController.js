@@ -1,4 +1,6 @@
 const hospitalizationService = require('../services/hospitalizationService');
+const supabase = require('../utils/supabaseClient');
+const BUCKET = 'clinic-documents';
 
 /**
  * Hospitalization Controller
@@ -82,32 +84,55 @@ class HospitalizationController {
   }
 
   /**
-   * Upload a document for a patient
+   * Get presigned upload URL for direct client→Supabase upload (no Vercel size limit)
+   * GET /api/hospitalization/patients/:id/upload-url?fileName=xxx.pdf
+   */
+  async getUploadUrl(req, res) {
+    try {
+      const businessUserId = req.user.id;
+      const patientId = parseInt(req.params.id);
+      const fileName = req.query.fileName || 'document.pdf';
+      const safeName = fileName.trim().replace(/[^a-zA-Z0-9._-]/g, '_');
+      const storagePath = `hospitalization/${businessUserId}/${patientId}/${Date.now()}_${safeName}`;
+
+      const { data, error } = await supabase.storage
+        .from(BUCKET)
+        .createSignedUploadUrl(storagePath);
+
+      if (error) {
+        console.error('[HospitalizationController] getUploadUrl error:', error);
+        return res.status(500).json({ error: 'Errore nella generazione URL di upload' });
+      }
+
+      return res.json({ signedUrl: data.signedUrl, storagePath });
+    } catch (error) {
+      console.error('[HospitalizationController] getUploadUrl error:', error);
+      return res.status(500).json({ error: 'Errore nella generazione URL di upload' });
+    }
+  }
+
+  /**
+   * Save document metadata after direct Supabase upload
    * POST /api/hospitalization/patients/:id/documents
+   * Body (JSON): { storagePath, fileName, details }
    */
   async uploadDocument(req, res) {
     try {
       const businessUserId = req.user.id;
       const patientId = parseInt(req.params.id);
+      const { storagePath, fileName, details } = req.body;
 
-      if (!req.file) {
-        return res.status(400).json({ error: 'Nessun file caricato' });
+      if (!storagePath || !fileName) {
+        return res.status(400).json({ error: 'storagePath e fileName sono obbligatori' });
       }
 
       const result = await hospitalizationService.uploadDocument(
         businessUserId,
         patientId,
-        {
-          originalName: req.file.originalname,
-          buffer: req.file.buffer,
-          details: req.body.details || null
-        }
+        { originalName: fileName, storagePath, details: details || null }
       );
 
-      return res.json({
-        message: 'Documento caricato con successo',
-        document: result
-      });
+      return res.json({ message: 'Documento caricato con successo', document: result });
     } catch (error) {
       console.error('[HospitalizationController] uploadDocument error:', error);
 
@@ -115,14 +140,12 @@ class HospitalizationController {
         return res.status(404).json({ error: error.message });
       }
 
-      return res.status(500).json({
-        error: 'Errore nel caricamento del documento'
-      });
+      return res.status(500).json({ error: 'Errore nel caricamento del documento' });
     }
   }
 
   /**
-   * Download a document
+   * Download a document — redirects to a short-lived signed Supabase URL
    * GET /api/hospitalization/documents/:id/download
    */
   async downloadDocument(req, res) {
@@ -132,13 +155,15 @@ class HospitalizationController {
 
       const document = await hospitalizationService.downloadDocument(businessUserId, documentId);
 
-      if (!document.fileData) {
-        return res.status(404).json({ error: 'File non trovato sul server' });
+      const { data, error } = await supabase.storage
+        .from(BUCKET)
+        .createSignedUrl(document.doc, 120); // 2-minute expiry
+
+      if (error || !data?.signedUrl) {
+        return res.status(404).json({ error: 'File non trovato nello storage' });
       }
 
-      res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(document.nameFile)}"`);
-      res.setHeader('Content-Type', 'application/pdf');
-      return res.send(document.fileData);
+      return res.redirect(data.signedUrl);
     } catch (error) {
       console.error('[HospitalizationController] downloadDocument error:', error);
 
@@ -149,14 +174,12 @@ class HospitalizationController {
         return res.status(403).json({ error: error.message });
       }
 
-      return res.status(500).json({
-        error: 'Errore nel download del documento'
-      });
+      return res.status(500).json({ error: 'Errore nel download del documento' });
     }
   }
 
   /**
-   * Delete a document
+   * Delete a document (DB record + Supabase Storage file)
    * DELETE /api/hospitalization/documents/:id
    */
   async deleteDocument(req, res) {
@@ -164,7 +187,14 @@ class HospitalizationController {
       const businessUserId = req.user.id;
       const documentId = parseInt(req.params.id);
 
-      await hospitalizationService.deleteDocument(businessUserId, documentId);
+      const storagePath = await hospitalizationService.deleteDocument(businessUserId, documentId);
+
+      // Best-effort delete from storage (non-blocking)
+      if (storagePath) {
+        supabase.storage.from(BUCKET).remove([storagePath]).catch((err) => {
+          console.warn('[HospitalizationController] Storage delete warning:', err.message);
+        });
+      }
 
       return res.json({ message: 'Documento eliminato con successo' });
     } catch (error) {
@@ -177,9 +207,7 @@ class HospitalizationController {
         return res.status(403).json({ error: error.message });
       }
 
-      return res.status(500).json({
-        error: 'Errore nell\'eliminazione del documento'
-      });
+      return res.status(500).json({ error: "Errore nell'eliminazione del documento" });
     }
   }
 

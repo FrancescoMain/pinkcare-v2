@@ -1,22 +1,8 @@
 const express = require('express');
 const { param, body } = require('express-validator');
-const multer = require('multer');
 const router = express.Router();
 const hospitalizationController = require('../controllers/hospitalizationController');
 const AuthMiddleware = require('../middleware/auth');
-
-// Multer config: memory storage — files stored in DB, no filesystem needed on Vercel
-const upload = multer({
-  storage: multer.memoryStorage(),
-  limits: { fileSize: 4 * 1024 * 1024 }, // 4MB (Vercel serverless body limit)
-  fileFilter: (req, file, cb) => {
-    if (file.mimetype === 'application/pdf') {
-      cb(null, true);
-    } else {
-      cb(new Error('Solo file PDF sono ammessi'), false);
-    }
-  }
-});
 
 /**
  * Hospitalization Routes
@@ -50,15 +36,24 @@ router.get('/patients/:id/documents',
   hospitalizationController.getDocuments
 );
 
-// Upload document for a patient (PDF only)
+// Get presigned upload URL for direct-to-Supabase upload (bypasses Vercel body limit)
+router.get('/patients/:id/upload-url',
+  AuthMiddleware.verifyToken,
+  AuthMiddleware.requireBusiness,
+  [
+    param('id').isInt().withMessage('ID paziente deve essere un intero')
+  ],
+  hospitalizationController.getUploadUrl
+);
+
+// Save document metadata after direct Supabase upload (JSON, no file)
 router.post('/patients/:id/documents',
   AuthMiddleware.verifyToken,
   AuthMiddleware.requireBusiness,
-  upload.single('file'),
   hospitalizationController.uploadDocument
 );
 
-// Download a document
+// Download a document (redirects to signed Supabase URL)
 router.get('/documents/:id/download',
   AuthMiddleware.verifyToken,
   AuthMiddleware.requireBusiness,

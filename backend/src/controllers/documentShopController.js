@@ -1,29 +1,27 @@
 const documentShopService = require('../services/documentShopService');
+const supabase = require('../utils/supabaseClient');
+const BUCKET = 'clinic-documents';
 
 /**
  * DocumentShop Controller
  * Handles API endpoints for document shop (upload referti per paziente)
- * Replicates legacy documentshop flow
+ * Files are stored in Supabase Storage (no Vercel body size limit)
  */
 class DocumentShopController {
 
   /**
    * Get paginated list of documents
    * GET /api/document-shop
-   * For CLINIC users: filters by clinic_id, optionally by doctorId
-   * For DOCTOR users: filters by doctor_id (their own user ID)
    */
   async getDocuments(req, res) {
     try {
       const userId = req.user.id;
       const { doctorId, page = 0, pageSize = 15 } = req.query;
 
-      // Determine user's team type
       const team = req.user.teams?.[0];
       const typeId = team?.type_id;
 
       if (typeId === 4) {
-        // CLINIC user: query by clinic_id, optionally filter by doctor
         const clinicId = await documentShopService.getClinicIdForUser(userId);
         const result = await documentShopService.getDocumentShops(
           clinicId,
@@ -33,7 +31,6 @@ class DocumentShopController {
         );
         return res.json(result);
       } else {
-        // DOCTOR user: query by doctor_id = their representative_id
         const doctorRepId = await documentShopService.getClinicIdForUser(userId);
         const result = await documentShopService.getDocumentShops(
           null,
@@ -45,30 +42,61 @@ class DocumentShopController {
       }
     } catch (error) {
       console.error('[DocumentShopController] getDocuments error:', error);
-      return res.status(500).json({
-        error: 'Errore nel caricamento dei documenti'
-      });
+      return res.status(500).json({ error: 'Errore nel caricamento dei documenti' });
     }
   }
 
   /**
-   * Upload a new document
+   * Get presigned upload URL for direct client→Supabase upload (no Vercel size limit)
+   * GET /api/document-shop/upload-url?fileName=xxx.pdf
+   */
+  async getUploadUrl(req, res) {
+    try {
+      const userId = req.user.id;
+      const fileName = req.query.fileName || 'document.pdf';
+      const safeName = fileName.trim().replace(/[^a-zA-Z0-9._-]/g, '_');
+
+      const clinicId = await documentShopService.getClinicIdForUser(userId);
+      if (!clinicId) {
+        return res.status(400).json({ error: 'Clinica non trovata' });
+      }
+
+      const storagePath = `document-shop/${clinicId}/${Date.now()}_${safeName}`;
+
+      const { data, error } = await supabase.storage
+        .from(BUCKET)
+        .createSignedUploadUrl(storagePath);
+
+      if (error) {
+        console.error('[DocumentShopController] getUploadUrl error:', error);
+        return res.status(500).json({ error: 'Errore nella generazione URL di upload' });
+      }
+
+      return res.json({ signedUrl: data.signedUrl, storagePath });
+    } catch (error) {
+      console.error('[DocumentShopController] getUploadUrl error:', error);
+      return res.status(500).json({ error: 'Errore nella generazione URL di upload' });
+    }
+  }
+
+  /**
+   * Save document metadata after direct Supabase upload
    * POST /api/document-shop
+   * Body (JSON): { storagePath, fileName, name_patient, surname_patient, notes, doctorId }
    */
   async uploadDocument(req, res) {
     try {
       const userId = req.user.id;
-      const { name_patient, surname_patient, notes, doctorId } = req.body;
+      const { storagePath, fileName, name_patient, surname_patient, notes, doctorId } = req.body;
 
-      if (!req.file) {
-        return res.status(400).json({ error: 'Nessun file caricato' });
+      if (!storagePath || !fileName) {
+        return res.status(400).json({ error: 'storagePath e fileName sono obbligatori' });
       }
 
       if (!name_patient || !surname_patient) {
         return res.status(400).json({ error: 'Nome e cognome paziente obbligatori' });
       }
 
-      // Get the user's clinic ID
       const clinicId = await documentShopService.getClinicIdForUser(userId);
       if (!clinicId) {
         return res.status(400).json({ error: 'Clinica non trovata' });
@@ -80,14 +108,11 @@ class DocumentShopController {
         namePatient: name_patient,
         surnamePatient: surname_patient,
         notes: notes || null,
-        originalName: req.file.originalname,
-        buffer: req.file.buffer
+        originalName: fileName,
+        storagePath
       });
 
-      return res.json({
-        message: 'Documento caricato con successo',
-        document: result
-      });
+      return res.json({ message: 'Documento caricato con successo', document: result });
     } catch (error) {
       console.error('[DocumentShopController] uploadDocument error:', error);
 
@@ -95,14 +120,12 @@ class DocumentShopController {
         return res.status(400).json({ error: error.message });
       }
 
-      return res.status(500).json({
-        error: 'Errore nel caricamento del documento'
-      });
+      return res.status(500).json({ error: 'Errore nel caricamento del documento' });
     }
   }
 
   /**
-   * Download a document
+   * Download a document — redirects to a short-lived signed Supabase URL
    * GET /api/document-shop/:id/download
    */
   async downloadDocument(req, res) {
@@ -113,13 +136,15 @@ class DocumentShopController {
       const clinicId = await documentShopService.getClinicIdForUser(userId);
       const document = await documentShopService.downloadDocument(documentId, clinicId);
 
-      if (!document.fileData) {
-        return res.status(404).json({ error: 'File non trovato sul server' });
+      const { data, error } = await supabase.storage
+        .from(BUCKET)
+        .createSignedUrl(document.doc, 120); // 2-minute expiry
+
+      if (error || !data?.signedUrl) {
+        return res.status(404).json({ error: 'File non trovato nello storage' });
       }
 
-      res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(document.nameFile)}"`);
-      res.setHeader('Content-Type', 'application/pdf');
-      return res.send(document.fileData);
+      return res.redirect(data.signedUrl);
     } catch (error) {
       console.error('[DocumentShopController] downloadDocument error:', error);
 
@@ -130,14 +155,12 @@ class DocumentShopController {
         return res.status(403).json({ error: error.message });
       }
 
-      return res.status(500).json({
-        error: 'Errore nel download del documento'
-      });
+      return res.status(500).json({ error: 'Errore nel download del documento' });
     }
   }
 
   /**
-   * Delete a document
+   * Delete a document (DB record + Supabase Storage file)
    * DELETE /api/document-shop/:id
    */
   async deleteDocument(req, res) {
@@ -146,7 +169,14 @@ class DocumentShopController {
       const documentId = parseInt(req.params.id);
 
       const clinicId = await documentShopService.getClinicIdForUser(userId);
-      await documentShopService.removeDocument(documentId, clinicId);
+      const deletedDoc = await documentShopService.removeDocument(documentId, clinicId);
+
+      // Best-effort delete from storage
+      if (deletedDoc.doc) {
+        supabase.storage.from(BUCKET).remove([deletedDoc.doc]).catch((err) => {
+          console.warn('[DocumentShopController] Storage delete warning:', err.message);
+        });
+      }
 
       return res.json({ message: 'Documento eliminato con successo' });
     } catch (error) {
@@ -159,9 +189,7 @@ class DocumentShopController {
         return res.status(403).json({ error: error.message });
       }
 
-      return res.status(500).json({
-        error: "Errore nell'eliminazione del documento"
-      });
+      return res.status(500).json({ error: "Errore nell'eliminazione del documento" });
     }
   }
 
@@ -180,9 +208,7 @@ class DocumentShopController {
       return res.json(doctors);
     } catch (error) {
       console.error('[DocumentShopController] searchDoctors error:', error);
-      return res.status(500).json({
-        error: 'Errore nella ricerca medici'
-      });
+      return res.status(500).json({ error: 'Errore nella ricerca medici' });
     }
   }
 }

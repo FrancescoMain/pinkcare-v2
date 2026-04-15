@@ -1,6 +1,7 @@
 import ApiService from './apiService';
 import { buildApiUrl, getAuthHeaders } from '../config/api';
 
+
 class DocumentShopApi {
 
   static async getDocuments(params = {}) {
@@ -13,36 +14,39 @@ class DocumentShopApi {
   }
 
   static async uploadDocument(file, data) {
-    const formData = new FormData();
-    formData.append('file', file);
-    if (data.name_patient) formData.append('name_patient', data.name_patient);
-    if (data.surname_patient) formData.append('surname_patient', data.surname_patient);
-    if (data.notes) formData.append('notes', data.notes);
-    if (data.doctorId) formData.append('doctorId', data.doctorId);
+    // Step 1: get a presigned upload URL from backend
+    const { signedUrl, storagePath } = await ApiService.get(
+      `/api/document-shop/upload-url?fileName=${encodeURIComponent(file.name)}`
+    );
 
-    const headers = getAuthHeaders();
-    // Remove Content-Type so browser sets multipart boundary
-    delete headers['Content-Type'];
-
-    const response = await fetch(buildApiUrl('/api/document-shop'), {
-      method: 'POST',
-      headers,
-      body: formData
+    // Step 2: upload directly to Supabase (bypasses Vercel — no size limit)
+    const uploadRes = await fetch(signedUrl, {
+      method: 'PUT',
+      body: file,
+      headers: { 'Content-Type': 'application/pdf' }
     });
-
-    if (!response.ok) {
-      const responseData = await response.json();
-      throw new Error(responseData.error || 'Errore nel caricamento');
+    if (!uploadRes.ok) {
+      throw new Error('Errore nel caricamento del file su storage');
     }
 
-    return response.json();
+    // Step 3: save metadata to backend
+    return ApiService.post('/api/document-shop', {
+      storagePath,
+      fileName: file.name,
+      name_patient: data.name_patient,
+      surname_patient: data.surname_patient,
+      notes: data.notes || null,
+      doctorId: data.doctorId || null
+    });
   }
 
   static async downloadDocument(id, fileName) {
+    // Backend redirects to a signed Supabase URL — follow the redirect
     const headers = getAuthHeaders();
     const response = await fetch(buildApiUrl(`/api/document-shop/${id}/download`), {
       method: 'GET',
-      headers
+      headers,
+      redirect: 'follow'
     });
     if (!response.ok) {
       throw new Error('Download failed');
@@ -51,7 +55,7 @@ class DocumentShopApi {
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = fileName || 'download';
+    a.download = fileName || 'download.pdf';
     document.body.appendChild(a);
     a.click();
     a.remove();

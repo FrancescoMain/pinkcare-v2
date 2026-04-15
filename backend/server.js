@@ -39,14 +39,12 @@ const notificationRoutes = require('./src/routes/notifications');
 const adminRoutes = require('./src/routes/admin');
 const { testConnection, sequelize } = require('./src/config/database');
 
-// Run DB migrations on module load (idempotent — safe to run on every cold start)
-Promise.all([
-  sequelize.query('ALTER TABLE app_clinic_document ADD COLUMN IF NOT EXISTS file_data bytea'),
-  sequelize.query('ALTER TABLE app_documents_shop ADD COLUMN IF NOT EXISTS file_data bytea')
-]).then(() => {
-  console.log('✓ DB migrations applied (file_data columns).');
-}).catch((err) => {
-  console.warn('⚠️  Migration warning (non-fatal):', err.message);
+// Ensure Supabase Storage bucket exists on cold start
+const supabase = require('./src/utils/supabaseClient');
+supabase.storage.createBucket('clinic-documents', { public: false }).then(() => {
+  console.log('✓ Supabase Storage bucket ready.');
+}).catch(() => {
+  // Bucket already exists — this is fine
 });
 
 const app = express();
