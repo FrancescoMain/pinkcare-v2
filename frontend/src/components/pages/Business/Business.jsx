@@ -828,6 +828,9 @@ const Business = () => {
                 value={team.structureDimension}
                 pendingValue={team.structureDimensionToValidate}
                 onRequestChange={handleRequestChange}
+                onApprove={handleApproveField}
+                onReject={handleRejectField}
+                isAdminMode={isAdminMode}
                 renderDisplay={(val) => <span>{val ? `${val} mq` : '---'}</span>}
                 renderEdit={(editValue, setEditValue) => (
                   <input
@@ -850,6 +853,9 @@ const Business = () => {
                 value={team.instrumentation}
                 pendingValue={team.instrumentationToValidate}
                 onRequestChange={handleRequestChange}
+                onApprove={handleApproveField}
+                onReject={handleRejectField}
+                isAdminMode={isAdminMode}
                 renderDisplay={(val) => <span className="inline-text-display">{val || '---'}</span>}
                 renderEdit={(editValue, setEditValue) => (
                   <textarea
@@ -872,6 +878,9 @@ const Business = () => {
                 value={team.description}
                 pendingValue={team.descriptionToValidate}
                 onRequestChange={handleRequestChange}
+                onApprove={handleApproveField}
+                onReject={handleRejectField}
+                isAdminMode={isAdminMode}
                 renderDisplay={(val) => <p className="inline-text-display">{val || '---'}</p>}
                 renderEdit={(editValue, setEditValue) => (
                   <textarea
