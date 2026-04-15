@@ -5,6 +5,7 @@ const { QueryTypes } = require('sequelize');
 const userService = require('../services/userService');
 const teamService = require('../services/teamService');
 const emailService = require('../services/emailService');
+const { User, Role } = require('../models');
 
 // Map type_id to string labels matching legacy typology constants
 const TYPE_ID_MAP = { 3: 'DOCTOR', 4: 'CLINIC' };
@@ -503,16 +504,28 @@ class AuthController {
       }
       
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const user = await userService.getUserProfile(decoded.userId);
-      
+
+      // Use raw approach (no Team include) to avoid Sequelize's boolean conversion
+      // issue with app_team.deleted = 'N'/'Y' char field
+      const user = await User.findByPk(decoded.userId, {
+        include: [{ model: Role, as: 'roles', attributes: ['id', 'name', 'description'] }]
+      });
+
       if (!user) {
         return res.status(401).json({
           error: 'Utente non trovato'
         });
       }
-      
-      // Fetch team data for business users
-      const team = await this.getTeamForUser(user.id);
+
+      // Fetch team with raw SQL to avoid Sequelize boolean conversion issue
+      const teams = await sequelize.query(
+        `SELECT t.id, t.name, t.logo, t.type_id, t.linkshop, t.representative_id
+         FROM app_team t
+         INNER JOIN app_user_app_team ut ON t.id = ut.teams_id
+         WHERE ut.app_user_id = :userId AND t.deleted = 'N'`,
+        { replacements: { userId: user.id }, type: QueryTypes.SELECT }
+      );
+      const team = teams?.[0] || null;
 
       const userResponse = {
         id: user.id,
